@@ -11,15 +11,15 @@ open import Definition.LogicalRelation
 
 
 -- Any level can be embedded into the highest level.
-maybeEmb : ∀ {l A Γ}
-         → Γ ⊩⟨ l ⟩ A
-         → Γ ⊩⟨ ¹ ⟩ A
+maybeEmb : ∀ {l A r Γ}
+         → Γ ⊩⟨ l ⟩ A ^ r
+         → Γ ⊩⟨ ¹ ⟩ A ^ r
 maybeEmb {⁰} [A] = emb 0<1 [A]
 maybeEmb {¹} [A] = [A]
 
 -- The lowest level can be embedded in any level.
-maybeEmb′ : ∀ {l A Γ}
-          → Γ ⊩⟨ ⁰ ⟩ A
-          → Γ ⊩⟨ l ⟩ A
+maybeEmb′ : ∀ {l A r Γ}
+          → Γ ⊩⟨ ⁰ ⟩ A ^ r
+          → Γ ⊩⟨ l ⟩ A ^ r
 maybeEmb′ {⁰} [A] = [A]
 maybeEmb′ {¹} [A] = emb 0<1 [A]
