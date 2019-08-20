@@ -10,19 +10,22 @@ open import Tools.List
 import Tools.PropositionalEquality as PE
 
 
-infixl 30 _∙_
+infixl 30 _∙_^_
 infix 30 Π_▹_
 infixr 22 _▹▹_
 infixl 30 _ₛ•ₛ_ _•ₛ_ _ₛ•_
 infix 25 _[_]
 infix 25 _[_]↑
 
+data Relevance : Set where
+  ! : Relevance
+  % : Relevance
 
 -- Typing contexts (snoc-lists, isomorphic to lists).
 
 data Con (A : Set) : Set where
   ε   : Con A               -- Empty context.
-  _∙_ : Con A → A → Con A  -- Context extension.
+  _∙_^_ : Con A → A → Relevance → Con A  -- Context extension.
 
 record GenT (A : Set) : Set where
   inductive
@@ -32,7 +35,7 @@ record GenT (A : Set) : Set where
     t : A
 
 data Kind : Set where
-  Ukind : Kind
+  Ukind : Relevance → Kind
   Pikind : Kind
   Natkind : Kind
   Lamkind : Kind
@@ -55,9 +58,12 @@ data Term : Set where
 
 -- Type constructors.
 U      : Term                     -- Universe.
-U = gen Ukind []
+U = gen (Ukind !) []
 
-pattern Univ u = gen (Ukind u) []
+Prop : Term
+Prop = gen (Ukind %) []
+
+pattern Univ r = gen (Ukind r) []
 
 Π_▹_   : (A B : Term)     → Term  -- Dependent function type (B is a binder).
 Π A ▹ B = gen Pikind (⟦ 0 , A ⟧ ∷ ⟦ 1 , B ⟧ ∷ [])
@@ -123,7 +129,7 @@ data Neutral : Term → Set where
 data Whnf : Term → Set where
 
   -- Type constructors are whnfs.
-  Uₙ    : Whnf U
+  Uₙ    : ∀ {r} → Whnf (Univ r)
   Πₙ    : ∀ {A B} → Whnf (Π A ▹ B)
   ℕₙ    : Whnf ℕ
   Emptyₙ : Whnf Empty
@@ -142,16 +148,16 @@ data Whnf : Term → Set where
 -- Different whnfs are trivially distinguished by propositional equality.
 -- (The following statements are sometimes called "no-confusion theorems".)
 
-U≢ℕ : U PE.≢ ℕ
+U≢ℕ : ∀ {r} → Univ r PE.≢ ℕ
 U≢ℕ ()
 
-U≢Empty : U PE.≢ Empty
+U≢Empty : ∀ {r} → Univ r PE.≢ Empty
 U≢Empty ()
 
-U≢Π : ∀ {F G} → U PE.≢ Π F ▹ G
+U≢Π : ∀ {r F G} → Univ r PE.≢ Π F ▹ G
 U≢Π ()
 
-U≢ne : ∀ {K} → Neutral K → U PE.≢ K
+U≢ne : ∀ {r K} → Neutral K → Univ r PE.≢ K
 U≢ne () PE.refl
 
 ℕ≢Π : ∀ {F G} → ℕ PE.≢ Π F ▹ G

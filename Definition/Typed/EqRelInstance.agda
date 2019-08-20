@@ -14,7 +14,7 @@ open import Tools.Function
 -- Judgmental instance of the equality relation
 
 instance eqRelInstance : EqRelSet
-eqRelInstance = eqRel _⊢_≡_ _⊢_≡_∷_ _⊢_≡_∷_
+eqRelInstance = eqRel _⊢_≡_^_ _⊢_≡_∷_^_ _⊢_≡_∷_^_
                       idᶠ idᶠ idᶠ univ
                       sym sym sym trans trans trans
                       conv conv wkEq wkEqTerm wkEqTerm

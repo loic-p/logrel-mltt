@@ -17,151 +17,151 @@ record EqRelSet : Set₁ where
     ---------------
 
     -- Equality of types
-    _⊢_≅_   : Con Term → (A B : Term)   → Set
+    _⊢_≅_^_   : Con Term → (A B : Term) → Relevance → Set
 
     -- Equality of terms
-    _⊢_≅_∷_ : Con Term → (t u A : Term) → Set
+    _⊢_≅_∷_^_ : Con Term → (t u A : Term) → Relevance → Set
 
     -- Equality of neutral terms
-    _⊢_~_∷_ : Con Term → (t u A : Term) → Set
+    _⊢_~_∷_^_ : Con Term → (t u A : Term) → Relevance → Set
 
     ----------------
     -- Properties --
     ----------------
 
     -- Generic equality compatibility
-    ~-to-≅ₜ : ∀ {k l A Γ}
-            → Γ ⊢ k ~ l ∷ A
-            → Γ ⊢ k ≅ l ∷ A
+    ~-to-≅ₜ : ∀ {k l A r Γ}
+            → Γ ⊢ k ~ l ∷ A ^ r
+            → Γ ⊢ k ≅ l ∷ A ^ r
 
     -- Judgmental conversion compatibility
-    ≅-eq  : ∀ {A B Γ}
-          → Γ ⊢ A ≅ B
-          → Γ ⊢ A ≡ B
-    ≅ₜ-eq : ∀ {t u A Γ}
-          → Γ ⊢ t ≅ u ∷ A
-          → Γ ⊢ t ≡ u ∷ A
+    ≅-eq  : ∀ {A B r Γ}
+          → Γ ⊢ A ≅ B ^ r
+          → Γ ⊢ A ≡ B ^ r
+    ≅ₜ-eq : ∀ {t u A r Γ}
+          → Γ ⊢ t ≅ u ∷ A ^ r
+          → Γ ⊢ t ≡ u ∷ A ^ r
 
     -- Universe
-    ≅-univ : ∀ {A B Γ}
-           → Γ ⊢ A ≅ B ∷ U
-           → Γ ⊢ A ≅ B
+    ≅-univ : ∀ {A B r Γ}
+           → Γ ⊢ A ≅ B ∷ (Univ r) ^ !
+           → Γ ⊢ A ≅ B ^ r
 
     -- Symmetry
-    ≅-sym  : ∀ {A B Γ}   → Γ ⊢ A ≅ B     → Γ ⊢ B ≅ A
-    ≅ₜ-sym : ∀ {t u A Γ} → Γ ⊢ t ≅ u ∷ A → Γ ⊢ u ≅ t ∷ A
-    ~-sym  : ∀ {k l A Γ} → Γ ⊢ k ~ l ∷ A → Γ ⊢ l ~ k ∷ A
+    ≅-sym  : ∀ {A B r Γ} → Γ ⊢ A ≅ B ^ r → Γ ⊢ B ≅ A ^ r
+    ≅ₜ-sym : ∀ {t u A r Γ} → Γ ⊢ t ≅ u ∷ A ^ r → Γ ⊢ u ≅ t ∷ A ^ r
+    ~-sym  : ∀ {k l A r Γ} → Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ l ~ k ∷ A ^ r
 
     -- Transitivity
-    ≅-trans  : ∀ {A B C Γ}   → Γ ⊢ A ≅ B     → Γ ⊢ B ≅ C     → Γ ⊢ A ≅ C
-    ≅ₜ-trans : ∀ {t u v A Γ} → Γ ⊢ t ≅ u ∷ A → Γ ⊢ u ≅ v ∷ A → Γ ⊢ t ≅ v ∷ A
-    ~-trans  : ∀ {k l m A Γ} → Γ ⊢ k ~ l ∷ A → Γ ⊢ l ~ m ∷ A → Γ ⊢ k ~ m ∷ A
+    ≅-trans  : ∀ {A B C r Γ} → Γ ⊢ A ≅ B ^ r → Γ ⊢ B ≅ C ^ r → Γ ⊢ A ≅ C ^ r
+    ≅ₜ-trans : ∀ {t u v A r Γ} → Γ ⊢ t ≅ u ∷ A ^ r → Γ ⊢ u ≅ v ∷ A ^ r → Γ ⊢ t ≅ v ∷ A ^ r
+    ~-trans  : ∀ {k l m A r Γ} → Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ l ~ m ∷ A ^ r → Γ ⊢ k ~ m ∷ A ^ r
 
     -- Conversion
-    ≅-conv : ∀ {t u A B Γ} → Γ ⊢ t ≅ u ∷ A → Γ ⊢ A ≡ B → Γ ⊢ t ≅ u ∷ B
-    ~-conv : ∀ {k l A B Γ} → Γ ⊢ k ~ l ∷ A → Γ ⊢ A ≡ B → Γ ⊢ k ~ l ∷ B
+    ≅-conv : ∀ {t u A B r Γ} → Γ ⊢ t ≅ u ∷ A ^ r → Γ ⊢ A ≡ B ^ r → Γ ⊢ t ≅ u ∷ B ^ r
+    ~-conv : ∀ {k l A B r Γ} → Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ A ≡ B ^ r → Γ ⊢ k ~ l ∷ B ^ r
 
     -- Weakening
-    ≅-wk  : ∀ {A B ρ Γ Δ}
+    ≅-wk  : ∀ {A B r ρ Γ Δ}
           → ρ ∷ Δ ⊆ Γ
           → ⊢ Δ
-          → Γ ⊢ A ≅ B
-          → Δ ⊢ wk ρ A ≅ wk ρ B
-    ≅ₜ-wk : ∀ {t u A ρ Γ Δ}
+          → Γ ⊢ A ≅ B ^ r
+          → Δ ⊢ wk ρ A ≅ wk ρ B ^ r
+    ≅ₜ-wk : ∀ {t u A r ρ Γ Δ}
           → ρ ∷ Δ ⊆ Γ
           → ⊢ Δ
-          → Γ ⊢ t ≅ u ∷ A
-          → Δ ⊢ wk ρ t ≅ wk ρ u ∷ wk ρ A
-    ~-wk  : ∀ {k l A ρ Γ Δ}
+          → Γ ⊢ t ≅ u ∷ A ^ r
+          → Δ ⊢ wk ρ t ≅ wk ρ u ∷ wk ρ A ^ r
+    ~-wk  : ∀ {k l A r ρ Γ Δ}
           → ρ ∷ Δ ⊆ Γ
           → ⊢ Δ
-          → Γ ⊢ k ~ l ∷ A
-          → Δ ⊢ wk ρ k ~ wk ρ l ∷ wk ρ A
+          → Γ ⊢ k ~ l ∷ A ^ r
+          → Δ ⊢ wk ρ k ~ wk ρ l ∷ wk ρ A ^ r
 
     -- Weak head expansion
-    ≅-red : ∀ {A A′ B B′ Γ}
-          → Γ ⊢ A ⇒* A′
-          → Γ ⊢ B ⇒* B′
+    ≅-red : ∀ {A A′ B B′ r Γ}
+          → Γ ⊢ A ⇒* A′ ^ r
+          → Γ ⊢ B ⇒* B′ ^ r
           → Whnf A′
           → Whnf B′
-          → Γ ⊢ A′ ≅ B′
-          → Γ ⊢ A  ≅ B
+          → Γ ⊢ A′ ≅ B′ ^ r
+          → Γ ⊢ A  ≅ B ^ r
 
-    ≅ₜ-red : ∀ {a a′ b b′ A B Γ}
-           → Γ ⊢ A ⇒* B
-           → Γ ⊢ a ⇒* a′ ∷ B
-           → Γ ⊢ b ⇒* b′ ∷ B
+    ≅ₜ-red : ∀ {a a′ b b′ A B r Γ}
+           → Γ ⊢ A ⇒* B ^ r
+           → Γ ⊢ a ⇒* a′ ∷ B ^ r
+           → Γ ⊢ b ⇒* b′ ∷ B ^ r
            → Whnf B
            → Whnf a′
            → Whnf b′
-           → Γ ⊢ a′ ≅ b′ ∷ B
-           → Γ ⊢ a  ≅ b  ∷ A
+           → Γ ⊢ a′ ≅ b′ ∷ B ^ r
+           → Γ ⊢ a  ≅ b  ∷ A ^ r
 
     -- Universe type reflexivity
-    ≅-Urefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ U ≅ U
+    ≅-Urefl   : ∀ {r Γ} → ⊢ Γ → Γ ⊢ (Univ r) ≅ (Univ r) ^ !
 
     -- Natural number type reflexivity
-    ≅-ℕrefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ ℕ ≅ ℕ
-    ≅ₜ-ℕrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ ℕ ≅ ℕ ∷ U
+    ≅-ℕrefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ ℕ ≅ ℕ ^ !
+    ≅ₜ-ℕrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ ℕ ≅ ℕ ∷ U ^ !
 
     -- Empty type reflexivity
-    ≅-Emptyrefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty
-    ≅ₜ-Emptyrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ∷ U
+    ≅-Emptyrefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ^ %
+    ≅ₜ-Emptyrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ∷ Prop ^ !
 
     -- Π-congurence
 
-    ≅-Π-cong  : ∀ {F G H E Γ}
-              → Γ ⊢ F
-              → Γ ⊢ F ≅ H
-              → Γ ∙ F ⊢ G ≅ E
-              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E
+    ≅-Π-cong  : ∀ {F G H E rF rG Γ}
+              → Γ ⊢ F ^ rF
+              → Γ ⊢ F ≅ H ^ rF
+              → Γ ∙ F ^ rF ⊢ G ≅ E ^ rG
+              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E ^ rG
 
-    ≅ₜ-Π-cong : ∀ {F G H E Γ}
-              → Γ ⊢ F
-              → Γ ⊢ F ≅ H ∷ U
-              → Γ ∙ F ⊢ G ≅ E ∷ U
-              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E ∷ U
+    ≅ₜ-Π-cong : ∀ {F G H E rF rG Γ}
+              → Γ ⊢ F ^ rF
+              → Γ ⊢ F ≅ H ∷ (Univ rF) ^ !
+              → Γ ∙ F ^ rF ⊢ G ≅ E ∷ (Univ rG) ^ !
+              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E ∷ (Univ rG) ^ !
 
     -- Zero reflexivity
-    ≅ₜ-zerorefl : ∀ {Γ} → ⊢ Γ → Γ ⊢ zero ≅ zero ∷ ℕ
+    ≅ₜ-zerorefl : ∀ {Γ} → ⊢ Γ → Γ ⊢ zero ≅ zero ∷ ℕ ^ !
 
     -- Successor congurence
-    ≅-suc-cong : ∀ {m n Γ} → Γ ⊢ m ≅ n ∷ ℕ → Γ ⊢ suc m ≅ suc n ∷ ℕ
+    ≅-suc-cong : ∀ {m n Γ} → Γ ⊢ m ≅ n ∷ ℕ ^ ! → Γ ⊢ suc m ≅ suc n ∷ ℕ ^ !
 
     -- η-equality
-    ≅-η-eq : ∀ {f g F G Γ}
-              → Γ ⊢ F
-              → Γ ⊢ f ∷ Π F ▹ G
-              → Γ ⊢ g ∷ Π F ▹ G
+    ≅-η-eq : ∀ {f g F G rF rG Γ}
+              → Γ ⊢ F ^ rF
+              → Γ ⊢ f ∷ Π F ▹ G ^ rG
+              → Γ ⊢ g ∷ Π F ▹ G ^ rG
               → Function f
               → Function g
-              → Γ ∙ F ⊢ wk1 f ∘ var 0 ≅ wk1 g ∘ var 0 ∷ G
-              → Γ ⊢ f ≅ g ∷ Π F ▹ G
+              → Γ ∙ F ^ rF ⊢ wk1 f ∘ var 0 ≅ wk1 g ∘ var 0 ∷ G ^ rG
+              → Γ ⊢ f ≅ g ∷ Π F ▹ G ^ rG
 
     -- Variable reflexivity
-    ~-var : ∀ {x A Γ} → Γ ⊢ var x ∷ A → Γ ⊢ var x ~ var x ∷ A
+    ~-var : ∀ {x A r Γ} → Γ ⊢ var x ∷ A ^ r → Γ ⊢ var x ~ var x ∷ A ^ r
 
     -- Application congurence
-    ~-app : ∀ {a b f g F G Γ}
-          → Γ ⊢ f ~ g ∷ Π F ▹ G
-          → Γ ⊢ a ≅ b ∷ F
-          → Γ ⊢ f ∘ a ~ g ∘ b ∷ G [ a ]
+    ~-app : ∀ {a b f g F G rF rG Γ}
+          → Γ ⊢ f ~ g ∷ Π F ▹ G ^ rG
+          → Γ ⊢ a ≅ b ∷ F ^ rF
+          → Γ ⊢ f ∘ a ~ g ∘ b ∷ G [ a ] ^ rG
 
     -- Natural recursion congurence
-    ~-natrec : ∀ {z z′ s s′ n n′ F F′ Γ}
-             → Γ ∙ ℕ ⊢ F ≅ F′
-             → Γ     ⊢ z ≅ z′ ∷ F [ zero ]
-             → Γ     ⊢ s ≅ s′ ∷ Π ℕ ▹ (F ▹▹ F [ suc (var 0) ]↑)
-             → Γ     ⊢ n ~ n′ ∷ ℕ
-             → Γ     ⊢ natrec F z s n ~ natrec F′ z′ s′ n′ ∷ F [ n ]
+    ~-natrec : ∀ {z z′ s s′ n n′ F F′ rF Γ}
+             → Γ ∙ ℕ ^ ! ⊢ F ≅ F′ ^ rF
+             → Γ     ⊢ z ≅ z′ ∷ F [ zero ] ^ rF
+             → Γ     ⊢ s ≅ s′ ∷ Π ℕ ▹ (F ▹▹ F [ suc (var 0) ]↑) ^ rF
+             → Γ     ⊢ n ~ n′ ∷ ℕ ^ !
+             → Γ     ⊢ natrec F z s n ~ natrec F′ z′ s′ n′ ∷ F [ n ] ^ rF
 
     -- Empty recursion congurence
-    ~-Emptyrec : ∀ {n n′ F F′ Γ}
-             → Γ ⊢ F ≅ F′
-             → Γ     ⊢ n ~ n′ ∷ Empty
-             → Γ     ⊢ Emptyrec F n ~ Emptyrec F′ n′ ∷ F
+    ~-Emptyrec : ∀ {n n′ F F′ rF Γ}
+             → Γ ⊢ F ≅ F′ ^ rF
+             → Γ     ⊢ n ~ n′ ∷ Empty ^ %
+             → Γ     ⊢ Emptyrec F n ~ Emptyrec F′ n′ ∷ F ^ rF
 
 
   -- Composition of universe and generic equality compatibility
-  ~-to-≅ : ∀ {k l Γ} → Γ ⊢ k ~ l ∷ U → Γ ⊢ k ≅ l
+  ~-to-≅ : ∀ {k l r Γ} → Γ ⊢ k ~ l ∷ (Univ r) ^ ! → Γ ⊢ k ≅ l ^ r
   ~-to-≅ k~l = ≅-univ (~-to-≅ₜ k~l)
