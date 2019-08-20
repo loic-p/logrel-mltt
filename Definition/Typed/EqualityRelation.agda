@@ -114,13 +114,13 @@ record EqRelSet : Set₁ where
               → Γ ⊢ F ^ rF
               → Γ ⊢ F ≅ H ^ rF
               → Γ ∙ F ^ rF ⊢ G ≅ E ^ rG
-              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E ^ rG
+              → Γ ⊢ Π F ^ rF ▹ G ≅ Π H ^ rF ▹ E ^ rG
 
     ≅ₜ-Π-cong : ∀ {F G H E rF rG Γ}
               → Γ ⊢ F ^ rF
               → Γ ⊢ F ≅ H ∷ (Univ rF) ^ !
               → Γ ∙ F ^ rF ⊢ G ≅ E ∷ (Univ rG) ^ !
-              → Γ ⊢ Π F ▹ G ≅ Π H ▹ E ∷ (Univ rG) ^ !
+              → Γ ⊢ Π F ^ rF ▹ G ≅ Π H ^ rF ▹ E ∷ (Univ rG) ^ !
 
     -- Zero reflexivity
     ≅ₜ-zerorefl : ∀ {Γ} → ⊢ Γ → Γ ⊢ zero ≅ zero ∷ ℕ ^ !
@@ -131,19 +131,19 @@ record EqRelSet : Set₁ where
     -- η-equality
     ≅-η-eq : ∀ {f g F G rF rG Γ}
               → Γ ⊢ F ^ rF
-              → Γ ⊢ f ∷ Π F ▹ G ^ rG
-              → Γ ⊢ g ∷ Π F ▹ G ^ rG
+              → Γ ⊢ f ∷ Π F ^ rF ▹ G ^ rG
+              → Γ ⊢ g ∷ Π F ^ rF ▹ G ^ rG
               → Function f
               → Function g
               → Γ ∙ F ^ rF ⊢ wk1 f ∘ var 0 ≅ wk1 g ∘ var 0 ∷ G ^ rG
-              → Γ ⊢ f ≅ g ∷ Π F ▹ G ^ rG
+              → Γ ⊢ f ≅ g ∷ Π F ^ rF ▹ G ^ rG
 
     -- Variable reflexivity
     ~-var : ∀ {x A r Γ} → Γ ⊢ var x ∷ A ^ r → Γ ⊢ var x ~ var x ∷ A ^ r
 
     -- Application congurence
     ~-app : ∀ {a b f g F G rF rG Γ}
-          → Γ ⊢ f ~ g ∷ Π F ▹ G ^ rG
+          → Γ ⊢ f ~ g ∷ Π F ^ rF ▹ G ^ rG
           → Γ ⊢ a ≅ b ∷ F ^ rF
           → Γ ⊢ f ∘ a ~ g ∘ b ∷ G [ a ] ^ rG
 
@@ -151,7 +151,7 @@ record EqRelSet : Set₁ where
     ~-natrec : ∀ {z z′ s s′ n n′ F F′ rF Γ}
              → Γ ∙ ℕ ^ ! ⊢ F ≅ F′ ^ rF
              → Γ     ⊢ z ≅ z′ ∷ F [ zero ] ^ rF
-             → Γ     ⊢ s ≅ s′ ∷ Π ℕ ▹ (F ▹▹ F [ suc (var 0) ]↑) ^ rF
+             → Γ     ⊢ s ≅ s′ ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var 0) ]↑) ^ rF
              → Γ     ⊢ n ~ n′ ∷ ℕ ^ !
              → Γ     ⊢ natrec F z s n ~ natrec F′ z′ s′ n′ ∷ F [ n ] ^ rF
 

@@ -119,7 +119,7 @@ ne-elim′ D neK (emb 0<1 x) | emb () x₂
 ne-elim : ∀ {Γ l r K} → Neutral K  → Γ ⊩⟨ l ⟩ K ^ r → Γ ⊩⟨ l ⟩ne K ^ r
 ne-elim neK [K] = ne-elim′ (id (escape [K])) neK [K]
 
-Π-elim′ : ∀ {A Γ F G r r' l} → Γ ⊢ A ⇒* Π F ▹ G ^ r → Γ ⊩⟨ l ⟩ A ^ r' → Γ ⊩⟨ l ⟩Π A ^ r'
+Π-elim′ : ∀ {A Γ F G rF r r' l} → Γ ⊢ A ⇒* Π F ^ rF ▹ G ^ r → Γ ⊩⟨ l ⟩ A ^ r' → Γ ⊩⟨ l ⟩Π A ^ r'
 Π-elim′ D (Uᵣ′ _ l′ l< ⊢Γ) = ⊥-elim (U≢Π (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , Πₙ)))
 Π-elim′ D (ℕᵣ D′) = ⊥-elim (ℕ≢Π (whrDet* (red D′ , ℕₙ) (D , Πₙ)))
 Π-elim′ D (Emptyᵣ D′) = ⊥-elim (Empty≢Π (whrDet* (red D′ , Emptyₙ) (D , Πₙ)))
@@ -131,7 +131,7 @@ ne-elim neK [K] = ne-elim′ (id (escape [K])) neK [K]
 Π-elim′ D (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
 Π-elim′ D (emb 0<1 x) | emb () x₂
 
-Π-elim : ∀ {Γ F G r l} → Γ ⊩⟨ l ⟩ Π F ▹ G ^ r → Γ ⊩⟨ l ⟩Π Π F ▹ G ^ r
+Π-elim : ∀ {Γ F G rF r l} → Γ ⊩⟨ l ⟩ Π F ^ rF ▹ G ^ r → Γ ⊩⟨ l ⟩Π Π F ^ rF ▹ G ^ r
 Π-elim [Π] = Π-elim′ (id (escape [Π])) [Π]
 
 -- Extract a type and a level from a maybe embedding

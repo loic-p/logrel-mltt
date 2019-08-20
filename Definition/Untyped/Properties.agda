@@ -364,11 +364,11 @@ wk-β↑ t = trans (wk-subst t) (sym (trans (subst-wk t)
 
 -- A specific equation on weakenings used for the reduction of natrec.
 
-wk-β-natrec : ∀ ρ G
-  → Π ℕ ▹ (Π wk (lift ρ) G ▹ wk (lift (lift ρ)) (wk1 (G [ suc (var 0) ]↑)))
-  ≡ Π ℕ ▹ (wk (lift ρ) G ▹▹ wk (lift ρ) G [ suc (var 0) ]↑)
-wk-β-natrec ρ G =
-  cong₂ Π_▹_ refl (cong₂ Π_▹_ refl
+wk-β-natrec : ∀ ρ G rG
+  → Π ℕ ^ ! ▹ (Π wk (lift ρ) G ^ rG ▹ wk (lift (lift ρ)) (wk1 (G [ suc (var 0) ]↑)))
+  ≡ Π ℕ ^ ! ▹ (wk (lift ρ) G ^ rG ▹▹ wk (lift ρ) G [ suc (var 0) ]↑)
+wk-β-natrec ρ G rG =
+  cong₃ Π_^_▹_ refl refl (cong₃ Π_^_▹_ refl refl
     (trans (wk-comp (lift (lift ρ)) (step id)
                     (subst (consSubst (wk1Subst var) (suc (var 0))) G))
        (trans (wk-subst G) (sym (trans (wk-subst (wk (lift ρ) G))
@@ -470,13 +470,13 @@ natrecSucCaseLemma {σ} (1+ x) =
            (sym (trans (wk1-wk (step id) _)
                              (wk≡subst (step (step id)) (σ x))))
 
-natrecSucCase : ∀ σ F
-  → Π ℕ ▹ (Π subst (liftSubst σ) F
+natrecSucCase : ∀ σ F rF
+  → Π ℕ ^ ! ▹ (Π subst (liftSubst σ) F ^ rF
                 ▹ subst (liftSubst (liftSubst σ)) (wk1 (F [ suc (var 0) ]↑)))
-  ≡ Π ℕ ▹ (subst (liftSubst σ) F ▹▹ subst (liftSubst σ) F [ suc (var 0) ]↑)
-natrecSucCase σ F =
-  cong₂ Π_▹_ refl
-    (cong₂ Π_▹_ refl
+  ≡ Π ℕ ^ ! ▹ (subst (liftSubst σ) F ^ rF ▹▹ subst (liftSubst σ) F [ suc (var 0) ]↑)
+natrecSucCase σ F rF =
+  cong₃ Π_^_▹_ refl refl
+    (cong₃ Π_^_▹_ refl refl
        (trans (trans (subst-wk (F [ suc (var 0) ]↑))
                            (substCompEq F))
                  (sym (trans (wk-subst (subst (liftSubst σ) F))

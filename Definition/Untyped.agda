@@ -11,8 +11,8 @@ import Tools.PropositionalEquality as PE
 
 
 infixl 30 _∙_^_
-infix 30 Π_▹_
-infixr 22 _▹▹_
+infix 30 Π_^_▹_
+infixr 22 _^_▹▹_
 infixl 30 _ₛ•ₛ_ _•ₛ_ _ₛ•_
 infix 25 _[_]
 infix 25 _[_]↑
@@ -36,7 +36,7 @@ record GenT (A : Set) : Set where
 
 data Kind : Set where
   Ukind : Relevance → Kind
-  Pikind : Kind
+  Pikind : Relevance → Kind
   Natkind : Kind
   Lamkind : Kind
   Appkind : Kind
@@ -65,8 +65,8 @@ Prop = gen (Ukind %) []
 
 pattern Univ r = gen (Ukind r) []
 
-Π_▹_   : (A B : Term)     → Term  -- Dependent function type (B is a binder).
-Π A ▹ B = gen Pikind (⟦ 0 , A ⟧ ∷ ⟦ 1 , B ⟧ ∷ [])
+Π_^_▹_   : Term → Relevance → Term → Term  -- Dependent function type (B is a binder).
+Π A ^ r ▹ B = gen (Pikind r) (⟦ 0 , A ⟧ ∷ ⟦ 1 , B ⟧ ∷ [])
 
 ℕ      : Term                     -- Type of natural numbers.
 ℕ = gen Natkind []
@@ -101,8 +101,9 @@ Emptyrec A e = gen Emptyreckind (⟦ 0 , A ⟧ ∷ ⟦ 0 , e ⟧ ∷ [])
 
 -- If  Π F G = Π H E  then  F = H  and  G = E.
 
-Π-PE-injectivity : ∀ {F G H E} → Π F ▹ G PE.≡ Π H ▹ E → F PE.≡ H × G PE.≡ E
-Π-PE-injectivity PE.refl = PE.refl , PE.refl
+Π-PE-injectivity : ∀ {F rF G H rH E} → Π F ^ rF ▹ G PE.≡ Π H ^ rH ▹ E
+  → F PE.≡ H × rF PE.≡ rH × G PE.≡ E
+Π-PE-injectivity PE.refl = PE.refl , PE.refl , PE.refl
 
 -- If  suc n = suc m  then  n = m.
 
@@ -130,7 +131,7 @@ data Whnf : Term → Set where
 
   -- Type constructors are whnfs.
   Uₙ    : ∀ {r} → Whnf (Univ r)
-  Πₙ    : ∀ {A B} → Whnf (Π A ▹ B)
+  Πₙ    : ∀ {A r B} → Whnf (Π A ^ r ▹ B)
   ℕₙ    : Whnf ℕ
   Emptyₙ : Whnf Empty
 
@@ -154,13 +155,13 @@ U≢ℕ ()
 U≢Empty : ∀ {r} → Univ r PE.≢ Empty
 U≢Empty ()
 
-U≢Π : ∀ {r F G} → Univ r PE.≢ Π F ▹ G
+U≢Π : ∀ {r r' F G} → Univ r PE.≢ Π F ^ r' ▹ G
 U≢Π ()
 
 U≢ne : ∀ {r K} → Neutral K → Univ r PE.≢ K
 U≢ne () PE.refl
 
-ℕ≢Π : ∀ {F G} → ℕ PE.≢ Π F ▹ G
+ℕ≢Π : ∀ {F r G} → ℕ PE.≢ Π F ^ r ▹ G
 ℕ≢Π ()
 
 ℕ≢Empty : ℕ PE.≢ Empty
@@ -175,10 +176,10 @@ Empty≢ℕ ()
 Empty≢ne : ∀ {K} → Neutral K → Empty PE.≢ K
 Empty≢ne () PE.refl
 
-Empty≢Π : ∀ {F G} → Empty PE.≢ Π F ▹ G
+Empty≢Π : ∀ {F r G} → Empty PE.≢ Π F ^ r ▹ G
 Empty≢Π ()
 
-Π≢ne : ∀ {F G K} → Neutral K → Π F ▹ G PE.≢ K
+Π≢ne : ∀ {F r G K} → Neutral K → Π F ^ r ▹ G PE.≢ K
 Π≢ne () PE.refl
 
 zero≢suc : ∀ {n} → zero PE.≢ suc n
@@ -204,7 +205,7 @@ data Natural : Term → Set where
 -- Large types could also be U.
 
 data Type : Term → Set where
-  Πₙ : ∀ {A B} → Type (Π A ▹ B)
+  Πₙ : ∀ {A r B} → Type (Π A ^ r ▹ B)
   ℕₙ : Type ℕ
   Emptyₙ : Type Empty
   ne : ∀{n} → Neutral n → Type n
@@ -332,8 +333,8 @@ wkWhnf ρ (ne x) = ne (wkNeutral ρ x)
 
 -- Non-dependent version of Π.
 
-_▹▹_ : Term → Term → Term
-A ▹▹ B = Π A ▹ wk1 B
+_^_▹▹_ : Term → Relevance → Term → Term
+A ^ r ▹▹ B = Π A ^ r ▹ wk1 B
 
 ------------------------------------------------------------------------
 -- Substitution

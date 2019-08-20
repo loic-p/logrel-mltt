@@ -235,10 +235,10 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
         rF : Relevance
         F : Term
         G : Term
-        D : Γ ⊢ A :⇒*: Π F ▹ G ^ r
+        D : Γ ⊢ A :⇒*: Π F ^ rF ▹ G ^ r
         ⊢F : Γ ⊢ F ^ rF
         ⊢G : Γ ∙ F ^ rF ⊢ G ^ r
-        A≡A : Γ ⊢ Π F ▹ G ≅ Π F ▹ G ^ r
+        A≡A : Γ ⊢ Π F ^ rF ▹ G ≅ Π F ^ rF ▹ G ^ r
         [F] : ∀ {ρ Δ} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ) → Δ ⊩¹ U.wk ρ F ^ rF
         [G] : ∀ {ρ Δ a}
             → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
@@ -259,8 +259,8 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       field
         F′     : Term
         G′     : Term
-        D′     : Γ ⊢ B ⇒* Π F′ ▹ G′ ^ r
-        A≡B    : Γ ⊢ Π F ▹ G ≅ Π F′ ▹ G′ ^ r
+        D′     : Γ ⊢ B ⇒* Π F′ ^ rF ▹ G′ ^ r
+        A≡B    : Γ ⊢ Π F ^ rF ▹ G ≅ Π F′ ^ rF ▹ G′ ^ r
         [F≡F′] : ∀ {ρ Δ}
                → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                → Δ ⊩¹ U.wk ρ F ≡ U.wk ρ F′ ^ rF / [F] [ρ] ⊢Δ
@@ -272,9 +272,9 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     -- Term of Π-type
     _⊩¹Π_∷_^_/_ : (Γ : Con Term) (t A : Term) (r : Relevance) ([A] : Γ ⊩¹Π A ^ r) → Set
     Γ ⊩¹Π t ∷ A ^ r / Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext =
-      ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ▹ G ^ r
+      ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ^ rF ▹ G ^ r
             × Function f
-            × Γ ⊢ f ≅ f ∷ Π F ▹ G ^ r
+            × Γ ⊢ f ≅ f ∷ Π F ^ rF ▹ G ^ r
             × (∀ {ρ Δ a b}
               → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                 ([a] : Δ ⊩¹ a ∷ U.wk ρ F ^ rF / [F] [ρ] ⊢Δ)
@@ -293,11 +293,11 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     Γ ⊩¹Π t ≡ u ∷ A ^ r / Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext =
       let [A] = Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext
       in  ∃₂ λ f g →
-          Γ ⊢ t :⇒*: f ∷ Π F ▹ G ^ r
-      ×   Γ ⊢ u :⇒*: g ∷ Π F ▹ G ^ r
+          Γ ⊢ t :⇒*: f ∷ Π F ^ rF ▹ G ^ r
+      ×   Γ ⊢ u :⇒*: g ∷ Π F ^ rF ▹ G ^ r
       ×   Function f
       ×   Function g
-      ×   Γ ⊢ f ≅ g ∷ Π F ▹ G ^ r
+      ×   Γ ⊢ f ≅ g ∷ Π F ^ rF ▹ G ^ r
       ×   Γ ⊩¹Π t ∷ A ^ r / [A]
       ×   Γ ⊩¹Π u ∷ A ^ r / [A]
       ×   (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)

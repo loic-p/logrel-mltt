@@ -34,7 +34,7 @@ mutual
     Πⱼ_▹_ : ∀ {F rF G rG}
          → Γ     ⊢ F ^ rF
          → Γ ∙ F ^ rF ⊢ G ^ rG
-         → Γ     ⊢ Π F ▹ G ^ rG
+         → Γ     ⊢ Π F ^ rF ▹ G ^ rG
     univ : ∀ {A r}
          → Γ ⊢ A ∷ (Univ r) ^ !
          → Γ ⊢ A ^ r
@@ -46,7 +46,7 @@ mutual
     Πⱼ_▹_   : ∀ {F rF G rG}
            → Γ     ⊢ F ∷ (Univ rF) ^ !
            → Γ ∙ F ^ rF ⊢ G ∷ (Univ rG) ^ !
-           → Γ     ⊢ Π F ▹ G ∷ (Univ rG) ^ !
+           → Γ     ⊢ Π F ^ rF ▹ G ∷ (Univ rG) ^ !
     var    : ∀ {A r x}
            → ⊢ Γ
            → x ∷ A ^ r ∈ Γ
@@ -54,9 +54,9 @@ mutual
     lamⱼ    : ∀ {F rF G rG t}
            → Γ     ⊢ F ^ rF
            → Γ ∙ F ^ rF ⊢ t ∷ G ^ rG
-           → Γ     ⊢ lam t ∷ Π F ▹ G ^ rG
+           → Γ     ⊢ lam t ∷ Π F ^ rF ▹ G ^ rG
     _∘ⱼ_    : ∀ {g a F rF G rG}
-           → Γ ⊢     g ∷ Π F ▹ G ^ rG
+           → Γ ⊢     g ∷ Π F ^ rF ▹ G ^ rG
            → Γ ⊢     a ∷ F ^ rF
            → Γ ⊢ g ∘ a ∷ G [ a ] ^ rG
     zeroⱼ   : ⊢ Γ
@@ -67,7 +67,7 @@ mutual
     natrecⱼ : ∀ {G rG s z n}
            → Γ ∙ ℕ ^ ! ⊢ G ^ rG
            → Γ       ⊢ z ∷ G [ zero ] ^ rG
-           → Γ       ⊢ s ∷ Π ℕ ▹ (G ▹▹ G [ suc (var Nat.zero) ]↑) ^ rG
+           → Γ       ⊢ s ∷ Π ℕ ^ ! ▹ (G ^ rG ▹▹ G [ suc (var Nat.zero) ]↑) ^ rG
            → Γ       ⊢ n ∷ ℕ ^ !
            → Γ       ⊢ natrec G z s n ∷ G [ n ] ^ rG
     Emptyrecⱼ : ∀ {A rA e}
@@ -96,7 +96,7 @@ mutual
            → Γ     ⊢ F ^ rF
            → Γ     ⊢ F ≡ H ^ rF
            → Γ ∙ F ^ rF ⊢ G ≡ E ^ rG
-           → Γ     ⊢ Π F ▹ G ≡ Π H ▹ E ^ rG
+           → Γ     ⊢ Π F ^ rF ▹ G ≡ Π H ^ rF ▹ E ^ rG
 
   -- Term equality
   data _⊢_≡_∷_^_ (Γ : Con Term) : Term → Term → Term → Relevance → Set where
@@ -118,9 +118,9 @@ mutual
                 → Γ     ⊢ F ^ rF
                 → Γ     ⊢ F ≡ H       ∷ (Univ rF) ^ !
                 → Γ ∙ F ^ rF ⊢ G ≡ E       ∷ (Univ rG) ^ !
-                → Γ     ⊢ Π F ▹ G ≡ Π H ▹ E ∷ (Univ rG) ^ !
+                → Γ     ⊢ Π F ^ rF ▹ G ≡ Π H ^ rF ▹ E ∷ (Univ rG) ^ !
     app-cong    : ∀ {a b f g F G rF rG}
-                → Γ ⊢ f ≡ g ∷ Π F ▹ G ^ rG
+                → Γ ⊢ f ≡ g ∷ Π F ^ rF ▹ G ^ rG
                 → Γ ⊢ a ≡ b ∷ F ^ rF
                 → Γ ⊢ f ∘ a ≡ g ∘ b ∷ G [ a ] ^ rG
     β-red       : ∀ {a t F rF G rG}
@@ -130,29 +130,29 @@ mutual
                 → Γ     ⊢ (lam t) ∘ a ≡ t [ a ] ∷ G [ a ] ^ rG
     η-eq        : ∀ {f g F rF G rG}
                 → Γ     ⊢ F ^ rF
-                → Γ     ⊢ f ∷ Π F ▹ G ^ rG
-                → Γ     ⊢ g ∷ Π F ▹ G ^ rG
+                → Γ     ⊢ f ∷ Π F ^ rF ▹ G ^ rG
+                → Γ     ⊢ g ∷ Π F ^ rF ▹ G ^ rG
                 → Γ ∙ F ^ rF ⊢ wk1 f ∘ var Nat.zero ≡ wk1 g ∘ var Nat.zero ∷ G ^ rG
-                → Γ     ⊢ f ≡ g ∷ Π F ▹ G ^ rG
+                → Γ     ⊢ f ≡ g ∷ Π F ^ rF ▹ G ^ rG
     suc-cong    : ∀ {m n}
                 → Γ ⊢ m ≡ n ∷ ℕ ^ !
                 → Γ ⊢ suc m ≡ suc n ∷ ℕ ^ !
     natrec-cong : ∀ {z z′ s s′ n n′ F F′ rF}
                 → Γ ∙ ℕ ^ ! ⊢ F ≡ F′ ^ rF
                 → Γ     ⊢ z ≡ z′ ∷ F [ zero ] ^ rF
-                → Γ     ⊢ s ≡ s′ ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+                → Γ     ⊢ s ≡ s′ ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                 → Γ     ⊢ n ≡ n′ ∷ ℕ ^ !
                 → Γ     ⊢ natrec F z s n ≡ natrec F′ z′ s′ n′ ∷ F [ n ] ^ rF
     natrec-zero : ∀ {z s F rF}
                 → Γ ∙ ℕ ^ ! ⊢ F ^ rF
                 → Γ     ⊢ z ∷ F [ zero ] ^ rF
-                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+                → Γ     ⊢ s ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                 → Γ     ⊢ natrec F z s zero ≡ z ∷ F [ zero ] ^ rF
     natrec-suc  : ∀ {n z s F rF}
                 → Γ     ⊢ n ∷ ℕ ^ !
                 → Γ ∙ ℕ ^ ! ⊢ F ^ rF
                 → Γ     ⊢ z ∷ F [ zero ] ^ rF
-                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+                → Γ     ⊢ s ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                 → Γ     ⊢ natrec F z s (suc n) ≡ (s ∘ n) ∘ (natrec F z s n)
                         ∷ F [ suc n ] ^ rF
     Emptyrec-cong : ∀ {A A' e e' r}
@@ -167,7 +167,7 @@ data _⊢_⇒_∷_^_ (Γ : Con Term) : Term → Term → Term → Relevance → 
                → Γ ⊢ A ≡ B ^ r
                → Γ ⊢ t ⇒ u ∷ B ^ r
   app-subst    : ∀ {A B t u a rA rB}
-               → Γ ⊢ t ⇒ u ∷ Π A ▹ B ^ rB
+               → Γ ⊢ t ⇒ u ∷ Π A ^ rA ▹ B ^ rB
                → Γ ⊢ a ∷ A ^ rA
                → Γ ⊢ t ∘ a ⇒ u ∘ a ∷ B [ a ] ^ rB
   β-red        : ∀ {A B a t rA rB}
@@ -178,19 +178,19 @@ data _⊢_⇒_∷_^_ (Γ : Con Term) : Term → Term → Term → Relevance → 
   natrec-subst : ∀ {z s n n′ F rF}
                → Γ ∙ ℕ ^ ! ⊢ F ^ rF
                → Γ     ⊢ z ∷ F [ zero ] ^ rF
-               → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+               → Γ     ⊢ s ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                → Γ     ⊢ n ⇒ n′ ∷ ℕ ^ !
                → Γ     ⊢ natrec F z s n ⇒ natrec F z s n′ ∷ F [ n ] ^ rF
   natrec-zero  : ∀ {z s F rF}
                → Γ ∙ ℕ ^ ! ⊢ F ^ rF
                → Γ     ⊢ z ∷ F [ zero ] ^ rF
-               → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+               → Γ     ⊢ s ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                → Γ     ⊢ natrec F z s zero ⇒ z ∷ F [ zero ] ^ rF
   natrec-suc   : ∀ {n z s F rF}
                → Γ     ⊢ n ∷ ℕ ^ !
                → Γ ∙ ℕ ^ ! ⊢ F ^ rF
                → Γ     ⊢ z ∷ F [ zero ] ^ rF
-               → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
+               → Γ     ⊢ s ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var Nat.zero) ]↑) ^ rF
                → Γ     ⊢ natrec F z s (suc n) ⇒ (s ∘ n) ∘ (natrec F z s n)
                        ∷ F [ suc n ] ^ rF
   Emptyrec-subst : ∀ {n n′ A r}
