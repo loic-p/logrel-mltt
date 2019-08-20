@@ -110,6 +110,9 @@ Emptyrec A e = gen Emptyreckind (⟦ 0 , A ⟧ ∷ ⟦ 0 , e ⟧ ∷ [])
 suc-PE-injectivity : ∀ {n m} → suc n PE.≡ suc m → n PE.≡ m
 suc-PE-injectivity PE.refl = PE.refl
 
+Univ-PE-injectivity : ∀ {r r'} → Univ r PE.≡ Univ r' → r PE.≡ r'
+Univ-PE-injectivity PE.refl = PE.refl
+
 
 -- Neutral terms.
 
