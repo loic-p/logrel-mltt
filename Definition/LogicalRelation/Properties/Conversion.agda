@@ -49,9 +49,9 @@ mutual
            (λ {ρ} [ρ] ⊢Δ [a] [b] [a≡b] →
               let [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                            ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                  [a]₁ = convTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
-                  [b]₁ = convTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [b]
-                  [a≡b]₁ = convEqTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a≡b]
+                  [a]₁ = convTerm₂′ PE.refl (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                  [b]₁ = convTerm₂′ PE.refl (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [b]
+                  [a≡b]₁ = convEqTerm₂′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a≡b]
                   [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                     (PE.sym G₁≡G′))
                                            ([G] [ρ] ⊢Δ [a]₁)
@@ -61,13 +61,13 @@ mutual
           (λ {ρ} [ρ] ⊢Δ [a] →
              let [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                           ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                 [a]₁ = convTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                 [a]₁ = convTerm₂′ PE.refl (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
                  [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                    (PE.sym G₁≡G′))
                                           ([G] [ρ] ⊢Δ [a]₁)
                                           ([G≡G′] [ρ] ⊢Δ [a]₁)
              in  convTerm₁ ([G] [ρ] ⊢Δ [a]₁) ([G]₁ [ρ] ⊢Δ [a]) [G≡G₁] ([f]₁ [ρ] ⊢Δ [a]₁))
-  convTermT₁ (Uᵥ (Uᵣ _ .⁰ 0<1 ⊢Γ) (Uᵣ _ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
+  convTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t rewrite Univ-PE-injectivity A≡B = t
   convTermT₁ (emb⁰¹ x) A≡B t = convTermT₁ x A≡B t
   convTermT₁ (emb¹⁰ x) A≡B t = convTermT₁ x A≡B t
 
@@ -86,21 +86,21 @@ mutual
                         (sym (≅-eq (~-to-≅ K≡M)))
     in  neₜ k (convRed:*: d K₁≡K)
             (neNfₜ neK₂ (conv ⊢k K₁≡K) (~-conv k≡k K₁≡K))
-  convTermT₂ {Γ = Γ} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
+  convTermT₂ {Γ = Γ} {r = r} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                          (Πᵣ rF₁ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
              (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
              (Πₜ f d funcF f≡f [f] [f]₁) =
     let ΠF₁G₁≡ΠF′G′   = whrDet* (red D₁ , Πₙ) (D′ , Πₙ)
         F₁≡F′ , rF₁≡rF′ , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
-        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ _)
+        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ r)
                              (PE.sym ΠF₁G₁≡ΠF′G′) (≅-eq A≡B)
     in  Πₜ f (convRed:*: d (sym ΠFG≡ΠF₁G₁)) funcF (≅-conv f≡f (sym ΠFG≡ΠF₁G₁))
            (λ {ρ} [ρ] ⊢Δ [a] [b] [a≡b] →
               let [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                            ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                  [a]₁ = convTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
-                  [b]₁ = convTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [b]
-                  [a≡b]₁ = convEqTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a≡b]
+                  [a]₁ = convTerm₁′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                  [b]₁ = convTerm₁′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [b]
+                  [a≡b]₁ = convEqTerm₁′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a≡b]
                   [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                     (PE.sym G₁≡G′))
                                            ([G] [ρ] ⊢Δ [a])
@@ -110,14 +110,14 @@ mutual
            (λ {ρ} [ρ] ⊢Δ [a] →
               let [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                            ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                  [a]₁ = convTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                  [a]₁ = convTerm₁′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
                   [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                     (PE.sym G₁≡G′))
                                            ([G] [ρ] ⊢Δ [a])
                                            ([G≡G′] [ρ] ⊢Δ [a])
               in  convTerm₂ ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁)
                             [G≡G₁] ([f]₁ [ρ] ⊢Δ [a]₁))
-  convTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
+  convTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t rewrite Univ-PE-injectivity A≡B = t
   convTermT₂ (emb⁰¹ x) A≡B t = convTermT₂ x A≡B t
   convTermT₂ (emb¹⁰ x) A≡B t = convTermT₂ x A≡B t
 
@@ -128,6 +128,13 @@ mutual
             → Γ ⊩⟨ l′ ⟩ t ∷ B ^ r / [B]
   convTerm₁ [A] [B] A≡B t = convTermT₁ (goodCases [A] [B] A≡B) A≡B t
 
+  -- Conversion of terms converting from left to right. with PE
+  convTerm₁′ : ∀ {Γ A B r r' t l l′} (eq : r PE.≡ r') ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r')
+            → Γ ⊩⟨ l ⟩  A ≡ B ^ r / [A]
+            → Γ ⊩⟨ l ⟩  t ∷ A ^ r / [A]
+            → Γ ⊩⟨ l′ ⟩ t ∷ B ^ r' / [B]
+  convTerm₁′ PE.refl [A] [B] A≡B t = convTerm₁ [A] [B] A≡B t
+
   -- Conversion of terms converting from right to left.
   convTerm₂ : ∀ {Γ A B r t l l′} ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r)
           → Γ ⊩⟨ l ⟩  A ≡ B ^ r / [A]
@@ -137,12 +144,12 @@ mutual
 
   -- Conversion of terms converting from right to left
   -- with some propsitionally equal types.
-  convTerm₂′ : ∀ {Γ A r B B′ t l l′} → B PE.≡ B′
-          → ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r)
+  convTerm₂′ : ∀ {Γ A r r' B B′ t l l′} → B PE.≡ B′ → r PE.≡ r'
+          → ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r')
           → Γ ⊩⟨ l ⟩  A ≡ B′ ^ r / [A]
-          → Γ ⊩⟨ l′ ⟩ t ∷ B ^ r / [B]
+          → Γ ⊩⟨ l′ ⟩ t ∷ B ^ r' / [B]
           → Γ ⊩⟨ l ⟩  t ∷ A ^ r / [A]
-  convTerm₂′ PE.refl [A] [B] A≡B t = convTerm₂ [A] [B] A≡B t
+  convTerm₂′ PE.refl PE.refl [A] [B] A≡B t = convTerm₂ [A] [B] A≡B t
 
 
   -- Helper function for conversion of term equality converting from left to right.
@@ -161,7 +168,7 @@ mutual
     in  neₜ₌ k m (convRed:*: d K≡K₁)
                  (convRed:*: d′ K≡K₁)
                  (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K≡K₁))
-  convEqTermT₁ {Γ = Γ} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
+  convEqTermT₁ {Γ = Γ} {r = r} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                            (Πᵣ rF₁ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
                (Πₜ₌ f g d d′ funcF funcG t≡u [t] [u] [t≡u]) =
@@ -169,7 +176,7 @@ mutual
         [B] = Πᵣ′ rF₁ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁
         [A≡B] = Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]
         ΠF₁G₁≡ΠF′G′ = whrDet* (red D₁ , Πₙ) (D′ , Πₙ)
-        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ _)
+        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ r)
                              (PE.sym ΠF₁G₁≡ΠF′G′) (≅-eq A≡B)
     in  Πₜ₌ f g (convRed:*: d ΠFG≡ΠF₁G₁) (convRed:*: d′ ΠFG≡ΠF₁G₁)
             funcF funcG (≅-conv t≡u ΠFG≡ΠF₁G₁)
@@ -178,14 +185,14 @@ mutual
                let F₁≡F′ , rF₁≡rF′ , G₁≡G′ = Π-PE-injectivity (whrDet* (red D₁ , Πₙ) (D′ , Πₙ))
                    [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                             ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                   [a]₁ = convTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                   [a]₁ = convTerm₂′ PE.refl (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
                    [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                      (PE.sym G₁≡G′))
                                             ([G] [ρ] ⊢Δ [a]₁)
                                             ([G≡G′] [ρ] ⊢Δ [a]₁)
                in  convEqTerm₁ ([G] [ρ] ⊢Δ [a]₁) ([G]₁ [ρ] ⊢Δ [a])
                                [G≡G₁] ([t≡u] [ρ] ⊢Δ [a]₁))
-  convEqTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
+  convEqTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u rewrite Univ-PE-injectivity A≡B = t≡u
   convEqTermT₁ (emb⁰¹ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
   convEqTermT₁ (emb¹⁰ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
 
@@ -204,7 +211,7 @@ mutual
                         (sym (≅-eq (~-to-≅ K≡M)))
     in  neₜ₌ k m (convRed:*: d K₁≡K) (convRed:*: d′ K₁≡K)
                  (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K₁≡K))
-  convEqTermT₂ {Γ = Γ} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
+  convEqTermT₂ {Γ = Γ} {r = r} (Πᵥ (Πᵣ rF F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                            (Πᵣ rF₁ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
                (Πₜ₌ f g d d′ funcF funcG t≡u [t] [u] [t≡u]) =
@@ -212,7 +219,7 @@ mutual
         [B] = Πᵣ′ rF₁ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁
         [A≡B] = Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]
         ΠF₁G₁≡ΠF′G′ = whrDet* (red D₁ , Πₙ) (D′ , Πₙ)
-        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ _)
+        ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ^ rF ▹ G ≡ x ^ r)
                              (PE.sym ΠF₁G₁≡ΠF′G′) (≅-eq A≡B)
     in  Πₜ₌ f g (convRed:*: d (sym ΠFG≡ΠF₁G₁)) (convRed:*: d′ (sym ΠFG≡ΠF₁G₁))
             funcF funcG (≅-conv t≡u (sym ΠFG≡ΠF₁G₁))
@@ -221,14 +228,14 @@ mutual
                let F₁≡F′ , rF₁≡rF′ , G₁≡G′ = Π-PE-injectivity (whrDet* (red D₁ , Πₙ) (D′ , Πₙ))
                    [F≡F₁] = irrelevanceEqR′ (PE.cong (wk ρ) (PE.sym F₁≡F′))
                                             ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
-                   [a]₁ = convTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
+                   [a]₁ = convTerm₁′ (PE.sym rF₁≡rF′) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
                    [G≡G₁] = irrelevanceEqR′ (PE.cong (λ x → wk (lift ρ) x [ _ ])
                                                      (PE.sym G₁≡G′))
                                             ([G] [ρ] ⊢Δ [a])
                                             ([G≡G′] [ρ] ⊢Δ [a])
                in  convEqTerm₂ ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁)
                                [G≡G₁] ([t≡u] [ρ] ⊢Δ [a]₁))
-  convEqTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
+  convEqTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u rewrite Univ-PE-injectivity A≡B = t≡u
   convEqTermT₂ (emb⁰¹ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
   convEqTermT₂ (emb¹⁰ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
 
@@ -239,9 +246,23 @@ mutual
               → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B ^ r / [B]
   convEqTerm₁ [A] [B] A≡B t≡u = convEqTermT₁ (goodCases [A] [B] A≡B) A≡B t≡u
 
+  -- Conversion of term equality converting from left to right. with PE
+  convEqTerm₁′ : ∀ {l l′ Γ A B t u r r'} (eq : r PE.≡ r') ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r')
+              → Γ ⊩⟨ l ⟩  A ≡ B ^ r / [A]
+              → Γ ⊩⟨ l ⟩  t ≡ u ∷ A ^ r / [A]
+              → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B ^ r' / [B]
+  convEqTerm₁′ PE.refl [A] [B] A≡B t≡u = convEqTerm₁ [A] [B] A≡B t≡u
+
   -- Conversion of term equality converting from right to left.
   convEqTerm₂ : ∀ {l l′ Γ A B t u r} ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r)
             → Γ ⊩⟨ l ⟩  A ≡ B ^ r / [A]
             → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B ^ r / [B]
             → Γ ⊩⟨ l ⟩  t ≡ u ∷ A ^ r / [A]
   convEqTerm₂ [A] [B] A≡B t≡u = convEqTermT₂ (goodCases [A] [B] A≡B) A≡B t≡u
+
+  -- Conversion of term equality converting from right to left with PE
+  convEqTerm₂′ : ∀ {l l′ Γ A B t u r r'} (eq : r PE.≡ r') ([A] : Γ ⊩⟨ l ⟩ A ^ r) ([B] : Γ ⊩⟨ l′ ⟩ B ^ r')
+            → Γ ⊩⟨ l ⟩  A ≡ B ^ r / [A]
+            → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B ^ r' / [B]
+            → Γ ⊩⟨ l ⟩  t ≡ u ∷ A ^ r / [A]
+  convEqTerm₂′ PE.refl [A] [B] A≡B t≡u = convEqTerm₂ [A] [B] A≡B t≡u
