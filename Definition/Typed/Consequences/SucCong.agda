@@ -13,9 +13,9 @@ open import Tools.Product
 
 
 -- Congurence of the type of the successor case in natrec.
-sucCong : ∀ {F G Γ} → Γ ∙ ℕ ⊢ F ≡ G
-        → Γ ⊢ Π ℕ ▹ (F ▹▹ F [ suc (var 0) ]↑)
-            ≡ Π ℕ ▹ (G ▹▹ G [ suc (var 0) ]↑)
+sucCong : ∀ {F G rF Γ} → Γ ∙ ℕ ^ ! ⊢ F ≡ G ^ rF
+        → Γ ⊢ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var 0) ]↑)
+            ≡ Π ℕ ^ ! ▹ (G ^ rF ▹▹ G [ suc (var 0) ]↑) ^ rF
 sucCong F≡G with wfEq F≡G
 sucCong F≡G | ⊢Γ ∙ ⊢ℕ =
   let ⊢F , _ = syntacticEq F≡G
