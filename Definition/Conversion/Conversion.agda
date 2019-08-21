@@ -19,11 +19,11 @@ import Tools.PropositionalEquality as PE
 
 mutual
   -- Conversion of algorithmic equality.
-  convConv↑Term : ∀ {t u A B Γ Δ}
+  convConv↑Term : ∀ {t u A B r Γ Δ}
                 → ⊢ Γ ≡ Δ
-                → Γ ⊢ A ≡ B
-                → Γ ⊢ t [conv↑] u ∷ A
-                → Δ ⊢ t [conv↑] u ∷ B
+                → Γ ⊢ A ≡ B ^ r
+                → Γ ⊢ t [conv↑] u ∷ A ^ r
+                → Δ ⊢ t [conv↑] u ∷ B ^ r
   convConv↑Term Γ≡Δ A≡B ([↑]ₜ B₁ t′ u′ D d d′ whnfB whnft′ whnfu′ t<>u) =
     let _ , ⊢B = syntacticEq A≡B
         B′ , whnfB′ , D′ = whNorm ⊢B
@@ -34,12 +34,12 @@ mutual
              (convConv↓Term Γ≡Δ B₁≡B′ whnfB′ t<>u)
 
   -- Conversion of algorithmic equality with terms and types in WHNF.
-  convConv↓Term : ∀ {t u A B Γ Δ}
+  convConv↓Term : ∀ {t u A B r Γ Δ}
                 → ⊢ Γ ≡ Δ
-                → Γ ⊢ A ≡ B
+                → Γ ⊢ A ≡ B ^ r
                 → Whnf B
-                → Γ ⊢ t [conv↓] u ∷ A
-                → Δ ⊢ t [conv↓] u ∷ B
+                → Γ ⊢ t [conv↓] u ∷ A ^ r
+                → Δ ⊢ t [conv↓] u ∷ B ^ r
   convConv↓Term Γ≡Δ A≡B whnfB (ℕ-ins x) rewrite ℕ≡A A≡B whnfB =
     ℕ-ins (stability~↓ Γ≡Δ x)
   convConv↓Term Γ≡Δ A≡B whnfB (Empty-ins x) rewrite Empty≡A A≡B whnfB =
@@ -57,15 +57,15 @@ mutual
     suc-cong (stabilityConv↑Term Γ≡Δ x)
   convConv↓Term Γ≡Δ A≡B whnfB (η-eq x x₁ x₂ y y₁ x₃) with Π≡A A≡B whnfB
   convConv↓Term Γ≡Δ A≡B whnfB (η-eq x x₁ x₂ y y₁ x₃) | F′ , G′ , PE.refl =
-    let F≡F′ , G≡G′ = injectivity A≡B
+    let F≡F′ , rF≡rF′ , G≡G′ = injectivity A≡B
         ⊢F , ⊢F′ = syntacticEq F≡F′
     in  η-eq (stability Γ≡Δ ⊢F′) (stabilityTerm Γ≡Δ (conv x₁ A≡B))
              (stabilityTerm Γ≡Δ (conv x₂ A≡B)) y y₁
              (convConv↑Term (Γ≡Δ ∙ F≡F′) G≡G′ x₃)
 
 -- Conversion of algorithmic equality with the same context.
-convConvTerm : ∀ {t u A B Γ}
-              → Γ ⊢ t [conv↑] u ∷ A
-              → Γ ⊢ A ≡ B
-              → Γ ⊢ t [conv↑] u ∷ B
+convConvTerm : ∀ {t u A B r Γ}
+              → Γ ⊢ t [conv↑] u ∷ A ^ r
+              → Γ ⊢ A ≡ B ^ r
+              → Γ ⊢ t [conv↑] u ∷ B ^ r
 convConvTerm t<>u A≡B = convConv↑Term (reflConEq (wfEq A≡B)) A≡B t<>u
