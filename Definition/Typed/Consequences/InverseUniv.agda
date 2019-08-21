@@ -15,12 +15,12 @@ open import Tools.Nullary
 
 -- Proposition for terms if they contain a U.
 data UFull : Term → Set where
-  ∃U  : UFull U
-  ∃Π₁ : ∀ {F G} → UFull F → UFull (Π F ▹ G)
-  ∃Π₂ : ∀ {F G} → UFull G → UFull (Π F ▹ G)
+  ∃U  : ∀ {r} → UFull (Univ r)
+  ∃Π₁ : ∀ {F rF G} → UFull F → UFull (Π F ^ rF ▹ G)
+  ∃Π₂ : ∀ {F rF G} → UFull G → UFull (Π F ^ rF ▹ G)
 
 -- Terms cannot contain U.
-noU : ∀ {t A Γ} → Γ ⊢ t ∷ A → ¬ (UFull t)
+noU : ∀ {t A rA Γ} → Γ ⊢ t ∷ A ^ rA → ¬ (UFull t)
 noU (ℕⱼ x) ()
 noU (Emptyⱼ x) ()
 noU (Πⱼ t ▹ t₁) (∃Π₁ ufull) = noU t ufull
@@ -43,14 +43,14 @@ noUNe (Emptyrecₙ neA) ()
 
 -- Helper function where if at least one Π-type does not contain U,
 -- one of F and H will not contain U and one of G and E will not contain U.
-pilem : ∀ {F G H E}
-      → (¬ UFull (Π F ▹ G)) ⊎ (¬ UFull (Π H ▹ E))
+pilem : ∀ {F G H E rF rH}
+      → (¬ UFull (Π F ^ rF ▹ G)) ⊎ (¬ UFull (Π H ^ rH ▹ E))
       → (¬ UFull F) ⊎ (¬ UFull H) × (¬ UFull G) ⊎ (¬ UFull E)
 pilem (inj₁ x) = inj₁ (λ x₁ → x (∃Π₁ x₁)) , inj₁ (λ x₁ → x (∃Π₂ x₁))
 pilem (inj₂ x) = inj₂ (λ x₁ → x (∃Π₁ x₁)) , inj₂ (λ x₁ → x (∃Π₂ x₁))
 
 -- If type A does not contain U, then A can be a term of type U.
-inverseUniv : ∀ {A Γ} → ¬ (UFull A) → Γ ⊢ A → Γ ⊢ A ∷ U
+inverseUniv : ∀ {A rA Γ} → ¬ (UFull A) → Γ ⊢ A ^ rA → Γ ⊢ A ∷ Univ rA ^ !
 inverseUniv q (ℕⱼ x) = ℕⱼ x
 inverseUniv q (Emptyⱼ x) = Emptyⱼ x
 inverseUniv q (Uⱼ x) = ⊥-elim (q ∃U)
@@ -58,12 +58,14 @@ inverseUniv q (Πⱼ A ▹ A₁) = Πⱼ inverseUniv (λ x → q (∃Π₁ x)) A
 inverseUniv q (univ x) = x
 
 -- If A is a neutral type, then A can be a term of U.
-inverseUnivNe : ∀ {A Γ} → Neutral A → Γ ⊢ A → Γ ⊢ A ∷ U
+inverseUnivNe : ∀ {A rA Γ} → Neutral A → Γ ⊢ A ^ rA → Γ ⊢ A ∷ Univ rA ^ !
 inverseUnivNe neA ⊢A = inverseUniv (noUNe neA) ⊢A
 
 -- Helper function where if at least one type does not contain U, then the
 -- equality of types can be an equality of term of type U.
-inverseUnivEq′ : ∀ {A B Γ} → (¬ (UFull A)) ⊎ (¬ (UFull B)) → Γ ⊢ A ≡ B → Γ ⊢ A ≡ B ∷ U
+inverseUnivEq′ : ∀ {A B rA Γ} → (¬ (UFull A)) ⊎ (¬ (UFull B))
+               → Γ ⊢ A ≡ B ^ rA
+               → Γ ⊢ A ≡ B ∷ Univ rA ^ !
 inverseUnivEq′ q (univ x) = x
 inverseUnivEq′ q (refl x) = refl (inverseUniv (Sum.id q) x)
 inverseUnivEq′ q (sym A≡B) = sym (inverseUnivEq′ (Sum.sym q) A≡B)
@@ -82,5 +84,5 @@ inverseUnivEq′ q (Π-cong x A≡B A≡B₁) =
   in  Π-cong x (inverseUnivEq′ w A≡B) (inverseUnivEq′ e A≡B₁)
 
 -- If A is a term of U, then the equality of types is an equality of terms of type U.
-inverseUnivEq : ∀ {A B Γ} → Γ ⊢ A ∷ U → Γ ⊢ A ≡ B → Γ ⊢ A ≡ B ∷ U
+inverseUnivEq : ∀ {A B rA Γ} → Γ ⊢ A ∷ Univ rA ^ ! → Γ ⊢ A ≡ B ^ rA → Γ ⊢ A ≡ B ∷ Univ rA ^ !
 inverseUnivEq A A≡B = inverseUnivEq′ (inj₁ (noU A)) A≡B
