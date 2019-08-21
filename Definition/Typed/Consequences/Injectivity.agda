@@ -21,22 +21,23 @@ import Tools.PropositionalEquality as PE
 
 
 -- Helper function of injectivity for specific reducible Π-types
-injectivity′ : ∀ {F G H E Γ l}
-               ([ΠFG] : Γ ⊩⟨ l ⟩Π Π F ▹ G)
-             → Γ ⊩⟨ l ⟩ Π F ▹ G ≡ Π H ▹ E / Π-intr [ΠFG]
-             → Γ ⊢ F ≡ H
-             × Γ ∙ F ⊢ G ≡ E
-injectivity′ (noemb (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext))
+injectivity′ : ∀ {F G H E rF rH rG Γ l}
+               ([ΠFG] : Γ ⊩⟨ l ⟩Π Π F ^ rF ▹ G ^ rG)
+             → Γ ⊩⟨ l ⟩ Π F ^ rF ▹ G ≡ Π H ^ rH ▹ E ^ rG / Π-intr [ΠFG]
+             → Γ ⊢ F ≡ H ^ rF
+             × rF PE.≡ rH
+             × Γ ∙ F ^ rF ⊢ G ≡ E ^ rG
+injectivity′ (noemb (Πᵣ rF′ F G D ⊢F ⊢G A≡A [F] [G] G-ext))
          (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
-  let F≡F₁ , G≡G₁ = Π-PE-injectivity (whnfRed* (red D) Πₙ)
-      H≡F′ , E≡G′ = Π-PE-injectivity (whnfRed* D′ Πₙ)
+  let F≡F₁ , rF≡rF₁ , G≡G₁ = Π-PE-injectivity (whnfRed* (red D) Πₙ)
+      H≡F′ , rH≡rF′ , E≡G′ = Π-PE-injectivity (whnfRed* D′ Πₙ)
       ⊢Γ = wf ⊢F
       [F]₁ = [F] id ⊢Γ
       [F]′ = irrelevance′ (PE.trans (wk-id _) (PE.sym F≡F₁)) [F]₁
       [x∷F] = neuTerm ([F] (step id) (⊢Γ ∙ ⊢F)) (var 0) (var (⊢Γ ∙ ⊢F) here)
                       (refl (var (⊢Γ ∙ ⊢F) here))
       [G]₁ = [G] (step id) (⊢Γ ∙ ⊢F) [x∷F]
-      [G]′ = PE.subst₂ (λ x y → _ ∙ y ⊩⟨ _ ⟩ x)
+      [G]′ = PE.subst₂ (λ x y → _ ∙ y ^ _ ⊩⟨ _ ⟩ x ^ _)
                        (PE.trans (wkSingleSubstId _) (PE.sym G≡G₁))
                        (PE.sym F≡F₁) [G]₁
       [F≡H]₁ = [F≡F′] id ⊢Γ
@@ -47,11 +48,16 @@ injectivity′ (noemb (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext))
       [G≡E]′ = irrelevanceEqLift″ (PE.trans (wkSingleSubstId _) (PE.sym G≡G₁))
                                    (PE.trans (wkSingleSubstId _) (PE.sym E≡G′))
                                    (PE.sym F≡F₁) [G]₁ [G]′ [G≡E]₁
-  in  escapeEq [F]′ [F≡H]′ , escapeEq [G]′ [G≡E]′
+  in  PE.subst _ (PE.sym rF≡rF₁) (escapeEq [F]′ [F≡H]′)
+    , PE.trans rF≡rF₁ (PE.sym rH≡rF′)
+    , PE.subst _ (PE.sym rF≡rF₁) (escapeEq [G]′ [G≡E]′)
 injectivity′ (emb 0<1 x) [ΠFG≡ΠHE] = injectivity′ x [ΠFG≡ΠHE]
 
 -- Injectivity of Π
-injectivity : ∀ {Γ F G H E} → Γ ⊢ Π F ▹ G ≡ Π H ▹ E → Γ ⊢ F ≡ H × Γ ∙ F ⊢ G ≡ E
+injectivity : ∀ {Γ F G H E rF rH rG} → Γ ⊢ Π F ^ rF ▹ G ≡ Π H ^ rH ▹ E ^ rG
+            → Γ ⊢ F ≡ H ^ rF
+            × rF PE.≡ rH
+            × Γ ∙ F ^ rF ⊢ G ≡ E ^ rG
 injectivity ⊢ΠFG≡ΠHE =
   let [ΠFG] , _ , [ΠFG≡ΠHE] = reducibleEq ⊢ΠFG≡ΠHE
   in  injectivity′ (Π-elim [ΠFG])
