@@ -17,21 +17,21 @@ open import Tools.Product
 
 
 -- Valid types are reducible.
-reducibleᵛ : ∀ {A Γ l}
+reducibleᵛ : ∀ {A rA Γ l}
              ([Γ] : ⊩ᵛ Γ)
-           → Γ ⊩ᵛ⟨ l ⟩ A / [Γ]
-           → Γ ⊩⟨ l ⟩ A
+           → Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ]
+           → Γ ⊩⟨ l ⟩ A ^ rA
 reducibleᵛ [Γ] [A] =
   let ⊢Γ = soundContext [Γ]
       [id] = idSubstS [Γ]
   in  irrelevance′ (subst-id _) (proj₁ ([A] ⊢Γ [id]))
 
 -- Valid type equality is reducible.
-reducibleEqᵛ : ∀ {A B Γ l}
+reducibleEqᵛ : ∀ {A B rA Γ l}
                ([Γ] : ⊩ᵛ Γ)
-               ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-             → Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A]
-             → Γ ⊩⟨ l ⟩ A ≡ B / reducibleᵛ [Γ] [A]
+               ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+             → Γ ⊩ᵛ⟨ l ⟩ A ≡ B ^ rA / [Γ] / [A]
+             → Γ ⊩⟨ l ⟩ A ≡ B ^ rA / reducibleᵛ [Γ] [A]
 reducibleEqᵛ {A = A} [Γ] [A] [A≡B] =
   let [σA] = reducibleᵛ {A = A} [Γ] [A]
       ⊢Γ = soundContext [Γ]
@@ -40,11 +40,11 @@ reducibleEqᵛ {A = A} [Γ] [A] [A≡B] =
                       (proj₁ ([A] ⊢Γ [id])) [σA] ([A≡B] ⊢Γ [id])
 
 -- Valid terms are reducible.
-reducibleTermᵛ : ∀ {t A Γ l}
+reducibleTermᵛ : ∀ {t A rA Γ l}
                  ([Γ] : ⊩ᵛ Γ)
-                 ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-               → Γ ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] / [A]
-               → Γ ⊩⟨ l ⟩ t ∷ A / reducibleᵛ [Γ] [A]
+                 ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+               → Γ ⊩ᵛ⟨ l ⟩ t ∷ A ^ rA / [Γ] / [A]
+               → Γ ⊩⟨ l ⟩ t ∷ A ^ rA / reducibleᵛ [Γ] [A]
 reducibleTermᵛ {A = A} [Γ] [A] [t] =
   let [σA] = reducibleᵛ {A = A} [Γ] [A]
       ⊢Γ = soundContext [Γ]
@@ -53,11 +53,11 @@ reducibleTermᵛ {A = A} [Γ] [A] [t] =
                         (proj₁ ([A] ⊢Γ [id])) [σA] (proj₁ ([t] ⊢Γ [id]))
 
 -- Valid term equality is reducible.
-reducibleEqTermᵛ : ∀ {t u A Γ l}
+reducibleEqTermᵛ : ∀ {t u A rA Γ l}
                    ([Γ] : ⊩ᵛ Γ)
-                   ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-                 → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A]
-                 → Γ ⊩⟨ l ⟩ t ≡ u ∷ A / reducibleᵛ [Γ] [A]
+                   ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+                 → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A ^ rA / [Γ] / [A]
+                 → Γ ⊩⟨ l ⟩ t ≡ u ∷ A ^ rA / reducibleᵛ [Γ] [A]
 reducibleEqTermᵛ {A = A} [Γ] [A] [t≡u] =
   let [σA] = reducibleᵛ {A = A} [Γ] [A]
       ⊢Γ = soundContext [Γ]
