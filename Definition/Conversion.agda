@@ -64,17 +64,19 @@ mutual
 
   -- Type equality with types in WHNF.
   data _⊢_[conv↓]_^_ (Γ : Con Term) : (A B : Term) → Relevance → Set where
-    U-refl    : ∀ {r} → ⊢ Γ → Γ ⊢ Univ r [conv↓] Univ r ^ !
+    U-refl    : ∀ {r r'} → r PE.≡ r' -- needed for K issues
+              → ⊢ Γ → Γ ⊢ Univ r [conv↓] Univ r' ^ !
     ℕ-refl    : ⊢ Γ → Γ ⊢ ℕ [conv↓] ℕ ^ !
     Empty-refl : ⊢ Γ → Γ ⊢ Empty [conv↓] Empty ^ %
     ne        : ∀ {r K L}
               → Γ ⊢ K ~ L ↓ Univ r ^ !
               → Γ ⊢ K [conv↓] L ^ r
-    Π-cong    : ∀ {F G H E rF rG}
+    Π-cong    : ∀ {F G H E rF rH rG}
+              → rF PE.≡ rH -- needed for K issues
               → Γ ⊢ F ^ rF
               → Γ ⊢ F [conv↑] H ^ rF
               → Γ ∙ F ^ rF ⊢ G [conv↑] E ^ rG
-              → Γ ⊢ Π F ^ rF ▹ G [conv↓] Π H ^ rF ▹ E ^ rG
+              → Γ ⊢ Π F ^ rF ▹ G [conv↓] Π H ^ rH ▹ E ^ rG
 
   -- Term equality.
   record _⊢_[conv↑]_∷_^_ (Γ : Con Term) (t u A : Term) (rA : Relevance) : Set where

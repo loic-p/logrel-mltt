@@ -28,8 +28,8 @@ mutual
 
   data Nf : Term → Set where
 
-    Uₙ    : Nf U
-    Πₙ    : ∀ {A B} → Nf A → Nf B → Nf (Π A ▹ B)
+    Uₙ    : ∀ {r} → Nf (Univ r)
+    Πₙ    : ∀ {A rA B} → Nf A → Nf B → Nf (Π A ^ rA ▹ B)
     ℕₙ    : Nf ℕ
     Emptyₙ    : Nf Empty
 
@@ -41,7 +41,7 @@ mutual
 
 
 mutual
-  fullRedNe : ∀ {t A Γ} → Γ ⊢ t ~ t ↑ A → ∃ λ u → NfNeutral u × Γ ⊢ t ≡ u ∷ A
+  fullRedNe : ∀ {t A rA Γ} → Γ ⊢ t ~ t ↑ A ^ rA → ∃ λ u → NfNeutral u × Γ ⊢ t ≡ u ∷ A ^ rA
   fullRedNe (var-refl x _) = var _ , var _ , refl x
   fullRedNe (app-cong t u) =
     let t′ , nfT′ , t≡t′ = fullRedNe′ t
@@ -60,36 +60,36 @@ mutual
     in  Emptyrec C′ n′ , Emptyrecₙ nfC′ nfN′
      ,  Emptyrec-cong C≡C′ n≡n′
 
-  fullRedNe′ : ∀ {t A Γ} → Γ ⊢ t ~ t ↓ A → ∃ λ u → NfNeutral u × Γ ⊢ t ≡ u ∷ A
+  fullRedNe′ : ∀ {t A rA Γ} → Γ ⊢ t ~ t ↓ A ^ rA → ∃ λ u → NfNeutral u × Γ ⊢ t ≡ u ∷ A ^ rA
   fullRedNe′ ([~] A D whnfB k~l) =
     let u , nf , t≡u = fullRedNe k~l
     in  u , nf , conv t≡u (subset* D)
 
-  fullRed : ∀ {A Γ} → Γ ⊢ A [conv↑] A → ∃ λ B → Nf B × Γ ⊢ A ≡ B
+  fullRed : ∀ {A rA Γ} → Γ ⊢ A [conv↑] A ^ rA → ∃ λ B → Nf B × Γ ⊢ A ≡ B ^ rA
   fullRed ([↑] A′ B′ D D′ whnfA′ whnfB′ A′<>B′)
     rewrite whrDet* (D , whnfA′) (D′ , whnfB′) =
     let B″ , nf , B′≡B″ = fullRed′ A′<>B′
     in  B″ , nf , trans (subset* D′) B′≡B″
 
-  fullRed′ : ∀ {A Γ} → Γ ⊢ A [conv↓] A → ∃ λ B → Nf B × Γ ⊢ A ≡ B
-  fullRed′ (U-refl ⊢Γ) = U , Uₙ , refl (Uⱼ ⊢Γ)
+  fullRed′ : ∀ {A rA Γ} → Γ ⊢ A [conv↓] A ^ rA → ∃ λ B → Nf B × Γ ⊢ A ≡ B ^ rA
+  fullRed′ (U-refl _ ⊢Γ) = Univ _ , Uₙ , refl (Uⱼ ⊢Γ)
   fullRed′ (ℕ-refl ⊢Γ) = ℕ , ℕₙ , refl (ℕⱼ ⊢Γ)
   fullRed′ (Empty-refl ⊢Γ) = Empty , Emptyₙ , refl (Emptyⱼ ⊢Γ)
   fullRed′ (ne A) =
     let B , nf , A≡B = fullRedNe′ A
     in  B , ne nf , univ A≡B
-  fullRed′ (Π-cong ⊢F F G) =
+  fullRed′ (Π-cong {rF = rF} _ ⊢F F G) =
     let F′ , nfF′ , F≡F′ = fullRed F
         G′ , nfG′ , G≡G′ = fullRed G
-    in  Π F′ ▹ G′ , Πₙ nfF′ nfG′ , Π-cong ⊢F F≡F′ G≡G′
+    in  Π F′ ^ rF ▹ G′ , Πₙ nfF′ nfG′ , Π-cong ⊢F F≡F′ G≡G′
 
-  fullRedTerm : ∀ {t A Γ} → Γ ⊢ t [conv↑] t ∷ A → ∃ λ u → Nf u × Γ ⊢ t ≡ u ∷ A
+  fullRedTerm : ∀ {t A rA Γ} → Γ ⊢ t [conv↑] t ∷ A ^ rA → ∃ λ u → Nf u × Γ ⊢ t ≡ u ∷ A ^ rA
   fullRedTerm ([↑]ₜ B t′ u′ D d d′ whnfB whnft′ whnfu′ t<>u)
     rewrite whrDet*Term (d , whnft′) (d′ , whnfu′) =
     let u″ , nf , u′≡u″ = fullRedTerm′ t<>u
     in  u″ , nf , conv (trans (subset*Term d′) u′≡u″) (sym (subset* D))
 
-  fullRedTerm′ : ∀ {t A Γ} → Γ ⊢ t [conv↓] t ∷ A → ∃ λ u → Nf u × Γ ⊢ t ≡ u ∷ A
+  fullRedTerm′ : ∀ {t A rA Γ} → Γ ⊢ t [conv↓] t ∷ A ^ rA → ∃ λ u → Nf u × Γ ⊢ t ≡ u ∷ A ^ rA
   fullRedTerm′ (ℕ-ins t) =
     let u , nf , t≡u = fullRedNe′ t
     in  u , ne nf , t≡u
@@ -118,6 +118,6 @@ mutual
         λu∘0 = lam (U.wk (lift (step id)) u) ∘ var 0
     in  lam u , lamₙ nf
      ,  η-eq ⊢F ⊢t (lamⱼ ⊢F ⊢u)
-             (trans t∘0≡u (PE.subst₂ (λ x y → _ ⊢ x ≡ λu∘0 ∷ y)
+             (trans t∘0≡u (PE.subst₂ (λ x y → _ ⊢ x ≡ λu∘0 ∷ y ^ _)
                                      (wkSingleSubstId u) (wkSingleSubstId _)
                                      (sym (β-red wk⊢F wk⊢u (var ΓF⊢ here)))))

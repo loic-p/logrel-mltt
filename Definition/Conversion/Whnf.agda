@@ -33,12 +33,12 @@ mutual
 whnfConv↓ : ∀ {A B rA Γ}
           → Γ ⊢ A [conv↓] B ^ rA
           → Whnf A × Whnf B
-whnfConv↓ (U-refl x) = Uₙ , Uₙ
+whnfConv↓ (U-refl _ x) = Uₙ , Uₙ
 whnfConv↓ (ℕ-refl x) = ℕₙ , ℕₙ
 whnfConv↓ (Empty-refl x) = Emptyₙ , Emptyₙ
 whnfConv↓ (ne x) = let _ , neA , neB = ne~↓ x
                    in  ne neA , ne neB
-whnfConv↓ (Π-cong x x₁ x₂) = Πₙ , Πₙ
+whnfConv↓ (Π-cong _ x x₁ x₂) = Πₙ , Πₙ
 
 -- Extraction of WHNF from algorithmic equality of terms in WHNF.
 whnfConv↓Term : ∀ {t u A rA Γ}
