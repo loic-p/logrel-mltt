@@ -17,8 +17,8 @@ import Tools.PropositionalEquality as PE
 
 mutual
   -- Algorithmic equality of neutrals is well-formed.
-  soundness~↑ : ∀ {k l A Γ} → Γ ⊢ k ~ l ↑ A → Γ ⊢ k ≡ l ∷ A
-  soundness~↑ (var-refl x x≡y) = PE.subst (λ y → _ ⊢ _ ≡ var y ∷ _) x≡y (refl x)
+  soundness~↑ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↑ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA
+  soundness~↑ (var-refl x x≡y) = PE.subst (λ y → _ ⊢ _ ≡ var y ∷ _ ^ _) x≡y (refl x)
   soundness~↑ (app-cong k~l x₁) = app-cong (soundness~↓ k~l) (soundnessConv↑Term x₁)
   soundness~↑ (natrec-cong x₁ x₂ x₃ k~l) =
     natrec-cong (soundnessConv↑ x₁) (soundnessConv↑Term x₂)
@@ -27,25 +27,25 @@ mutual
     Emptyrec-cong (soundnessConv↑ x₁) (soundness~↓ k~l)
 
   -- Algorithmic equality of neutrals in WHNF is well-formed.
-  soundness~↓ : ∀ {k l A Γ} → Γ ⊢ k ~ l ↓ A → Γ ⊢ k ≡ l ∷ A
+  soundness~↓ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↓ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA
   soundness~↓ ([~] A₁ D whnfA k~l) = conv (soundness~↑ k~l) (subset* D)
 
   -- Algorithmic equality of types is well-formed.
-  soundnessConv↑ : ∀ {A B Γ} → Γ ⊢ A [conv↑] B → Γ ⊢ A ≡ B
+  soundnessConv↑ : ∀ {A B rA Γ} → Γ ⊢ A [conv↑] B ^ rA → Γ ⊢ A ≡ B ^ rA
   soundnessConv↑ ([↑] A′ B′ D D′ whnfA′ whnfB′ A′<>B′) =
     trans (subset* D) (trans (soundnessConv↓ A′<>B′) (sym (subset* D′)))
 
   -- Algorithmic equality of types in WHNF is well-formed.
-  soundnessConv↓ : ∀ {A B Γ} → Γ ⊢ A [conv↓] B → Γ ⊢ A ≡ B
-  soundnessConv↓ (U-refl ⊢Γ) = refl (Uⱼ ⊢Γ)
+  soundnessConv↓ : ∀ {A B rA Γ} → Γ ⊢ A [conv↓] B ^ rA → Γ ⊢ A ≡ B ^ rA
+  soundnessConv↓ (U-refl PE.refl ⊢Γ) = refl (Uⱼ ⊢Γ)
   soundnessConv↓ (ℕ-refl ⊢Γ) = refl (ℕⱼ ⊢Γ)
   soundnessConv↓ (Empty-refl ⊢Γ) = refl (Emptyⱼ ⊢Γ)
   soundnessConv↓ (ne x) = univ (soundness~↓ x)
-  soundnessConv↓ (Π-cong F c c₁) =
+  soundnessConv↓ (Π-cong PE.refl F c c₁) =
     Π-cong F (soundnessConv↑ c) (soundnessConv↑ c₁)
 
   -- Algorithmic equality of terms is well-formed.
-  soundnessConv↑Term : ∀ {a b A Γ} → Γ ⊢ a [conv↑] b ∷ A → Γ ⊢ a ≡ b ∷ A
+  soundnessConv↑Term : ∀ {a b A rA Γ} → Γ ⊢ a [conv↑] b ∷ A ^ rA → Γ ⊢ a ≡ b ∷ A ^ rA
   soundnessConv↑Term ([↑]ₜ B t′ u′ D d d′ whnfB whnft′ whnfu′ t<>u) =
     conv (trans (subset*Term d)
                 (trans (soundnessConv↓Term t<>u)
@@ -53,7 +53,7 @@ mutual
          (sym (subset* D))
 
   -- Algorithmic equality of terms in WHNF is well-formed.
-  soundnessConv↓Term : ∀ {a b A Γ} → Γ ⊢ a [conv↓] b ∷ A → Γ ⊢ a ≡ b ∷ A
+  soundnessConv↓Term : ∀ {a b A rA Γ} → Γ ⊢ a [conv↓] b ∷ A ^ rA → Γ ⊢ a ≡ b ∷ A ^ rA
   soundnessConv↓Term (ℕ-ins x) = soundness~↓ x
   soundnessConv↓Term (Empty-ins x) = soundness~↓ x
   soundnessConv↓Term (ne-ins t u x x₁) =
