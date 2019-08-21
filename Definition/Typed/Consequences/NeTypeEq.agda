@@ -13,20 +13,26 @@ import Tools.PropositionalEquality as PE
 
 
 -- Helper function for the same variable instance of a context have equal types.
-varTypeEq′ : ∀ {n R T Γ} → n ∷ R ∈ Γ → n ∷ T ∈ Γ → R PE.≡ T
-varTypeEq′ here here = PE.refl
-varTypeEq′ (there n∷R) (there n∷T) rewrite varTypeEq′ n∷R n∷T = PE.refl
+varTypeEq′ : ∀ {n R rR T rT Γ} → n ∷ R ^ rR ∈ Γ → n ∷ T ^ rT ∈ Γ → R PE.≡ T × rR PE.≡ rT
+varTypeEq′ here here = PE.refl , PE.refl
+varTypeEq′ (there n∷R) (there n∷T) with varTypeEq′ n∷R n∷T
+... | PE.refl , PE.refl = PE.refl , PE.refl
 
 -- The same variable instance of a context have equal types.
-varTypeEq : ∀ {x A B Γ} → Γ ⊢ A → Γ ⊢ B → x ∷ A ∈ Γ → x ∷ B ∈ Γ → Γ ⊢ A ≡ B
-varTypeEq A B x∷A x∷B rewrite varTypeEq′ x∷A x∷B = refl A
+varTypeEq : ∀ {x A B rA rB Γ} → Γ ⊢ A ^ rA → Γ ⊢ B ^ rB
+          → x ∷ A ^ rA ∈ Γ
+          → x ∷ B ^ rB ∈ Γ
+          → Γ ⊢ A ≡ B ^ rA × rA PE.≡ rB
+varTypeEq A B x∷A x∷B with varTypeEq′ x∷A x∷B
+... | PE.refl , PE.refl = refl A , PE.refl
 
 -- The same neutral term have equal types.
-neTypeEq : ∀ {t A B Γ} → Neutral t → Γ ⊢ t ∷ A → Γ ⊢ t ∷ B → Γ ⊢ A ≡ B
+-- to use this with different relevances rA rB we need unicity of relevance for types
+neTypeEq : ∀ {t A B rA Γ} → Neutral t → Γ ⊢ t ∷ A ^ rA → Γ ⊢ t ∷ B ^ rA → Γ ⊢ A ≡ B ^ rA
 neTypeEq (var x) (var x₁ x₂) (var x₃ x₄) =
-  varTypeEq (syntacticTerm (var x₃ x₂)) (syntacticTerm (var x₃ x₄)) x₂ x₄
+  proj₁ (varTypeEq (syntacticTerm (var x₃ x₂)) (syntacticTerm (var x₃ x₄)) x₂ x₄)
 neTypeEq (∘ₙ neT) (t∷A ∘ⱼ t∷A₁) (t∷B ∘ⱼ t∷B₁) with neTypeEq neT t∷A t∷B
-... | q = let w = proj₂ (injectivity q)
+... | q = let _ , _ , w = injectivity q
           in  substTypeEq w (refl t∷A₁)
 neTypeEq (natrecₙ neT) (natrecⱼ x t∷A t∷A₁ t∷A₂) (natrecⱼ x₁ t∷B t∷B₁ t∷B₂) =
   refl (substType x₁ t∷B₂)
