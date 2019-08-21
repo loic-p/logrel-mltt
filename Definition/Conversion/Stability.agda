@@ -17,7 +17,7 @@ import Tools.PropositionalEquality as PE
 -- Equality of contexts.
 data ⊢_≡_ : (Γ Δ : Con Term) → Set where
   ε : ⊢ ε ≡ ε
-  _∙_ : ∀ {Γ Δ A B} → ⊢ Γ ≡ Δ → Γ ⊢ A ≡ B → ⊢ Γ ∙ A ≡ Δ ∙ B
+  _∙_ : ∀ {Γ Δ A B r} → ⊢ Γ ≡ Δ → Γ ⊢ A ≡ B ^ r → ⊢ Γ ∙ A ^ r ≡ Δ ∙ B ^ r
 
 mutual
   -- Syntactic validity and conversion substitution of a context equality.
@@ -30,23 +30,23 @@ mutual
     in  ⊢Γ ∙ ⊢A , ⊢Δ ∙ Δ⊢B
         , (wk1Subst′ ⊢Γ ⊢Δ Δ⊢B [σ]
         , conv (var (⊢Δ ∙ Δ⊢B) here)
-               (PE.subst (λ x → _ ⊢ _ ≡ x)
+               (PE.subst (λ x → _ ⊢ _ ≡ x ^ _)
                          (wk1-tailId A)
                          (wkEq (step id) (⊢Δ ∙ Δ⊢B) (stabilityEq Γ≡Δ (sym A≡B)))))
 
   -- Stability of types under equal contexts.
-  stability : ∀ {A Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A → Δ ⊢ A
+  stability : ∀ {A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ^ rA → Δ ⊢ A ^ rA
   stability Γ≡Δ A =
     let ⊢Γ , ⊢Δ , σ = contextConvSubst Γ≡Δ
         q = substitution A σ ⊢Δ
-    in  PE.subst (λ x → _ ⊢ x) (subst-id _) q
+    in  PE.subst (λ x → _ ⊢ x ^ _) (subst-id _) q
 
   -- Stability of type equality.
-  stabilityEq : ∀ {A B Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ≡ B → Δ ⊢ A ≡ B
+  stabilityEq : ∀ {A B rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ≡ B ^ rA → Δ ⊢ A ≡ B ^ rA
   stabilityEq Γ≡Δ A≡B =
     let ⊢Γ , ⊢Δ , σ = contextConvSubst Γ≡Δ
         q = substitutionEq A≡B (substRefl σ) ⊢Δ
-    in  PE.subst₂ (λ x y → _ ⊢ x ≡ y) (subst-id _) (subst-id _) q
+    in  PE.subst₂ (λ x y → _ ⊢ x ≡ y ^ _) (subst-id _) (subst-id _) q
 
 -- Reflexivity of context equality.
 reflConEq : ∀ {Γ} → ⊢ Γ → ⊢ Γ ≡ Γ
@@ -59,14 +59,14 @@ symConEq ε = ε
 symConEq (Γ≡Δ ∙ A≡B) = symConEq Γ≡Δ ∙ stabilityEq Γ≡Δ (sym A≡B)
 
 -- Stability of terms.
-stabilityTerm : ∀ {t A Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ∷ A → Δ ⊢ t ∷ A
+stabilityTerm : ∀ {t A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ∷ A ^ rA → Δ ⊢ t ∷ A ^ rA
 stabilityTerm Γ≡Δ t =
   let ⊢Γ , ⊢Δ , σ = contextConvSubst Γ≡Δ
       q = substitutionTerm t σ ⊢Δ
-  in  PE.subst₂ (λ x y → _ ⊢ x ∷ y) (subst-id _) (subst-id _) q
+  in  PE.subst₂ (λ x y → _ ⊢ x ∷ y ^ _) (subst-id _) (subst-id _) q
 
 -- Stability of term reduction.
-stabilityRedTerm : ∀ {t u A Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ⇒ u ∷ A → Δ ⊢ t ⇒ u ∷ A
+stabilityRedTerm : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ⇒ u ∷ A ^ rA → Δ ⊢ t ⇒ u ∷ A ^ rA
 stabilityRedTerm Γ≡Δ (conv d x) =
   conv (stabilityRedTerm Γ≡Δ d) (stabilityEq Γ≡Δ x)
 stabilityRedTerm Γ≡Δ (app-subst d x) =
@@ -90,25 +90,25 @@ stabilityRedTerm Γ≡Δ (Emptyrec-subst x d) =
   Emptyrec-subst (stability Γ≡Δ x) (stabilityRedTerm Γ≡Δ d)
 
 -- Stability of type reductions.
-stabilityRed : ∀ {A B Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ⇒ B → Δ ⊢ A ⇒ B
+stabilityRed : ∀ {A B r Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ⇒ B ^ r → Δ ⊢ A ⇒ B ^ r
 stabilityRed Γ≡Δ (univ x) = univ (stabilityRedTerm Γ≡Δ x)
 
 -- Stability of type reduction closures.
-stabilityRed* : ∀ {A B Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ⇒* B → Δ ⊢ A ⇒* B
+stabilityRed* : ∀ {A B r Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ A ⇒* B ^ r → Δ ⊢ A ⇒* B ^ r
 stabilityRed* Γ≡Δ (id x) = id (stability Γ≡Δ x)
 stabilityRed* Γ≡Δ (x ⇨ D) = stabilityRed Γ≡Δ x ⇨ stabilityRed* Γ≡Δ D
 
 -- Stability of term reduction closures.
-stabilityRed*Term : ∀ {t u A Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ⇒* u ∷ A → Δ ⊢ t ⇒* u ∷ A
+stabilityRed*Term : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ⇒* u ∷ A ^ rA → Δ ⊢ t ⇒* u ∷ A ^ rA
 stabilityRed*Term Γ≡Δ (id x) = id (stabilityTerm Γ≡Δ x)
 stabilityRed*Term Γ≡Δ (x ⇨ d) = stabilityRedTerm Γ≡Δ x ⇨ stabilityRed*Term Γ≡Δ d
 
 mutual
   -- Stability of algorithmic equality of neutrals.
-  stability~↑ : ∀ {k l A Γ Δ}
+  stability~↑ : ∀ {k l A rA Γ Δ}
               → ⊢ Γ ≡ Δ
-              → Γ ⊢ k ~ l ↑ A
-              → Δ ⊢ k ~ l ↑ A
+              → Γ ⊢ k ~ l ↑ A ^ rA
+              → Δ ⊢ k ~ l ↑ A ^ rA
   stability~↑ Γ≡Δ (var-refl x x≡y) =
     var-refl (stabilityTerm Γ≡Δ x) x≡y
   stability~↑ Γ≡Δ (app-cong k~l x) =
@@ -124,30 +124,30 @@ mutual
                 (stability~↓ Γ≡Δ k~l)
 
   -- Stability of algorithmic equality of neutrals of types in WHNF.
-  stability~↓ : ∀ {k l A Γ Δ}
+  stability~↓ : ∀ {k l A rA Γ Δ}
               → ⊢ Γ ≡ Δ
-              → Γ ⊢ k ~ l ↓ A
-              → Δ ⊢ k ~ l ↓ A
+              → Γ ⊢ k ~ l ↓ A ^ rA
+              → Δ ⊢ k ~ l ↓ A ^ rA
   stability~↓ Γ≡Δ ([~] A D whnfA k~l) =
     [~] A (stabilityRed* Γ≡Δ D) whnfA (stability~↑ Γ≡Δ k~l)
 
   -- Stability of algorithmic equality of types.
-  stabilityConv↑ : ∀ {A B Γ Δ}
+  stabilityConv↑ : ∀ {A B r Γ Δ}
                  → ⊢ Γ ≡ Δ
-                 → Γ ⊢ A [conv↑] B
-                 → Δ ⊢ A [conv↑] B
+                 → Γ ⊢ A [conv↑] B ^ r
+                 → Δ ⊢ A [conv↑] B ^ r
   stabilityConv↑ Γ≡Δ ([↑] A′ B′ D D′ whnfA′ whnfB′ A′<>B′) =
     [↑] A′ B′ (stabilityRed* Γ≡Δ D) (stabilityRed* Γ≡Δ D′) whnfA′ whnfB′
         (stabilityConv↓ Γ≡Δ A′<>B′)
 
   -- Stability of algorithmic equality of types in WHNF.
-  stabilityConv↓ : ∀ {A B Γ Δ}
+  stabilityConv↓ : ∀ {A B r Γ Δ}
                  → ⊢ Γ ≡ Δ
-                 → Γ ⊢ A [conv↓] B
-                 → Δ ⊢ A [conv↓] B
-  stabilityConv↓ Γ≡Δ (U-refl x) =
+                 → Γ ⊢ A [conv↓] B ^ r
+                 → Δ ⊢ A [conv↓] B ^ r
+  stabilityConv↓ Γ≡Δ (U-refl PE.refl x) =
     let _ , ⊢Δ , _ = contextConvSubst Γ≡Δ
-    in  U-refl ⊢Δ
+    in  U-refl PE.refl ⊢Δ
   stabilityConv↓ Γ≡Δ (ℕ-refl x) =
     let _ , ⊢Δ , _ = contextConvSubst Γ≡Δ
     in  ℕ-refl ⊢Δ
@@ -156,25 +156,25 @@ mutual
     in  Empty-refl ⊢Δ
   stabilityConv↓ Γ≡Δ (ne x) =
     ne (stability~↓ Γ≡Δ x)
-  stabilityConv↓ Γ≡Δ (Π-cong F A<>B A<>B₁) =
-    Π-cong (stability Γ≡Δ F) (stabilityConv↑ Γ≡Δ A<>B)
+  stabilityConv↓ Γ≡Δ (Π-cong PE.refl F A<>B A<>B₁) =
+    Π-cong PE.refl (stability Γ≡Δ F) (stabilityConv↑ Γ≡Δ A<>B)
            (stabilityConv↑ (Γ≡Δ ∙ refl F) A<>B₁)
 
   -- Stability of algorithmic equality of terms.
-  stabilityConv↑Term : ∀ {t u A Γ Δ}
+  stabilityConv↑Term : ∀ {t u A rA Γ Δ}
                      → ⊢ Γ ≡ Δ
-                     → Γ ⊢ t [conv↑] u ∷ A
-                     → Δ ⊢ t [conv↑] u ∷ A
+                     → Γ ⊢ t [conv↑] u ∷ A ^ rA
+                     → Δ ⊢ t [conv↑] u ∷ A ^ rA
   stabilityConv↑Term Γ≡Δ ([↑]ₜ B t′ u′ D d d′ whnfB whnft′ whnfu′ t<>u) =
     [↑]ₜ B t′ u′ (stabilityRed* Γ≡Δ D) (stabilityRed*Term Γ≡Δ d)
                  (stabilityRed*Term Γ≡Δ d′) whnfB whnft′ whnfu′
                  (stabilityConv↓Term Γ≡Δ t<>u)
 
   -- Stability of algorithmic equality of terms in WHNF.
-  stabilityConv↓Term : ∀ {t u A Γ Δ}
+  stabilityConv↓Term : ∀ {t u A rA Γ Δ}
                      → ⊢ Γ ≡ Δ
-                     → Γ ⊢ t [conv↓] u ∷ A
-                     → Δ ⊢ t [conv↓] u ∷ A
+                     → Γ ⊢ t [conv↓] u ∷ A ^ rA
+                     → Δ ⊢ t [conv↓] u ∷ A ^ rA
   stabilityConv↓Term Γ≡Δ (ℕ-ins x) =
     ℕ-ins (stability~↓ Γ≡Δ x)
   stabilityConv↓Term Γ≡Δ (Empty-ins x) =
