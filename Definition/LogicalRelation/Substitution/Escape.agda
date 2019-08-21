@@ -20,15 +20,15 @@ open import Tools.Product
 
 
 -- Valid types are well-formed.
-escapeᵛ : ∀ {A l Γ} ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ l ⟩ A / [Γ] → Γ ⊢ A
+escapeᵛ : ∀ {A rA l Γ} ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ] → Γ ⊢ A ^ rA
 escapeᵛ [Γ] [A] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]
   in  escape (irrelevance′ (subst-id _) (proj₁ ([A] ⊢Γ idSubst)))
 
 -- Valid type equality respects the equality relation.
-escapeEqᵛ : ∀ {A B l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-              → Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A] → Γ ⊢ A ≅ B
+escapeEqᵛ : ∀ {A B rA l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+              → Γ ⊩ᵛ⟨ l ⟩ A ≡ B ^ rA / [Γ] / [A] → Γ ⊢ A ≅ B ^ rA
 escapeEqᵛ [Γ] [A] [A≡B] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]
@@ -38,8 +38,8 @@ escapeEqᵛ [Γ] [A] [A≡B] =
                                            [idA] [idA]′ ([A≡B] ⊢Γ idSubst))
 
 -- Valid terms are well-formed.
-escapeTermᵛ : ∀ {t A l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-               → Γ ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] / [A] → Γ ⊢ t ∷ A
+escapeTermᵛ : ∀ {t A rA l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+               → Γ ⊩ᵛ⟨ l ⟩ t ∷ A ^ rA / [Γ] / [A] → Γ ⊢ t ∷ A ^ rA
 escapeTermᵛ [Γ] [A] [t] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]
@@ -50,8 +50,8 @@ escapeTermᵛ [Γ] [A] [t] =
                                        [idA] [idA]′ (proj₁ ([t] ⊢Γ idSubst)))
 
 -- Valid term equality respects the equality relation.
-escapeEqTermᵛ : ∀ {t u A l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-               → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A] → Γ ⊢ t ≅ u ∷ A
+escapeEqTermᵛ : ∀ {t u A rA l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A ^ rA / [Γ])
+               → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A ^ rA / [Γ] / [A] → Γ ⊢ t ≅ u ∷ A ^ rA
 escapeEqTermᵛ [Γ] [A] [t≡u] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]
