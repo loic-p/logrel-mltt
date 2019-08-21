@@ -62,3 +62,15 @@ injectivity ⊢ΠFG≡ΠHE =
   let [ΠFG] , _ , [ΠFG≡ΠHE] = reducibleEq ⊢ΠFG≡ΠHE
   in  injectivity′ (Π-elim [ΠFG])
                    (irrelevanceEq [ΠFG] (Π-intr (Π-elim [ΠFG])) [ΠFG≡ΠHE])
+
+Uinjectivity′ : ∀ {Γ r₁ r₂ l}
+               ([U] : Γ ⊩⟨ l ⟩U)
+             → Γ ⊩⟨ l ⟩ Univ r₁ ≡ Univ r₂ ^ ! / U-intr [U]
+             → r₁ PE.≡ r₂
+Uinjectivity′ (noemb x) PE.refl = PE.refl -- probably more complicated if we had large univs
+Uinjectivity′ (emb 0<1 a) b = Uinjectivity′ a b
+
+Uinjectivity : ∀ {Γ r₁ r₂} → Γ ⊢ Univ r₁ ≡ Univ r₂ ^ ! → r₁ PE.≡ r₂
+Uinjectivity ⊢U≡U =
+  let [U] , _ , [U≡U] = reducibleEq ⊢U≡U
+  in Uinjectivity′ (U-elim [U]) (irrelevanceEq [U] (U-intr (U-elim [U])) [U≡U])
