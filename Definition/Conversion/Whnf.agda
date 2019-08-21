@@ -11,8 +11,8 @@ open import Tools.Product
 
 mutual
   -- Extraction of neutrality from algorithmic equality of neutrals.
-  ne~↑ : ∀ {t u A Γ}
-       → Γ ⊢ t ~ u ↑ A
+  ne~↑ : ∀ {t u A rA Γ}
+       → Γ ⊢ t ~ u ↑ A ^ rA
        → Neutral t × Neutral u
   ne~↑ (var-refl x₁ x≡y) = var _ , var _
   ne~↑ (app-cong x x₁) = let _ , q , w = ne~↓ x
@@ -24,14 +24,14 @@ mutual
 
   -- Extraction of neutrality and WHNF from algorithmic equality of neutrals
   -- with type in WHNF.
-  ne~↓ : ∀ {t u A Γ}
-       → Γ ⊢ t ~ u ↓ A
+  ne~↓ : ∀ {t u A rA Γ}
+       → Γ ⊢ t ~ u ↓ A ^ rA
        → Whnf A × Neutral t × Neutral u
   ne~↓ ([~] A₁ D whnfB k~l) = whnfB , ne~↑ k~l
 
 -- Extraction of WHNF from algorithmic equality of types in WHNF.
-whnfConv↓ : ∀ {A B Γ}
-          → Γ ⊢ A [conv↓] B
+whnfConv↓ : ∀ {A B rA Γ}
+          → Γ ⊢ A [conv↓] B ^ rA
           → Whnf A × Whnf B
 whnfConv↓ (U-refl x) = Uₙ , Uₙ
 whnfConv↓ (ℕ-refl x) = ℕₙ , ℕₙ
@@ -41,8 +41,8 @@ whnfConv↓ (ne x) = let _ , neA , neB = ne~↓ x
 whnfConv↓ (Π-cong x x₁ x₂) = Πₙ , Πₙ
 
 -- Extraction of WHNF from algorithmic equality of terms in WHNF.
-whnfConv↓Term : ∀ {t u A Γ}
-              → Γ ⊢ t [conv↓] u ∷ A
+whnfConv↓Term : ∀ {t u A rA Γ}
+              → Γ ⊢ t [conv↓] u ∷ A ^ rA
               → Whnf A × Whnf t × Whnf u
 whnfConv↓Term (ℕ-ins x) = let _ , neT , neU = ne~↓ x
                           in ℕₙ , ne neT , ne neU
