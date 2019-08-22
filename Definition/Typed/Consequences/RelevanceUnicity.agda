@@ -109,3 +109,6 @@ relevance-unicity ⊢A₁ ⊢A₂ with doΠNorm ⊢A₁
 relevance-unicity ⊢A₁ ⊢A₂ | B , nB , ⊢B , rB | C , nC , ⊢C , rC =
   let e = detΠNorm* nB nC rB rC
   in relevance-unicity′ nC (PE.subst _ e ⊢B) ⊢C
+
+univ-unicity : ∀ {Γ A r₁ r₂} → Γ ⊢ A ∷ Univ r₁ ^ ! → Γ ⊢ A ∷ Univ r₂ ^ ! → r₁ PE.≡ r₂
+univ-unicity ⊢₁ ⊢₂ = relevance-unicity (univ ⊢₁) (univ ⊢₂)
