@@ -568,3 +568,24 @@ substConcatSingleton′ t = substVar-to-subst (λ { 0 → refl ; (1+ x) → refl
 
 wk1-tailId : ∀ t → wk1 t ≡ subst (tail idSubst) t
 wk1-tailId t = trans (sym (subst-id (wk1 t))) (subst-wk t)
+
+
+-- helpers
+open import Tools.Product
+open import Tools.Sum using (_⊎_; inj₁; inj₂)
+
+subst-Univ-either : ∀ {r} a b → subst (sgSubst a) b ≡ Univ r
+                  → (a ≡ Univ r × b ≡ var 0) ⊎ (b ≡ Univ r)
+subst-Univ-either a (var 0) e = inj₁ (e , refl)
+subst-Univ-either a (Univ x) refl = inj₂ refl
+subst-Univ-either a (var (1+ x)) ()
+subst-Univ-either a (gen (Ukind x) (x₁ ∷ y)) ()
+subst-Univ-either a (gen (Pikind x) c) ()
+subst-Univ-either a (gen Natkind c) ()
+subst-Univ-either a (gen Lamkind c) ()
+subst-Univ-either a (gen Appkind c) ()
+subst-Univ-either a (gen Zerokind c) ()
+subst-Univ-either a (gen Suckind c) ()
+subst-Univ-either a (gen Natreckind c) ()
+subst-Univ-either a (gen Emptykind c) ()
+subst-Univ-either a (gen Emptyreckind c) ()
