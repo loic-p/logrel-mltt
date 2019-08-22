@@ -21,6 +21,9 @@ data Relevance : Set where
   ! : Relevance
   % : Relevance
 
+!≢% : ! PE.≢ %
+!≢% ()
+
 -- Typing contexts (snoc-lists, isomorphic to lists).
 
 data Con (A : Set) : Set where
