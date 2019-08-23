@@ -18,6 +18,8 @@ open import Tools.Product
 open import Tools.Empty
 import Tools.PropositionalEquality as PE
 
+-- in the end is relevanceunicity used in the decidability etc proofs??
+
 A≢B : ∀ {A B rA rB Γ} (_⊩′⟨_⟩A_ _⊩′⟨_⟩B_ : Con Term → TypeLevel → Term → Set)
       (A-intr : ∀ {l} → Γ ⊩′⟨ l ⟩A A → Γ ⊩⟨ l ⟩ A ^ rA)
       (B-intr : ∀ {l} → Γ ⊩′⟨ l ⟩B B → Γ ⊩⟨ l ⟩ B ^ rB)
