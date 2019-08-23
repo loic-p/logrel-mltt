@@ -122,6 +122,8 @@ mutual
   stability~↑ Γ≡Δ (Emptyrec-cong x₁ k~l) =
     Emptyrec-cong (stabilityConv↑ Γ≡Δ x₁)
                 (stability~↓ Γ≡Δ k~l)
+  stability~↑ Γ≡Δ (proof-irrelevance x x₁) =
+    proof-irrelevance (stability~↑ Γ≡Δ x) (stability~↑ Γ≡Δ x₁)
 
   -- Stability of algorithmic equality of neutrals of types in WHNF.
   stability~↓ : ∀ {k l A rA Γ Δ}

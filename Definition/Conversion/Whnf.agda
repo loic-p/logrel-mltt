@@ -21,6 +21,7 @@ mutual
                                   in  natrecₙ q , natrecₙ w
   ne~↑ (Emptyrec-cong x x₁) = let _ , q , w = ne~↓ x₁
                               in Emptyrecₙ q , Emptyrecₙ w
+  ne~↑ (proof-irrelevance x x₁) = (proj₁ (ne~↑ x)) , (proj₁ (ne~↑ x₁))
 
   -- Extraction of neutrality and WHNF from algorithmic equality of neutrals
   -- with type in WHNF.

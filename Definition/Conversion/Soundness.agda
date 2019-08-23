@@ -25,6 +25,9 @@ mutual
                 (soundnessConv↑Term x₃) (soundness~↓ k~l)
   soundness~↑ (Emptyrec-cong x₁ k~l) =
     Emptyrec-cong (soundnessConv↑ x₁) (soundness~↓ k~l)
+  soundness~↑ (proof-irrelevance x x₁) =
+    proof-irrelevance (proj₁ (proj₂ (syntacticEqTerm (soundness~↑ x))))
+                      (proj₁ (proj₂ (syntacticEqTerm (soundness~↑ x₁))))
 
   -- Algorithmic equality of neutrals in WHNF is well-formed.
   soundness~↓ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↓ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA

@@ -29,6 +29,8 @@ mutual
                           (wk~↓ [ρ] ⊢Δ t~u))
   wk~↑ {ρ} {Δ = Δ} [ρ] ⊢Δ (Emptyrec-cong {k} {l} {F} {G} x t~u) =
     Emptyrec-cong (wkConv↑ [ρ] ⊢Δ x) (wk~↓ [ρ] ⊢Δ t~u)
+  wk~↑ {ρ} {Δ = Δ} [ρ] ⊢Δ (proof-irrelevance x x₁) =
+    proof-irrelevance (wk~↑ [ρ] ⊢Δ x) (wk~↑ [ρ] ⊢Δ x₁)
 
   -- Weakening of algorithmic equality of neutrals in WHNF.
   wk~↓ : ∀ {ρ t u A rA Γ Δ} ([ρ] : ρ ∷ Δ ⊆ Γ) → ⊢ Δ

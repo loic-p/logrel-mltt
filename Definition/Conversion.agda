@@ -39,6 +39,10 @@ mutual
                   → Γ ⊢ F [conv↑] G ^ rF
                   → Γ ⊢ k ~ l ↓ Empty ^ %
                   → Γ ⊢ Emptyrec F k ~ Emptyrec G l ↑ F ^ rF
+    proof-irrelevance : ∀ {t u A}
+                      → Γ ⊢ t ~ t ↑ A ^ %
+                      → Γ ⊢ u ~ u ↑ A ^ %
+                      → Γ ⊢ t ~ u ↑ A ^ %
 
   -- Neutral equality with types in WHNF.
   record _⊢_~_↓_^_ (Γ : Con Term) (k l B : Term) (rB : Relevance) : Set where

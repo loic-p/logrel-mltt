@@ -117,6 +117,21 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
       Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ k [conv↑] l ∷ A ^ r
 ~-to-conv (↑ x x₁) = convConvTerm (lift~toConv↑ x₁) (sym x)
 
+~-irrelevance : {n n′ A : Term} {Γ : Con Term}
+               → Γ ⊢ n ∷ A ^ %
+               → Γ ⊢ n′ ∷ A ^ %
+               → Γ ⊢ n ~ n ∷ A ^ %
+               → Γ ⊢ n′ ~ n′ ∷ A ^ %
+               → Γ ⊢ n ~ n′ ∷ A ^ %
+~-irrelevance ⊢n ⊢n′ (↑ A≡B n~n) (↑ A≡C n′~n′) = {!!}
+
+≅-irrelevance : {a b A : Term} {Γ : Con Term}
+              → Γ ⊢ a ∷ A ^ %
+              → Γ ⊢ b ∷ A ^ %
+              → Γ ⊢ a [conv↑] a ∷ A ^ %
+              → Γ ⊢ b [conv↑] b ∷ A ^ %
+              → Γ ⊢ a [conv↑] b ∷ A ^ %
+≅-irrelevance = {!!}
 
 -- Algorithmic equality instance of the generic equality relation.
 instance eqRelInstance : EqRelSet
@@ -149,3 +164,4 @@ eqRelInstance = eqRel _⊢_[conv↑]_^_ _⊢_[conv↑]_∷_^_ _⊢_~_∷_^_
                       (liftConvTerm ∘ᶠ suc-cong)
                       (λ x x₁ x₂ x₃ x₄ x₅ → liftConvTerm (η-eq x x₁ x₂ x₃ x₄ x₅))
                       ~-var ~-app ~-natrec ~-Emptyrec
+                      ~-irrelevance ≅-irrelevance

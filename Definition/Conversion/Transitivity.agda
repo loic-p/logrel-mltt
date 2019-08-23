@@ -58,6 +58,10 @@ mutual
         A<>C = transConv↑ Γ≡Δ A<>B B<>C
         t~v , _ = trans~↓ Γ≡Δ t~u u~v
     in  Emptyrec-cong A<>C t~v , A≡B
+  trans~↑ Γ≡Δ (proof-irrelevance t~t u~u) u~v =
+    let u~v , A≡B = trans~↑ Γ≡Δ u~u u~v
+    in {!!}
+  trans~↑ Γ≡Δ x (proof-irrelevance y y₁) = {!!}
 
   -- Transitivity of algorithmic equality of neutrals with types in WHNF.
   trans~↓ : ∀ {t u v A B r Γ Δ}

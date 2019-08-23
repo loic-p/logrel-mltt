@@ -57,6 +57,9 @@ mutual
     in  _ , soundnessConv↑ x
     , Emptyrec-cong (symConv↑ Γ≡Δ x)
                     (PE.subst (λ x₁ → _ ⊢ _ ~ _ ↓ x₁ ^ _) B≡Empty u~t)
+  sym~↑ Γ≡Δ (proof-irrelevance x x₁) =
+    let ⊢A , _ , _ = syntacticEqTerm (soundness~↑ x)
+    in _ , refl ⊢A , proof-irrelevance (stability~↑ Γ≡Δ x₁) (stability~↑ Γ≡Δ x)
 
   -- Symmetry of algorithmic equality of neutrals of types in WHNF.
   sym~↓ : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ~ u ↓ A ^ rA

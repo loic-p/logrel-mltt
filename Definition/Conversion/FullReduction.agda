@@ -59,6 +59,7 @@ mutual
         n′ , nfN′ , n≡n′ = fullRedNe′ n
     in  Emptyrec C′ n′ , Emptyrecₙ nfC′ nfN′
      ,  Emptyrec-cong C≡C′ n≡n′
+  fullRedNe (proof-irrelevance x x₁) = fullRedNe x
 
   fullRedNe′ : ∀ {t A rA Γ} → Γ ⊢ t ~ t ↓ A ^ rA → ∃ λ u → NfNeutral u × Γ ⊢ t ≡ u ∷ A ^ rA
   fullRedNe′ ([~] A D whnfB k~l) =
