@@ -173,6 +173,7 @@ mutual
                                   A≡A' e≡e') =
     (Emptyrec-cong (wkEq [ρ] ⊢Δ A≡A')
       (wkEqTerm [ρ] ⊢Δ e≡e'))
+  wkEqTerm [ρ] ⊢Δ (proof-irrelevance t u) = proof-irrelevance (wkTerm [ρ] ⊢Δ t) (wkTerm [ρ] ⊢Δ u)
 
 mutual
   wkRed : ∀ {Γ Δ A B r ρ} → ρ ∷ Δ ⊆ Γ →

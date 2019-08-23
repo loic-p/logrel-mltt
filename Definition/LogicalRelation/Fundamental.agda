@@ -535,6 +535,10 @@ mutual
                      (Emptyrec-congᵛ {F} {F′} {rF} {n} {n′}
                        [Γ]′ [Empty] [F]′ [F′]′ [F≡F′]′
                        [n] [n′] [n≡n′])
+  fundamentalTermEq (proof-irrelevance ⊢t ⊢u) with fundamentalTerm ⊢t | fundamentalTerm ⊢u
+  fundamentalTermEq (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ′] , [A′] , [u] =
+    [Γ′] , (modelsTermEq [A′] {!!} {!!} {!!})
+
 
 -- Fundamental theorem for substitutions.
 fundamentalSubst : ∀ {Γ Δ σ} (⊢Γ : ⊢ Γ) (⊢Δ : ⊢ Δ)

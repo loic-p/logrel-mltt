@@ -47,6 +47,7 @@ wfEqTerm (natrec-cong F≡F′ z≡z′ s≡s′ n≡n′) = wfEqTerm z≡z′
 wfEqTerm (natrec-zero F z s) = wfTerm z
 wfEqTerm (natrec-suc n F z s) = wfTerm n
 wfEqTerm (Emptyrec-cong A≡A' e≡e') = wfEqTerm e≡e'
+wfEqTerm (proof-irrelevance t u) = wfTerm t
 
 wfEq : ∀ {Γ A B r} → Γ ⊢ A ≡ B ^ r → ⊢ Γ
 wfEq (univ A≡B) = wfEqTerm A≡B
