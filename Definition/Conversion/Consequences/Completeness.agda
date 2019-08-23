@@ -16,13 +16,13 @@ open import Tools.Product
 
 
 -- Algorithmic equality is derivable from judgemental equality of types.
-completeEq : ∀ {A B Γ} → Γ ⊢ A ≡ B → Γ ⊢ A [conv↑] B
+completeEq : ∀ {A B r Γ} → Γ ⊢ A ≡ B ^ r → Γ ⊢ A [conv↑] B ^ r
 completeEq A≡B =
   let [Γ] , [A] , [B] , [A≡B] = fundamentalEq A≡B
   in  escapeEqᵛ [Γ] [A] [A≡B]
 
 -- Algorithmic equality is derivable from judgemental equality of terms.
-completeEqTerm : ∀ {t u A Γ} → Γ ⊢ t ≡ u ∷ A → Γ ⊢ t [conv↑] u ∷ A
+completeEqTerm : ∀ {t u A r Γ} → Γ ⊢ t ≡ u ∷ A ^ r → Γ ⊢ t [conv↑] u ∷ A ^ r
 completeEqTerm t≡u =
   let [Γ] , modelsTermEq [A] [t] [u] [t≡u] = fundamentalTermEq t≡u
   in  escapeEqTermᵛ [Γ] [A] [t≡u]
