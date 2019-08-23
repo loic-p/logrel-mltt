@@ -159,6 +159,10 @@ mutual
                 → Γ ⊢ A ≡ A' ^ r
                 → Γ ⊢ e ≡ e' ∷ Empty ^ %
                 → Γ ⊢ Emptyrec A e ≡ Emptyrec A' e' ∷ A ^ r
+    proof-irrelevance : ∀ {t u A}
+                      → Γ ⊢ t ∷ A ^ %
+                      → Γ ⊢ u ∷ A ^ %
+                      → Γ ⊢ t ≡ u ∷ A ^ %
 
 -- Term reduction
 data _⊢_⇒_∷_^_ (Γ : Con Term) : Term → Term → Term → Relevance → Set where
