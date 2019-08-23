@@ -162,6 +162,8 @@ record EqRelSet : Set₁ where
              → Γ     ⊢ Emptyrec F n ~ Emptyrec F′ n′ ∷ F ^ rF
 
 
+    ~-irrelevance : ∀ {n n′ A Γ} → Γ ⊢ n ~ n ∷ A ^ % → Γ ⊢ n′ ~ n′ ∷ A ^ % → Γ ⊢ n ~ n′ ∷ A ^ %
+
   -- Composition of universe and generic equality compatibility
   ~-to-≅ : ∀ {k l r Γ} → Γ ⊢ k ~ l ∷ (Univ r) ^ ! → Γ ⊢ k ≅ l ^ r
   ~-to-≅ k~l = ≅-univ (~-to-≅ₜ k~l)

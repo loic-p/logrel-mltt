@@ -536,8 +536,9 @@ mutual
                        [Γ]′ [Empty] [F]′ [F′]′ [F≡F′]′
                        [n] [n′] [n≡n′])
   fundamentalTermEq (proof-irrelevance ⊢t ⊢u) with fundamentalTerm ⊢t | fundamentalTerm ⊢u
-  fundamentalTermEq (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ′] , [A′] , [u] =
-    [Γ′] , (modelsTermEq [A′] {!!} {!!} {!!})
+  fundamentalTermEq (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ]′ , [A]′ , [u] =
+    let [t]′ = S.irrelevanceTerm [Γ] [Γ]′ [A] [A]′ [t]
+    in [Γ]′ , (modelsTermEq [A]′ [t]′ [u] {!!})
 
 
 -- Fundamental theorem for substitutions.
