@@ -17,6 +17,7 @@ open import Definition.LogicalRelation.Substitution.Conversion
 open import Definition.LogicalRelation.Substitution.Reduction
 open import Definition.LogicalRelation.Substitution.Reflexivity
 open import Definition.LogicalRelation.Substitution.Introductions
+import Definition.LogicalRelation.Substitution.ProofIrrelevance as PI
 import Definition.LogicalRelation.Substitution.Irrelevance as S
 
 open import Tools.Product
@@ -536,9 +537,10 @@ mutual
                        [Γ]′ [Empty] [F]′ [F′]′ [F≡F′]′
                        [n] [n′] [n≡n′])
   fundamentalTermEq (proof-irrelevance ⊢t ⊢u) with fundamentalTerm ⊢t | fundamentalTerm ⊢u
-  fundamentalTermEq (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ]′ , [A]′ , [u] =
-    let [t]′ = S.irrelevanceTerm [Γ] [Γ]′ [A] [A]′ [t]
-    in [Γ]′ , (modelsTermEq [A]′ [t]′ [u] {!!})
+  fundamentalTermEq {A = A} {t = t} {t′ = t′} (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ]′ , [A]′ , [u] =
+    let [t]′ = S.irrelevanceTerm {A = A} {t = t} [Γ] [Γ]′ [A] [A]′ [t]
+    in [Γ]′ , modelsTermEq [A]′ [t]′ [u]
+                           (PI.proof-irrelevanceᵛ {A = A} {t = t} {u = t′} [Γ]′ [A]′ [t]′ [u])
 
 
 -- Fundamental theorem for substitutions.
