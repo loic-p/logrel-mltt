@@ -6,24 +6,13 @@ module Definition.LogicalRelation.Substitution.ProofIrrelevance {{eqrel : EqRelS
 open EqRelSet {{...}}
 
 open import Definition.Untyped as U hiding (wk)
-open import Definition.Untyped.Properties
 open import Definition.Typed
 open import Definition.Typed.Weakening
 open import Definition.Typed.Properties
-open import Definition.Typed.RedSteps
 open import Definition.LogicalRelation
-open import Definition.LogicalRelation.ShapeView
-open import Definition.LogicalRelation.Irrelevance
 open import Definition.LogicalRelation.Properties
-open import Definition.LogicalRelation.Application
 open import Definition.LogicalRelation.Substitution
-open import Definition.LogicalRelation.Substitution.Properties
-import Definition.LogicalRelation.Substitution.Irrelevance as S
-open import Definition.LogicalRelation.Substitution.Reflexivity
-open import Definition.LogicalRelation.Substitution.Weakening
-open import Definition.LogicalRelation.Substitution.Introductions.Empty
-open import Definition.LogicalRelation.Substitution.Introductions.Pi
-open import Definition.LogicalRelation.Substitution.Introductions.SingleSubst
+
 
 open import Tools.Product
 open import Tools.Unit
