@@ -31,4 +31,4 @@ eqRelInstance = eqRel _⊢_≡_^_ _⊢_≡_∷_^_ _⊢_≡_∷_^_
                       Π-cong Π-cong (refl ∘ᶠ zeroⱼ) suc-cong
                       (λ x x₁ x₂ x₃ x₄ x₅ → η-eq x x₁ x₂ x₅)
                       refl app-cong natrec-cong Emptyrec-cong
-                      proof-irrelevance′ proof-irrelevance′
+                      proof-irrelevance′

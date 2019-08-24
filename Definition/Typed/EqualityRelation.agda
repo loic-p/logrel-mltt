@@ -166,10 +166,6 @@ record EqRelSet : Set₁ where
                   → Γ ⊢ n ~ n ∷ A ^ %
                   → Γ ⊢ n′ ~ n′ ∷ A ^ %
                   → Γ ⊢ n ~ n′ ∷ A ^ %
-    ≅-irrelevance : ∀ {a b A Γ} → Γ ⊢ a ∷ A ^ % → Γ ⊢ b ∷ A ^ %
-                  → Γ ⊢ a ≅ a ∷ A ^ %
-                  → Γ ⊢ b ≅ b ∷ A ^ %
-                  → Γ ⊢ a ≅ b ∷ A ^ %
 
   -- Composition of universe and generic equality compatibility
   ~-to-≅ : ∀ {k l r Γ} → Γ ⊢ k ~ l ∷ (Univ r) ^ ! → Γ ⊢ k ≅ l ^ r

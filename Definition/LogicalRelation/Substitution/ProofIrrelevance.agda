@@ -6,6 +6,7 @@ module Definition.LogicalRelation.Substitution.ProofIrrelevance {{eqrel : EqRelS
 open EqRelSet {{...}}
 
 open import Definition.Untyped as U hiding (wk)
+open import Definition.Untyped.Properties using (wkSingleSubstId)
 open import Definition.Typed
 open import Definition.Typed.Weakening
 open import Definition.Typed.Properties
@@ -49,7 +50,6 @@ proof-irrelevance′ {Γ} {l = l} (Πᵣ′ rF F G D ⊢F ⊢G A≡A [F] [G] G-e
       f′≡f = whrDet*Term (t⇨f′ , functionWhnf funcF′) (t⇨f , functionWhnf funcF)
       Πₜ f₁′ [ _ , ⊢d₁′ , t₁⇨f₁′ ] funcF₁′ _ f₁′-ext _ = [f₁]
       f₁′≡f₁ = whrDet*Term (t₁⇨f₁′ , functionWhnf funcF₁′) (t₁⇨f₁ , functionWhnf funcF₁)
-      irrF = ≅-irrelevance ⊢f ⊢f₁ (≅-quasirefl f≡g) (≅-quasirefl f₁≡g₁)
       irrWk : (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
             → ([a] : Δ ⊩⟨ l ⟩ a ∷ U.wk ρ F ^ rF / [F] [ρ] ⊢Δ)
             → Δ ⊩⟨ l ⟩ U.wk ρ f ∘ a ≡ U.wk ρ f₁ ∘ a ∷ U.wk (lift ρ) G [ a ] ^ % / [G] [ρ] ⊢Δ [a])
@@ -58,9 +58,16 @@ proof-irrelevance′ {Γ} {l = l} (Πᵣ′ rF F G D ⊢F ⊢G A≡A [F] [G] G-e
             f-a = PE.subst _ f′≡f f′-a
             f₁′-a = f₁′-ext [ρ] ⊢Δ [a] [a] (reflEqTerm ([F] [ρ] ⊢Δ) [a])
             f₁-a = PE.subst _ f₁′≡f₁ f₁′-a
-        in proof-irrelevance′ ([G] [ρ] ⊢Δ [a])
-                              f-a f₁-a
-  in Πₜ₌ f f₁ d d₁ funcF funcF₁ irrF [f] [f₁] irrWk
+        in proof-irrelevance′ ([G] [ρ] ⊢Δ [a]) f-a f₁-a
+      irr≅η′ =
+        let ⊢Δ = (wf ⊢F) ∙ ⊢F
+            [F′] = [F] (step id) ⊢Δ
+            ⊢a = var ⊢Δ here
+            [a] = neuTerm [F′] (var 0) ⊢a (~-var ⊢a)
+        in escapeTermEq ([G] (step id) ⊢Δ [a]) (irrWk (step id) ⊢Δ [a])
+      irr≅η = PE.subst (λ Gx → _ ⊢ _ ≅ _ ∷ Gx ^ _) (wkSingleSubstId G) irr≅η′
+      irr≅ = ≅-η-eq ⊢F ⊢f ⊢f₁ funcF funcF₁ irr≅η
+  in Πₜ₌ f f₁ d d₁ funcF funcF₁ irr≅ [f] [f₁] irrWk
 proof-irrelevance′ (emb 0<1 [A]) [t] [u] = proof-irrelevance′ [A] [t] [u]
 
 proof-irrelevanceRel : ∀ {Γ A t u l} ([A] : Γ ⊩⟨ l ⟩ A ^ %)
