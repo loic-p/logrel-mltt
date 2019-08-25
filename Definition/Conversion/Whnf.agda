@@ -22,19 +22,11 @@ mutual
   ne~↑! (Emptyrec-cong x x₁) = let _ , q , w = ne~↓ x₁
                               in Emptyrecₙ q , Emptyrecₙ w
 
-  ne~↑% : ∀ {k A Γ}
-        → Γ ⊢ k ↑% A
-        → Neutral k
-  ne~↑% (var% x) = var _
-  ne~↑% (app% k t) = let _ , neK , _ = ne~↓ k in ∘ₙ neK
-  ne~↑% (natrec% F a₀ h k) = let _ , neK , _ = ne~↓ k in natrecₙ neK
-  ne~↑% (Emptyrec% A k) = let _ , neK , _ = ne~↓ k in Emptyrecₙ neK
-
   ne~↑ : ∀ {t u A rA Γ}
        → Γ ⊢ t ~ u ↑ A ^ rA
        → Neutral t × Neutral u
   ne~↑ (relevant-neutrals x) = ne~↑! x
-  ne~↑ (irrelevant-neutrals _ _ x x₁) = ne~↑% x , ne~↑% x₁
+  ne~↑ (irrelevant-neutrals nex ney _ _ _) = nex , ney
 
   -- Extraction of neutrality and WHNF from algorithmic equality of neutrals
   -- with type in WHNF.

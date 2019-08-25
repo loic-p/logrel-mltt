@@ -123,31 +123,13 @@ mutual
     Emptyrec-cong (stabilityConv↑ Γ≡Δ x₁)
                 (stability~↓ Γ≡Δ k~l)
 
-  stability~↑% : ∀ {k A Γ Δ}
-               → ⊢ Γ ≡ Δ
-               → Γ ⊢ k ↑% A
-               → Δ ⊢ k ↑% A
-  stability~↑% Γ≡Δ (var% x) = var% (stabilityTerm Γ≡Δ x)
-  stability~↑% Γ≡Δ (app% k t) = app% (stability~↓ Γ≡Δ k) (stabilityConv↑Term Γ≡Δ t)
-  stability~↑% Γ≡Δ (natrec% F a₀ h k) =
-    let ⊢Γ , _ , _ = contextConvSubst Γ≡Δ
-    in natrec% (stabilityConv↑ (Γ≡Δ ∙ refl (ℕⱼ ⊢Γ)) F)
-               (stabilityConv↑Term Γ≡Δ a₀)
-               (stabilityConv↑Term Γ≡Δ h)
-               (stability~↓ Γ≡Δ k)
-  stability~↑% Γ≡Δ (Emptyrec% A k) =
-    let ⊢Γ , _ , _ = contextConvSubst Γ≡Δ
-    in Emptyrec% (stabilityConv↑ Γ≡Δ A)
-                 (stability~↓ Γ≡Δ k)
-
   stability~↑ : ∀ {k l A rA Γ Δ}
               → ⊢ Γ ≡ Δ
               → Γ ⊢ k ~ l ↑ A ^ rA
               → Δ ⊢ k ~ l ↑ A ^ rA
   stability~↑ Γ≡Δ (relevant-neutrals x) = relevant-neutrals (stability~↑! Γ≡Δ x)
-  stability~↑ Γ≡Δ (irrelevant-neutrals ac bc x x₁) =
-    irrelevant-neutrals (stabilityConv↑ Γ≡Δ ac) (stabilityConv↑ Γ≡Δ bc)
-                        (stability~↑% Γ≡Δ x) (stability~↑% Γ≡Δ x₁)
+  stability~↑ Γ≡Δ (irrelevant-neutrals neK neL k l A) =
+    irrelevant-neutrals neK neL (stabilityTerm Γ≡Δ k) (stabilityTerm Γ≡Δ l) (stabilityConv↑ Γ≡Δ A)
 
   -- Stability of algorithmic equality of neutrals of types in WHNF.
   stability~↓ : ∀ {k l A rA Γ Δ}

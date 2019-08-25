@@ -40,31 +40,15 @@ mutual
                   → Γ ⊢ k ~ l ↓ Empty ^ %
                   → Γ ⊢ Emptyrec F k ~ Emptyrec G l ↑! F
 
-  data _⊢_↑%_ (Γ : Con Term) : Term → Term → Set where
-    var% : ∀ {x A} → Γ ⊢ var x ∷ A ^ % → Γ ⊢ var x ↑% A
-    app% : ∀ {k t F rF G}
-         → Γ ⊢ k ~ k ↓ Π F ^ rF ▹ G ^ %
-         → Γ ⊢ t [conv↑] t ∷ F ^ rF
-         → Γ ⊢ k ∘ t ↑% G [ t ]
-    natrec% : ∀ {k h a₀ F}
-            → Γ ∙ ℕ ^ ! ⊢ F [conv↑] F ^ %
-            → Γ ⊢ a₀ [conv↑] a₀ ∷ F [ zero ] ^ %
-            → Γ ⊢ h [conv↑] h ∷ Π ℕ ^ ! ▹ (F ^ % ▹▹ F [ suc (var 0) ]↑) ^ %
-            → Γ ⊢ k ~ k ↓ ℕ ^ !
-            → Γ ⊢ natrec F a₀ h k ↑% F [ k ]
-    Emptyrec% : ∀ {k F}
-              → Γ ⊢ F [conv↑] F ^ %
-              → Γ ⊢ k ~ k ↓ Empty ^ %
-              → Γ ⊢ Emptyrec F k ↑% F
-
   data _⊢_~_↑_^_ (Γ : Con Term) : (k l A : Term) → Relevance → Set where
     relevant-neutrals : ∀ {k l A} → Γ ⊢ k ~ l ↑! A → Γ ⊢ k ~ l ↑ A ^ !
-    irrelevant-neutrals : ∀ {k l A B C}
-                        → Γ ⊢ C [conv↑] A ^ %
-                        → Γ ⊢ B [conv↑] C ^ %
-                        → Γ ⊢ k ↑% A
-                        → Γ ⊢ l ↑% B
-                        → Γ ⊢ k ~ l ↑ C ^ %
+    -- the important thing with irrelevant terms is being able to compare their types
+    irrelevant-neutrals : ∀ {k l A}
+                        → Neutral k → Neutral l
+                        → Γ ⊢ k ∷ A ^ %
+                        → Γ ⊢ l ∷ A ^ %
+                        → Γ ⊢ A [conv↑] A ^ %
+                        → Γ ⊢ k ~ l ↑ A ^ %
 
   -- Neutral equality with types in WHNF.
   record _⊢_~_↓_^_ (Γ : Con Term) (k l B : Term) (rB : Relevance) : Set where

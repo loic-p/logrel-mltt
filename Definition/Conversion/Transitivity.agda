@@ -69,17 +69,10 @@ mutual
   trans~↑ Γ≡Δ (relevant-neutrals t~u) (relevant-neutrals u~v) =
     let t~v , A≡B = trans~↑! Γ≡Δ t~u u~v
     in relevant-neutrals t~v , A≡B
-  trans~↑ Γ≡Δ (irrelevant-neutrals ac bc t u) (irrelevant-neutrals ac′ bc′ u′ v) =
-    let ⊢t = soundness~↑% t
-        ⊢u = soundness~↑% u
-        ⊢u′ = soundness~↑% u′
-        ⊢v = soundness~↑% v
-        neU = ne~↑% u
-        A≡B = neTypeEq neU ⊢u (stabilityTerm (symConEq Γ≡Δ) ⊢u′)
-        -- ac″ = stabilityConv↑ (symConEq Γ≡Δ) ac′
-        -- bc″ = stabilityConv↑ (symConEq Γ≡Δ) bc′
-        -- A≡B′ = trans (sym bc) (trans A≡B ac″)
-    in irrelevant-neutrals {!!} {!!} t {!!} , {!!}
+  trans~↑ Γ≡Δ (irrelevant-neutrals neT neU ⊢t ⊢u A↑) (irrelevant-neutrals _ neV ⊢u′ ⊢v B↑) =
+    let A≡B = neTypeEq neU ⊢u (stabilityTerm (symConEq Γ≡Δ) ⊢u′)
+        ⊢v′ = conv (stabilityTerm (symConEq Γ≡Δ) ⊢v) (sym A≡B)
+    in irrelevant-neutrals neT neV ⊢t ⊢v′ A↑ , A≡B
 
   -- Transitivity of algorithmic equality of neutrals with types in WHNF.
   trans~↓ : ∀ {t u v A B r Γ Δ}

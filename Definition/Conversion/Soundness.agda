@@ -26,31 +26,9 @@ mutual
   soundness~↑! (Emptyrec-cong x₁ k~l) =
     Emptyrec-cong (soundnessConv↑ x₁) (soundness~↓ k~l)
 
-  soundness~↑% : ∀ {k A Γ} → Γ ⊢ k ↑% A → Γ ⊢ k ∷ A ^ %
-  soundness~↑% (var% x) = x
-  soundness~↑% (app% k t) =
-    let _ , ⊢k , _ = syntacticEqTerm (soundness~↓ k)
-        _ , ⊢t , _ = syntacticEqTerm (soundnessConv↑Term t)
-    in ⊢k ∘ⱼ ⊢t
-  soundness~↑% (natrec% C z s n) =
-    let ⊢C , _ = syntacticEq (soundnessConv↑ C)
-        _ , ⊢z , _ = syntacticEqTerm (soundnessConv↑Term z)
-        _ , ⊢s , _ = syntacticEqTerm (soundnessConv↑Term s)
-        _ , ⊢n , _ = syntacticEqTerm (soundness~↓ n)
-    in natrecⱼ ⊢C ⊢z ⊢s ⊢n
-  soundness~↑% (Emptyrec% C n) =
-    let ⊢C , _ = syntacticEq (soundnessConv↑ C)
-        _ , ⊢n , _ = syntacticEqTerm (soundness~↓ n)
-    in Emptyrecⱼ ⊢C ⊢n
-
   soundness~↑ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↑ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA
   soundness~↑ (relevant-neutrals x) = soundness~↑! x
-  soundness~↑ (irrelevant-neutrals ac bc x x₁) =
-    let ⊢x = soundness~↑% x
-        ⊢x₁ = soundness~↑% x₁
-        ⊢ac = soundnessConv↑ ac
-        ⊢bc = soundnessConv↑ bc
-    in proof-irrelevance (conv ⊢x (sym ⊢ac)) (conv ⊢x₁ ⊢bc)
+  soundness~↑ (irrelevant-neutrals _ _ k l _) = proof-irrelevance k l
 
   -- Algorithmic equality of neutrals in WHNF is well-formed.
   soundness~↓ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↓ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA

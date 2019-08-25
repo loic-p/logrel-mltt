@@ -12,25 +12,32 @@ import Tools.PropositionalEquality as PE
 
 mutual
   -- Weakening of algorithmic equality of neutrals.
-  wk~↑ : ∀ {ρ t u A rA Γ Δ} ([ρ] : ρ ∷ Δ ⊆ Γ) → ⊢ Δ
-      → Γ ⊢ t ~ u ↑ A ^ rA
-      → Δ ⊢ U.wk ρ t ~ U.wk ρ u ↑ U.wk ρ A ^ rA
-  wk~↑ {ρ} [ρ] ⊢Δ (var-refl x₁ x≡y) = var-refl (wkTerm [ρ] ⊢Δ x₁) (PE.cong (wkVar ρ) x≡y)
-  wk~↑ ρ ⊢Δ (app-cong {G = G} t~u x) =
-    PE.subst (λ x → _ ⊢ _ ~ _ ↑ x ^ _) (PE.sym (wk-β G))
+  wk~↑! : ∀ {ρ t u A Γ Δ} ([ρ] : ρ ∷ Δ ⊆ Γ) → ⊢ Δ
+      → Γ ⊢ t ~ u ↑! A
+      → Δ ⊢ U.wk ρ t ~ U.wk ρ u ↑! U.wk ρ A
+  wk~↑! {ρ} [ρ] ⊢Δ (var-refl x₁ x≡y) = var-refl (wkTerm [ρ] ⊢Δ x₁) (PE.cong (wkVar ρ) x≡y)
+  wk~↑! ρ ⊢Δ (app-cong {G = G} t~u x) =
+    PE.subst (λ x → _ ⊢ _ ~ _ ↑! x) (PE.sym (wk-β G))
              (app-cong (wk~↓ ρ ⊢Δ t~u) (wkConv↑Term ρ ⊢Δ x))
-  wk~↑ {ρ} {Δ = Δ} [ρ] ⊢Δ (natrec-cong {k} {l} {h} {g} {a₀} {b₀} {F} {G} {rF} x x₁ x₂ t~u) =
-    PE.subst (λ x → _ ⊢ U.wk ρ (natrec F a₀ h k) ~ _ ↑ x ^ _) (PE.sym (wk-β F))
+  wk~↑! {ρ} {Δ = Δ} [ρ] ⊢Δ (natrec-cong {k} {l} {h} {g} {a₀} {b₀} {F} {G} x x₁ x₂ t~u) =
+    PE.subst (λ x → _ ⊢ U.wk ρ (natrec F a₀ h k) ~ _ ↑! x) (PE.sym (wk-β F))
              (natrec-cong (wkConv↑ (lift [ρ]) (⊢Δ ∙ ℕⱼ ⊢Δ) x)
                           (PE.subst (λ x → _ ⊢ _ [conv↑] _ ∷ x ^ _) (wk-β F)
                                     (wkConv↑Term [ρ] ⊢Δ x₁))
-                          (PE.subst (λ x → Δ ⊢ U.wk ρ h [conv↑] U.wk ρ g ∷ x ^ rF)
-                                    (wk-β-natrec _ F rF) (wkConv↑Term [ρ] ⊢Δ x₂))
+                          (PE.subst (λ x → Δ ⊢ U.wk ρ h [conv↑] U.wk ρ g ∷ x ^ !)
+                                    (wk-β-natrec _ F !) (wkConv↑Term [ρ] ⊢Δ x₂))
                           (wk~↓ [ρ] ⊢Δ t~u))
-  wk~↑ {ρ} {Δ = Δ} [ρ] ⊢Δ (Emptyrec-cong {k} {l} {F} {G} x t~u) =
+  wk~↑! {ρ} {Δ = Δ} [ρ] ⊢Δ (Emptyrec-cong {k} {l} {F} {G} x t~u) =
     Emptyrec-cong (wkConv↑ [ρ] ⊢Δ x) (wk~↓ [ρ] ⊢Δ t~u)
-  wk~↑ {ρ} {Δ = Δ} [ρ] ⊢Δ (proof-irrelevance x x₁) =
-    proof-irrelevance (wk~↑ [ρ] ⊢Δ x) (wk~↑ [ρ] ⊢Δ x₁)
+
+  wk~↑ : ∀ {ρ t u A rA Γ Δ} ([ρ] : ρ ∷ Δ ⊆ Γ) → ⊢ Δ
+      → Γ ⊢ t ~ u ↑ A ^ rA
+      → Δ ⊢ U.wk ρ t ~ U.wk ρ u ↑ U.wk ρ A ^ rA
+  wk~↑ [ρ] ⊢Δ (relevant-neutrals x) = relevant-neutrals (wk~↑! [ρ] ⊢Δ x)
+  wk~↑ {ρ} [ρ] ⊢Δ (irrelevant-neutrals neT neU ⊢t ⊢u A↑) =
+    irrelevant-neutrals (wkNeutral ρ neT) (wkNeutral ρ neU)
+                        (wkTerm [ρ] ⊢Δ ⊢t) (wkTerm [ρ] ⊢Δ ⊢u)
+                        (wkConv↑ [ρ] ⊢Δ A↑)
 
   -- Weakening of algorithmic equality of neutrals in WHNF.
   wk~↓ : ∀ {ρ t u A rA Γ Δ} ([ρ] : ρ ∷ Δ ⊆ Γ) → ⊢ Δ
