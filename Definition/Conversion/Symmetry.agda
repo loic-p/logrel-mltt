@@ -22,15 +22,15 @@ import Tools.PropositionalEquality as PE
 
 mutual
   -- Symmetry of algorithmic equality of neutrals.
-  sym~↑ : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ
-        → Γ ⊢ t ~ u ↑ A ^ rA
-        → ∃ λ B → Γ ⊢ A ≡ B ^ rA × Δ ⊢ u ~ t ↑ B ^ rA
-  sym~↑ Γ≡Δ (var-refl x x≡y) =
+  sym~↑! : ∀ {t u A Γ Δ} → ⊢ Γ ≡ Δ
+        → Γ ⊢ t ~ u ↑! A
+        → ∃ λ B → Γ ⊢ A ≡ B ^ ! × Δ ⊢ u ~ t ↑! B
+  sym~↑! Γ≡Δ (var-refl x x≡y) =
     let ⊢A = syntacticTerm x
     in  _ , refl ⊢A
      ,  var-refl (PE.subst (λ y → _ ⊢ var y ∷ _ ^ _) x≡y (stabilityTerm Γ≡Δ x))
                  (PE.sym x≡y)
-  sym~↑ Γ≡Δ (app-cong t~u x) =
+  sym~↑! Γ≡Δ (app-cong t~u x) =
     let ⊢Γ , ⊢Δ , _ = contextConvSubst Γ≡Δ
         B , whnfB , A≡B , u~t = sym~↓ Γ≡Δ t~u
         F′ , G′ , ΠF′G′≡B = Π≡A A≡B whnfB
@@ -38,7 +38,7 @@ mutual
     in  _ , substTypeEq G≡G′ (soundnessConv↑Term x)
     ,   app-cong (PE.subst (λ x → _ ⊢ _ ~ _ ↓ x ^ _) ΠF′G′≡B u~t)
                  (convConvTerm (symConv↑Term Γ≡Δ x) (stabilityEq Γ≡Δ F≡F′))
-  sym~↑ Γ≡Δ (natrec-cong x x₁ x₂ t~u) =
+  sym~↑! Γ≡Δ (natrec-cong x x₁ x₂ t~u) =
     let ⊢Γ , ⊢Δ , _ = contextConvSubst Γ≡Δ
         B , whnfB , A≡B , u~t = sym~↓ Γ≡Δ t~u
         B≡ℕ = ℕ≡A A≡B whnfB
@@ -49,7 +49,7 @@ mutual
                     (convConvTerm (symConv↑Term Γ≡Δ x₁) F[0]≡G[0])
                     (convConvTerm (symConv↑Term Γ≡Δ x₂) (sucCong F≡G))
                     (PE.subst (λ x → _ ⊢ _ ~ _ ↓ x ^ _) B≡ℕ u~t)
-  sym~↑ Γ≡Δ (Emptyrec-cong x t~u) =
+  sym~↑! Γ≡Δ (Emptyrec-cong x t~u) =
     let ⊢Γ , ⊢Δ , _ = contextConvSubst Γ≡Δ
         B , whnfB , A≡B , u~t = sym~↓ Γ≡Δ t~u
         B≡Empty = Empty≡A A≡B whnfB
@@ -57,9 +57,18 @@ mutual
     in  _ , soundnessConv↑ x
     , Emptyrec-cong (symConv↑ Γ≡Δ x)
                     (PE.subst (λ x₁ → _ ⊢ _ ~ _ ↓ x₁ ^ _) B≡Empty u~t)
-  sym~↑ Γ≡Δ (proof-irrelevance x x₁) =
-    let ⊢A , _ , _ = syntacticEqTerm (soundness~↑ x)
-    in _ , refl ⊢A , proof-irrelevance (stability~↑ Γ≡Δ x₁) (stability~↑ Γ≡Δ x)
+
+  sym~↑ : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ
+        → Γ ⊢ t ~ u ↑ A ^ rA
+        → ∃ λ B → Γ ⊢ A ≡ B ^ rA × Δ ⊢ u ~ t ↑ B ^ rA
+  sym~↑ Γ≡Δ (relevant-neutrals x) =
+    let B , A≡B , x′ = sym~↑! Γ≡Δ x
+    in B , A≡B , relevant-neutrals x′
+  sym~↑ {A = A} Γ≡Δ (irrelevant-neutrals ac bc t u) =
+    let _ , ⊢A = syntacticEq ac
+    in A , refl ⊢A
+         , irrelevant-neutrals (stabilityEq Γ≡Δ bc) (stabilityEq Γ≡Δ ac)
+                               (stability~↑% Γ≡Δ u) (stability~↑% Γ≡Δ t)
 
   -- Symmetry of algorithmic equality of neutrals of types in WHNF.
   sym~↓ : ∀ {t u A rA Γ Δ} → ⊢ Γ ≡ Δ → Γ ⊢ t ~ u ↓ A ^ rA

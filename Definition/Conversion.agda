@@ -20,29 +20,51 @@ infix 10 _⊢_[conv↓]_∷_^_
 
 mutual
   -- Neutral equality.
-  data _⊢_~_↑_^_ (Γ : Con Term) : (k l A : Term) → Relevance → Set where
-    var-refl    : ∀ {x y A rA}
-                → Γ ⊢ var x ∷ A ^ rA
+  data _⊢_~_↑!_ (Γ : Con Term) : (k l A : Term) → Set where
+    var-refl    : ∀ {x y A}
+                → Γ ⊢ var x ∷ A ^ !
                 → x PE.≡ y
-                → Γ ⊢ var x ~ var y ↑ A ^ rA
-    app-cong    : ∀ {k l t v F rF G rG}
-                → Γ ⊢ k ~ l ↓ Π F ^ rF ▹ G ^ rG
+                → Γ ⊢ var x ~ var y ↑! A
+    app-cong    : ∀ {k l t v F rF G}
+                → Γ ⊢ k ~ l ↓ Π F ^ rF ▹ G ^ !
                 → Γ ⊢ t [conv↑] v ∷ F ^ rF
-                → Γ ⊢ k ∘ t ~ l ∘ v ↑ G [ t ] ^ rG
-    natrec-cong : ∀ {k l h g a₀ b₀ F G rF}
-                → Γ ∙ ℕ ^ ! ⊢ F [conv↑] G ^ rF
-                → Γ ⊢ a₀ [conv↑] b₀ ∷ F [ zero ] ^ rF
-                → Γ ⊢ h [conv↑] g ∷ Π ℕ ^ ! ▹ (F ^ rF ▹▹ F [ suc (var 0) ]↑) ^ rF
+                → Γ ⊢ k ∘ t ~ l ∘ v ↑! G [ t ]
+    natrec-cong : ∀ {k l h g a₀ b₀ F G}
+                → Γ ∙ ℕ ^ ! ⊢ F [conv↑] G ^ !
+                → Γ ⊢ a₀ [conv↑] b₀ ∷ F [ zero ] ^ !
+                → Γ ⊢ h [conv↑] g ∷ Π ℕ ^ ! ▹ (F ^ ! ▹▹ F [ suc (var 0) ]↑) ^ !
                 → Γ ⊢ k ~ l ↓ ℕ ^ !
-                → Γ ⊢ natrec F a₀ h k ~ natrec G b₀ g l ↑ F [ k ] ^ rF
-    Emptyrec-cong : ∀ {k l F G rF}
-                  → Γ ⊢ F [conv↑] G ^ rF
+                → Γ ⊢ natrec F a₀ h k ~ natrec G b₀ g l ↑! F [ k ]
+    Emptyrec-cong : ∀ {k l F G}
+                  → Γ ⊢ F [conv↑] G ^ !
                   → Γ ⊢ k ~ l ↓ Empty ^ %
-                  → Γ ⊢ Emptyrec F k ~ Emptyrec G l ↑ F ^ rF
-    proof-irrelevance : ∀ {t u A}
-                      → Γ ⊢ t ~ t ↑ A ^ %
-                      → Γ ⊢ u ~ u ↑ A ^ %
-                      → Γ ⊢ t ~ u ↑ A ^ %
+                  → Γ ⊢ Emptyrec F k ~ Emptyrec G l ↑! F
+
+  data _⊢_↑%_ (Γ : Con Term) : Term → Term → Set where
+    var% : ∀ {x A} → Γ ⊢ var x ∷ A ^ % → Γ ⊢ var x ↑% A
+    app% : ∀ {k t F rF G}
+         → Γ ⊢ k ~ k ↓ Π F ^ rF ▹ G ^ %
+         → Γ ⊢ t [conv↑] t ∷ F ^ rF
+         → Γ ⊢ k ∘ t ↑% G [ t ]
+    natrec% : ∀ {k h a₀ F}
+            → Γ ∙ ℕ ^ ! ⊢ F [conv↑] F ^ %
+            → Γ ⊢ a₀ [conv↑] a₀ ∷ F [ zero ] ^ %
+            → Γ ⊢ h [conv↑] h ∷ Π ℕ ^ ! ▹ (F ^ % ▹▹ F [ suc (var 0) ]↑) ^ %
+            → Γ ⊢ k ~ k ↓ ℕ ^ !
+            → Γ ⊢ natrec F a₀ h k ↑% F [ k ]
+    Emptyrec% : ∀ {k F}
+              → Γ ⊢ F [conv↑] F ^ %
+              → Γ ⊢ k ~ k ↓ Empty ^ %
+              → Γ ⊢ Emptyrec F k ↑% F
+
+  data _⊢_~_↑_^_ (Γ : Con Term) : (k l A : Term) → Relevance → Set where
+    relevant-neutrals : ∀ {k l A} → Γ ⊢ k ~ l ↑! A → Γ ⊢ k ~ l ↑ A ^ !
+    irrelevant-neutrals : ∀ {k l A B C}
+                        → Γ ⊢ C [conv↑] A ^ %
+                        → Γ ⊢ B [conv↑] C ^ %
+                        → Γ ⊢ k ↑% A
+                        → Γ ⊢ l ↑% B
+                        → Γ ⊢ k ~ l ↑ C ^ %
 
   -- Neutral equality with types in WHNF.
   record _⊢_~_↓_^_ (Γ : Con Term) (k l B : Term) (rB : Relevance) : Set where

@@ -17,17 +17,40 @@ import Tools.PropositionalEquality as PE
 
 mutual
   -- Algorithmic equality of neutrals is well-formed.
-  soundness~↑ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↑ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA
-  soundness~↑ (var-refl x x≡y) = PE.subst (λ y → _ ⊢ _ ≡ var y ∷ _ ^ _) x≡y (refl x)
-  soundness~↑ (app-cong k~l x₁) = app-cong (soundness~↓ k~l) (soundnessConv↑Term x₁)
-  soundness~↑ (natrec-cong x₁ x₂ x₃ k~l) =
+  soundness~↑! : ∀ {k l A Γ} → Γ ⊢ k ~ l ↑! A → Γ ⊢ k ≡ l ∷ A ^ !
+  soundness~↑! (var-refl x x≡y) = PE.subst (λ y → _ ⊢ _ ≡ var y ∷ _ ^ _) x≡y (refl x)
+  soundness~↑! (app-cong k~l x₁) = app-cong (soundness~↓ k~l) (soundnessConv↑Term x₁)
+  soundness~↑! (natrec-cong x₁ x₂ x₃ k~l) =
     natrec-cong (soundnessConv↑ x₁) (soundnessConv↑Term x₂)
                 (soundnessConv↑Term x₃) (soundness~↓ k~l)
-  soundness~↑ (Emptyrec-cong x₁ k~l) =
+  soundness~↑! (Emptyrec-cong x₁ k~l) =
     Emptyrec-cong (soundnessConv↑ x₁) (soundness~↓ k~l)
-  soundness~↑ (proof-irrelevance x x₁) =
-    proof-irrelevance (proj₁ (proj₂ (syntacticEqTerm (soundness~↑ x))))
-                      (proj₁ (proj₂ (syntacticEqTerm (soundness~↑ x₁))))
+
+  soundness~↑% : ∀ {k A Γ} → Γ ⊢ k ↑% A → Γ ⊢ k ∷ A ^ %
+  soundness~↑% (var% x) = x
+  soundness~↑% (app% k t) =
+    let _ , ⊢k , _ = syntacticEqTerm (soundness~↓ k)
+        _ , ⊢t , _ = syntacticEqTerm (soundnessConv↑Term t)
+    in ⊢k ∘ⱼ ⊢t
+  soundness~↑% (natrec% C z s n) =
+    let ⊢C , _ = syntacticEq (soundnessConv↑ C)
+        _ , ⊢z , _ = syntacticEqTerm (soundnessConv↑Term z)
+        _ , ⊢s , _ = syntacticEqTerm (soundnessConv↑Term s)
+        _ , ⊢n , _ = syntacticEqTerm (soundness~↓ n)
+    in natrecⱼ ⊢C ⊢z ⊢s ⊢n
+  soundness~↑% (Emptyrec% C n) =
+    let ⊢C , _ = syntacticEq (soundnessConv↑ C)
+        _ , ⊢n , _ = syntacticEqTerm (soundness~↓ n)
+    in Emptyrecⱼ ⊢C ⊢n
+
+  soundness~↑ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↑ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA
+  soundness~↑ (relevant-neutrals x) = soundness~↑! x
+  soundness~↑ (irrelevant-neutrals ac bc x x₁) =
+    let ⊢x = soundness~↑% x
+        ⊢x₁ = soundness~↑% x₁
+        ⊢ac = soundnessConv↑ ac
+        ⊢bc = soundnessConv↑ bc
+    in proof-irrelevance (conv ⊢x (sym ⊢ac)) (conv ⊢x₁ ⊢bc)
 
   -- Algorithmic equality of neutrals in WHNF is well-formed.
   soundness~↓ : ∀ {k l A rA Γ} → Γ ⊢ k ~ l ↓ A ^ rA → Γ ⊢ k ≡ l ∷ A ^ rA

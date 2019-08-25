@@ -11,17 +11,30 @@ open import Tools.Product
 
 mutual
   -- Extraction of neutrality from algorithmic equality of neutrals.
+  ne~↑! : ∀ {t u A Γ}
+       → Γ ⊢ t ~ u ↑! A
+       → Neutral t × Neutral u
+  ne~↑! (var-refl x₁ x≡y) = var _ , var _
+  ne~↑! (app-cong x x₁) = let _ , q , w = ne~↓ x
+                         in  ∘ₙ q , ∘ₙ w
+  ne~↑! (natrec-cong x x₁ x₂ x₃) = let _ , q , w = ne~↓ x₃
+                                  in  natrecₙ q , natrecₙ w
+  ne~↑! (Emptyrec-cong x x₁) = let _ , q , w = ne~↓ x₁
+                              in Emptyrecₙ q , Emptyrecₙ w
+
+  ne~↑% : ∀ {k A Γ}
+        → Γ ⊢ k ↑% A
+        → Neutral k
+  ne~↑% (var% x) = var _
+  ne~↑% (app% k t) = let _ , neK , _ = ne~↓ k in ∘ₙ neK
+  ne~↑% (natrec% F a₀ h k) = let _ , neK , _ = ne~↓ k in natrecₙ neK
+  ne~↑% (Emptyrec% A k) = let _ , neK , _ = ne~↓ k in Emptyrecₙ neK
+
   ne~↑ : ∀ {t u A rA Γ}
        → Γ ⊢ t ~ u ↑ A ^ rA
        → Neutral t × Neutral u
-  ne~↑ (var-refl x₁ x≡y) = var _ , var _
-  ne~↑ (app-cong x x₁) = let _ , q , w = ne~↓ x
-                         in  ∘ₙ q , ∘ₙ w
-  ne~↑ (natrec-cong x x₁ x₂ x₃) = let _ , q , w = ne~↓ x₃
-                                  in  natrecₙ q , natrecₙ w
-  ne~↑ (Emptyrec-cong x x₁) = let _ , q , w = ne~↓ x₁
-                              in Emptyrecₙ q , Emptyrecₙ w
-  ne~↑ (proof-irrelevance x x₁) = (proj₁ (ne~↑ x)) , (proj₁ (ne~↑ x₁))
+  ne~↑ (relevant-neutrals x) = ne~↑! x
+  ne~↑ (irrelevant-neutrals _ _ x x₁) = ne~↑% x , ne~↑% x₁
 
   -- Extraction of neutrality and WHNF from algorithmic equality of neutrals
   -- with type in WHNF.
