@@ -112,32 +112,51 @@ mutual
   stability~↑! Γ≡Δ (var-refl x x≡y) =
     var-refl (stabilityTerm Γ≡Δ x) x≡y
   stability~↑! Γ≡Δ (app-cong k~l x) =
-    app-cong (stability~↓ Γ≡Δ k~l) (stabilityConv↑Term Γ≡Δ x)
+    app-cong (stability~↓! Γ≡Δ k~l) (stabilityConv↑Term Γ≡Δ x)
   stability~↑! Γ≡Δ (natrec-cong x₁ x₂ x₃ k~l) =
     let ⊢Γ , _ , _ = contextConvSubst Γ≡Δ
     in natrec-cong (stabilityConv↑ (Γ≡Δ ∙ (refl (ℕⱼ ⊢Γ))) x₁)
                    (stabilityConv↑Term Γ≡Δ x₂)
                    (stabilityConv↑Term Γ≡Δ x₃)
-                   (stability~↓ Γ≡Δ k~l)
+                   (stability~↓! Γ≡Δ k~l)
   stability~↑! Γ≡Δ (Emptyrec-cong x₁ k~l) =
     Emptyrec-cong (stabilityConv↑ Γ≡Δ x₁)
-                (stability~↓ Γ≡Δ k~l)
+                (stability~↓% Γ≡Δ k~l)
+
+  stability~↑% : ∀ {k l A Γ Δ}
+              → ⊢ Γ ≡ Δ
+              → Γ ⊢ k ~ l ↑% A
+              → Δ ⊢ k ~ l ↑% A
+  stability~↑% Γ≡Δ (%~↑ neK neL ⊢k ⊢l) = %~↑ neK neL (stabilityTerm Γ≡Δ ⊢k) (stabilityTerm Γ≡Δ ⊢l)
 
   stability~↑ : ∀ {k l A rA Γ Δ}
               → ⊢ Γ ≡ Δ
               → Γ ⊢ k ~ l ↑ A ^ rA
               → Δ ⊢ k ~ l ↑ A ^ rA
-  stability~↑ Γ≡Δ (relevant-neutrals x) = relevant-neutrals (stability~↑! Γ≡Δ x)
-  stability~↑ Γ≡Δ (irrelevant-neutrals neK neL k l A) =
-    irrelevant-neutrals neK neL (stabilityTerm Γ≡Δ k) (stabilityTerm Γ≡Δ l) (stabilityConv↑ Γ≡Δ A)
+  stability~↑ Γ≡Δ (~↑! x) = ~↑! (stability~↑! Γ≡Δ x)
+  stability~↑ Γ≡Δ (~↑% x) = ~↑% (stability~↑% Γ≡Δ x)
 
   -- Stability of algorithmic equality of neutrals of types in WHNF.
+  stability~↓! : ∀ {k l A Γ Δ}
+              → ⊢ Γ ≡ Δ
+              → Γ ⊢ k ~ l ↓! A
+              → Δ ⊢ k ~ l ↓! A
+  stability~↓! Γ≡Δ ([~] A D whnfA k~l) =
+    [~] A (stabilityRed* Γ≡Δ D) whnfA (stability~↑! Γ≡Δ k~l)
+
+  stability~↓% : ∀ {k l A Γ Δ}
+              → ⊢ Γ ≡ Δ
+              → Γ ⊢ k ~ l ↓% A
+              → Δ ⊢ k ~ l ↓% A
+  stability~↓% Γ≡Δ ([~] A D whnfA k~l) =
+    [~] A (stabilityRed* Γ≡Δ D) whnfA (stability~↑% Γ≡Δ k~l)
+
   stability~↓ : ∀ {k l A rA Γ Δ}
               → ⊢ Γ ≡ Δ
               → Γ ⊢ k ~ l ↓ A ^ rA
               → Δ ⊢ k ~ l ↓ A ^ rA
-  stability~↓ Γ≡Δ ([~] A D whnfA k~l) =
-    [~] A (stabilityRed* Γ≡Δ D) whnfA (stability~↑ Γ≡Δ k~l)
+  stability~↓ Γ≡Δ (~↓! x) = ~↓! (stability~↓! Γ≡Δ x)
+  stability~↓ Γ≡Δ (~↓% x) = ~↓% (stability~↓% Γ≡Δ x)
 
   -- Stability of algorithmic equality of types.
   stabilityConv↑ : ∀ {A B r Γ Δ}
@@ -163,7 +182,7 @@ mutual
     let _ , ⊢Δ , _ = contextConvSubst Γ≡Δ
     in  Empty-refl ⊢Δ
   stabilityConv↓ Γ≡Δ (ne x) =
-    ne (stability~↓ Γ≡Δ x)
+    ne (stability~↓! Γ≡Δ x)
   stabilityConv↓ Γ≡Δ (Π-cong PE.refl F A<>B A<>B₁) =
     Π-cong PE.refl (stability Γ≡Δ F) (stabilityConv↑ Γ≡Δ A<>B)
            (stabilityConv↑ (Γ≡Δ ∙ refl F) A<>B₁)
@@ -184,9 +203,9 @@ mutual
                      → Γ ⊢ t [conv↓] u ∷ A ^ rA
                      → Δ ⊢ t [conv↓] u ∷ A ^ rA
   stabilityConv↓Term Γ≡Δ (ℕ-ins x) =
-    ℕ-ins (stability~↓ Γ≡Δ x)
+    ℕ-ins (stability~↓! Γ≡Δ x)
   stabilityConv↓Term Γ≡Δ (Empty-ins x) =
-    Empty-ins (stability~↓ Γ≡Δ x)
+    Empty-ins (stability~↓% Γ≡Δ x)
   stabilityConv↓Term Γ≡Δ (ne-ins t u neN x) =
     ne-ins (stabilityTerm Γ≡Δ t) (stabilityTerm Γ≡Δ u) neN (stability~↓ Γ≡Δ x)
   stabilityConv↓Term Γ≡Δ (univ x x₁ x₂) =

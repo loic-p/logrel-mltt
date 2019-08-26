@@ -3,9 +3,10 @@
 module Definition.Conversion.EqRelInstance where
 
 open import Definition.Untyped
+open import Definition.Untyped.Properties using (wkSingleSubstId)
 open import Definition.Typed
 open import Definition.Typed.Properties
-open import Definition.Typed.Weakening using (_∷_⊆_; wkEq)
+open import Definition.Typed.Weakening using (_∷_⊆_; wkEq; step; id)
 open import Definition.Conversion
 open import Definition.Conversion.Reduction
 open import Definition.Conversion.Universe
@@ -16,6 +17,7 @@ open import Definition.Conversion.Conversion
 open import Definition.Conversion.Symmetry
 open import Definition.Conversion.Transitivity
 open import Definition.Conversion.Weakening
+open import Definition.Conversion.Whnf
 open import Definition.Typed.EqualityRelation
 open import Definition.Typed.Consequences.Syntactic
 open import Definition.Typed.Consequences.Substitution
@@ -38,7 +40,7 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
 ~-var : ∀ {x A r Γ} → Γ ⊢ var x ∷ A ^ r → Γ ⊢ var x ~ var x ∷ A ^ r
 ~-var x =
   let ⊢A = syntacticTerm x
-  in  ↑ (refl ⊢A) (var-refl x PE.refl)
+  in  ↑ (refl ⊢A) (var-refl′ x)
 
 ~-app : ∀ {f g a b F rF G rG Γ}
       → Γ ⊢ f ~ g ∷ Π F ^ rF ▹ G ^ rG
@@ -52,8 +54,8 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
       F≡H , _ , G≡E = injectivity (PE.subst (λ x → _ ⊢ _ ≡ x ^ _) B≡ΠHE ΠFG≡B′)
       _ , ⊢f , _ = syntacticEqTerm (soundnessConv↑Term x₁)
   in  ↑ (substTypeEq G≡E (refl ⊢f))
-        (app-cong (PE.subst (λ x → _ ⊢ _ ~ _ ↓ x ^ _)
-                       B≡ΠHE ([~] _ (red D) whnfB′ x))
+        (app-cong′ (PE.subst (λ x → _ ⊢ _ ~ _ ↓ x ^ _)
+                       B≡ΠHE ([~]′ _ (red D) whnfB′ x))
              (convConvTerm x₁ F≡H))
 
 ~-natrec : ∀ {z z′ s s′ n n′ F F′ rF Γ}
@@ -68,11 +70,10 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
       ℕ≡B′ = trans A≡B (subset* (red D))
       B≡ℕ = ℕ≡A ℕ≡B′ whnfB′
       k~l′ = PE.subst (λ x → _ ⊢ _ ~ _ ↓ x  ^ _) B≡ℕ
-                      ([~] _ (red D) whnfB′ x₄)
+                      ([~]′ _ (red D) whnfB′ x₄)
       ⊢F , _ = syntacticEq (soundnessConv↑ x)
       _ , ⊢n , _ = syntacticEqTerm (soundness~↓ k~l′)
-  in  ↑ (refl (substType ⊢F ⊢n))
-        (natrec-cong x x₁ x₂ k~l′)
+  in  ↑ (refl (substType ⊢F ⊢n)) (natrec-cong′ x x₁ x₂ k~l′)
 
 ~-Emptyrec : ∀ {n n′ F F′ rF Γ}
          → Γ ⊢ F [conv↑] F′ ^ rF →
@@ -84,11 +85,10 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
       Empty≡B′ = trans A≡B (subset* (red D))
       B≡Empty = Empty≡A Empty≡B′ whnfB′
       k~l′ = PE.subst (λ x → _ ⊢ _ ~ _ ↓ x ^ _) B≡Empty
-                      ([~] _ (red D) whnfB′ x₄)
+                      ([~]′ _ (red D) whnfB′ x₄)
       ⊢F , _ = syntacticEq (soundnessConv↑ x)
       _ , ⊢n , _ = syntacticEqTerm (soundness~↓ k~l′)
-  in  ↑ (refl ⊢F)
-        (Emptyrec-cong x k~l′)
+  in  ↑ (refl ⊢F) (Emptyrec-cong′ x k~l′)
 
 ~-sym : {k l A : Term} {r : Relevance} {Γ : Con Term} → Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ l ~ k ∷ A ^ r
 ~-sym (↑ A≡B x) =
@@ -117,21 +117,30 @@ data _⊢_~_∷_^_ (Γ : Con Term) (k l A : Term) (r : Relevance) : Set where
       Γ ⊢ k ~ l ∷ A ^ r → Γ ⊢ k [conv↑] l ∷ A ^ r
 ~-to-conv (↑ x x₁) = convConvTerm (lift~toConv↑ x₁) (sym x)
 
-~-irrelevance : {n n′ A : Term} {Γ : Con Term}
-               → Γ ⊢ n ∷ A ^ %
-               → Γ ⊢ n′ ∷ A ^ %
-               → Γ ⊢ n ~ n ∷ A ^ %
-               → Γ ⊢ n′ ~ n′ ∷ A ^ %
-               → Γ ⊢ n ~ n′ ∷ A ^ %
-~-irrelevance ⊢n ⊢n′ (↑ A≡B n~n) (↑ A≡C n′~n′) = {!!}
+Πₜ-cong : ∀ {F G H E rF rG Γ}
+        → Γ ⊢ F ^ rF
+        → Γ ⊢ F [conv↑] H ∷ (Univ rF) ^ !
+        → Γ ∙ F ^ rF ⊢ G [conv↑] E ∷ (Univ rG) ^ !
+        → Γ ⊢ Π F ^ rF ▹ G [conv↑] Π H ^ rF ▹ E ∷ (Univ rG) ^ !
+Πₜ-cong x x₁ x₂ =
+  let _ , F∷U , H∷U = syntacticEqTerm (soundnessConv↑Term x₁)
+      _ , G∷U , E∷U = syntacticEqTerm (soundnessConv↑Term x₂)
+      ⊢Γ = wfTerm F∷U
+      F<>H = univConv↑ x₁
+      G<>E = univConv↑ x₂
+      F≡H = soundnessConv↑ F<>H
+      E∷U′ = stabilityTerm (reflConEq ⊢Γ ∙ F≡H) E∷U
+      in  liftConvTerm (univ (Πⱼ F∷U ▹ G∷U) (Πⱼ H∷U ▹ E∷U′)
+                       (Π-cong PE.refl x F<>H G<>E))
 
-≅-irrelevance : {a b A : Term} {Γ : Con Term}
-              → Γ ⊢ a ∷ A ^ %
-              → Γ ⊢ b ∷ A ^ %
-              → Γ ⊢ a [conv↑] a ∷ A ^ %
-              → Γ ⊢ b [conv↑] b ∷ A ^ %
-              → Γ ⊢ a [conv↑] b ∷ A ^ %
-≅-irrelevance = {!!}
+~-irrelevance : {k l A : Term} {Γ : Con Term}
+               → Γ ⊢ k ∷ A ^ %
+               → Γ ⊢ l ∷ A ^ %
+               → Γ ⊢ k ~ k ∷ A ^ %
+               → Γ ⊢ l ~ l ∷ A ^ %
+               → Γ ⊢ k ~ l ∷ A ^ %
+~-irrelevance ⊢k ⊢l (↑ A≡B (~↑% (%~↑ neN _ _ _))) (↑ A≡C (~↑% (%~↑ neL _ _ _))) =
+  ↑ (trans A≡B (sym A≡B)) (~↑% (%~↑ neN neL ⊢k ⊢l))
 
 -- Algorithmic equality instance of the generic equality relation.
 instance eqRelInstance : EqRelSet
@@ -149,19 +158,9 @@ eqRelInstance = eqRel _⊢_[conv↑]_^_ _⊢_[conv↑]_∷_^_ _⊢_~_∷_^_
                       (liftConv ∘ᶠ Empty-refl)
                       (λ x → liftConvTerm (univ (Emptyⱼ x) (Emptyⱼ x) (Empty-refl x)))
                       (λ x x₁ x₂ → liftConv (Π-cong PE.refl x x₁ x₂))
-                      (λ x x₁ x₂ →
-                         let _ , F∷U , H∷U = syntacticEqTerm (soundnessConv↑Term x₁)
-                             _ , G∷U , E∷U = syntacticEqTerm (soundnessConv↑Term x₂)
-                             ⊢Γ = wfTerm F∷U
-                             F<>H = univConv↑ x₁
-                             G<>E = univConv↑ x₂
-                             F≡H = soundnessConv↑ F<>H
-                             E∷U′ = stabilityTerm (reflConEq ⊢Γ ∙ F≡H) E∷U
-                         in  liftConvTerm (univ (Πⱼ F∷U ▹ G∷U) (Πⱼ H∷U ▹ E∷U′)
-                                                (Π-cong PE.refl x F<>H G<>E)))
-
+                      Πₜ-cong
                       (liftConvTerm ∘ᶠ zero-refl)
                       (liftConvTerm ∘ᶠ suc-cong)
                       (λ x x₁ x₂ x₃ x₄ x₅ → liftConvTerm (η-eq x x₁ x₂ x₃ x₄ x₅))
                       ~-var ~-app ~-natrec ~-Emptyrec
-                      ~-irrelevance ≅-irrelevance
+                      ~-irrelevance
