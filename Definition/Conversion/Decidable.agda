@@ -194,7 +194,7 @@ mutual
 --  decConv↓ Γ≡Δ (U-refl e x) (Empty-refl x₁) = no (λ { (ne ([~] A D whnfB ())) })
   decConv↓ Γ≡Δ (U-refl e x) (ne x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x₁
-               in  ⊥-elim (IE.U≢ne neK (soundnessConv↓ x₂)))
+               in  ⊥-elim (IE.U≢ne! neK (soundnessConv↓ x₂)))
   decConv↓ Γ≡Δ (U-refl e x) (Π-cong e₁ x₁ x₂ x₃) = no (λ { (ne ([~] A D whnfB ())) })
   decConv↓ Γ≡Δ (ℕ-refl x) (U-refl e x₁) = no (λ { (ne ([~] A D whnfB ())) })
 --  decConv↓ Γ≡Δ (Empty-refl x) (U-refl e x₁) = no (λ { (ne ([~] A D whnfB ())) })
@@ -204,21 +204,21 @@ mutual
   decConv↓ Γ≡Δ (Empty-refl x) (Empty-refl x₁) = yes (Empty-refl x)
   decConv↓ Γ≡Δ (ℕ-refl x) (ne x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x₁
-               in  ⊥-elim (IE.ℕ≢ne neK (soundnessConv↓ x₂)))
+               in  ⊥-elim (IE.ℕ≢ne! neK (soundnessConv↓ x₂)))
   decConv↓ Γ≡Δ (Empty-refl x) (ne x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x₁
-               in  ⊥-elim (IE.Empty≢ne neK (soundnessConv↓ x₂)))
+               in  ⊥-elim (IE.Empty≢ne% neK (soundnessConv↓ x₂)))
   decConv↓ Γ≡Δ (ℕ-refl x) (Π-cong e x₁ x₂ x₃) = no (λ { (ne ([~] A D whnfB ())) })
   decConv↓ Γ≡Δ (Empty-refl x) (Π-cong e x₁ x₂ x₃) = no (λ { (ne ([~] A D whnfB ())) })
   decConv↓ Γ≡Δ (ne x) (U-refl e x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x
-               in  ⊥-elim (IE.U≢ne neK (sym (soundnessConv↓ x₂))))
+               in  ⊥-elim (IE.U≢ne! neK (sym (soundnessConv↓ x₂))))
   decConv↓ Γ≡Δ (ne x) (ℕ-refl x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x
-               in  ⊥-elim (IE.ℕ≢ne neK (sym (soundnessConv↓ x₂))))
+               in  ⊥-elim (IE.ℕ≢ne! neK (sym (soundnessConv↓ x₂))))
   decConv↓ Γ≡Δ (ne x) (Empty-refl x₁) =
     no (λ x₂ → let whnfA , neK , neL = ne~↓! x
-               in  ⊥-elim (IE.Empty≢ne neK (sym (soundnessConv↓ x₂))))
+               in  ⊥-elim (IE.Empty≢ne% neK (sym (soundnessConv↓ x₂))))
   decConv↓ Γ≡Δ (ne x) (ne x₁) with dec~↓! Γ≡Δ x x₁
   decConv↓ Γ≡Δ (ne x) (ne x₁) | yes (A , k~l) =
     let whnfA , neK , neL = ne~↓! k~l

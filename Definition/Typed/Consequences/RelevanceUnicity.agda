@@ -2,13 +2,13 @@
 
 module Definition.Typed.Consequences.RelevanceUnicity where
 
-open import Definition.Untyped
+open import Definition.Untyped hiding (U≢ℕ; U≢Π; U≢ne; ℕ≢Π; ℕ≢ne; Π≢ne; U≢Empty; ℕ≢Empty; Empty≢Π; Empty≢ne)
 open import Definition.Untyped.Properties using (subst-Univ-either)
 open import Definition.Typed
 open import Definition.Typed.Properties
 open import Definition.Typed.Weakening
 open import Definition.Typed.Consequences.Equality
-import Definition.Typed.Consequences.PreInequality as Ineq
+import Definition.Typed.Consequences.Inequality as Ineq
 open import Definition.Typed.Consequences.Inversion
 open import Definition.Typed.Consequences.InverseUniv
 open import Definition.Typed.Consequences.Injectivity
@@ -70,14 +70,14 @@ Univ-uniq′ e₁ e₂ w (var _ x) (var _ y) =
   in Uinjectivity (trans (trans (sym e₁) ⊢T≡T) e₂)
 Univ-uniq′ e₁ e₂ w (natrecⱼ x x₁ x₂ x₃) (natrecⱼ x₄ y y₁ y₂) = Uinjectivity (trans (sym e₁) e₂)
 Univ-uniq′ e₁ e₂ w (Emptyrecⱼ x x₁) (Emptyrecⱼ x₂ y) = Uinjectivity (trans (sym e₁) e₂)
-Univ-uniq′ e₁ e₂ w (lamⱼ x x₁) y = ⊥-elim (Ineq.U≢Π (sym e₁))
+Univ-uniq′ e₁ e₂ w (lamⱼ x x₁) y = ⊥-elim (Ineq.U≢Π! (sym e₁))
 Univ-uniq′ e₁ e₂ (ne (∘ₙ n)) (_∘ⱼ_ {G = G} x x₁) (_∘ⱼ_ {G = G₁} y y₁) =
   let e₁′ = subst-Univ-typed {b = G} x₁ (U≡A (sym e₁))
       e₂′ = subst-Univ-typed {b = G₁} y₁ (U≡A (sym e₂))
       F≡F , rF≡rF , G≡G = injectivity (neTypeEq n x y)
   in Uinjectivity (PE.subst₂ (λ a b → _ ⊢ a ≡ b ^ _) e₁′ e₂′ G≡G)
-Univ-uniq′ e₁ e₂ w (zeroⱼ x) y = ⊥-elim (Ineq.U≢ℕ (sym e₁))
-Univ-uniq′ e₁ e₂ w (sucⱼ x) y = ⊥-elim (Ineq.U≢ℕ (sym e₁))
+Univ-uniq′ e₁ e₂ w (zeroⱼ x) y = ⊥-elim (Ineq.U≢ℕ! (sym e₁))
+Univ-uniq′ e₁ e₂ w (sucⱼ x) y = ⊥-elim (Ineq.U≢ℕ! (sym e₁))
 
 Univ-uniq : ∀ {Γ A r₁ r₂} → ΠNorm A
   → Γ ⊢ A ∷ Univ r₁ ^ ! → Γ ⊢ A ∷ Univ r₂ ^ ! → r₁ PE.≡ r₂
@@ -112,3 +112,56 @@ relevance-unicity ⊢A₁ ⊢A₂ | B , nB , ⊢B , rB | C , nC , ⊢C , rC =
 
 univ-unicity : ∀ {Γ A r₁ r₂} → Γ ⊢ A ∷ Univ r₁ ^ ! → Γ ⊢ A ∷ Univ r₂ ^ ! → r₁ PE.≡ r₂
 univ-unicity ⊢₁ ⊢₂ = relevance-unicity (univ ⊢₁) (univ ⊢₂)
+
+-- inequalities at any relevance
+U≢ℕ : ∀ {r r′ Γ} → Γ ⊢ Univ r ≡ ℕ ^ r′ → ⊥
+U≢ℕ U≡ℕ = Ineq.U≢ℕ! (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx)
+                   (relevance-unicity (proj₂ (syntacticEq U≡ℕ))
+                                      (ℕⱼ (wfEq U≡ℕ)))
+                   U≡ℕ)
+
+U≢Π : ∀ {rU F rF G r Γ} → Γ ⊢ Univ rU ≡ Π F ^ rF ▹ G ^ r → ⊥
+U≢Π U≡Π =
+  let r≡! = relevance-unicity (proj₁ (syntacticEq U≡Π)) (Uⱼ (wfEq U≡Π))
+  in Ineq.U≢Π! (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡! U≡Π)
+
+U≢ne : ∀ {rU r K Γ} → Neutral K → Γ ⊢ Univ rU ≡ K ^ r → ⊥
+U≢ne neK U≡K =
+  let r≡! = relevance-unicity (proj₁ (syntacticEq U≡K)) (Uⱼ (wfEq U≡K))
+  in Ineq.U≢ne! neK (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡! U≡K)
+
+ℕ≢Π : ∀ {F rF G r Γ} → Γ ⊢ ℕ ≡ Π F ^ rF ▹ G ^ r → ⊥
+ℕ≢Π ℕ≡Π =
+  let r≡! = relevance-unicity (proj₁ (syntacticEq ℕ≡Π)) (ℕⱼ (wfEq ℕ≡Π))
+  in Ineq.ℕ≢Π! (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡! ℕ≡Π)
+
+Empty≢Π : ∀ {F rF G r Γ} → Γ ⊢ Empty ≡ Π F ^ rF ▹ G ^ r → ⊥
+Empty≢Π Empty≡Π =
+  let r≡% = relevance-unicity (proj₁ (syntacticEq Empty≡Π)) (Emptyⱼ (wfEq Empty≡Π))
+  in Ineq.Empty≢Π% (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡% Empty≡Π)
+
+ℕ≢ne : ∀ {K r Γ} → Neutral K → Γ ⊢ ℕ ≡ K ^ r → ⊥
+ℕ≢ne neK ℕ≡K =
+  let r≡! = relevance-unicity (proj₁ (syntacticEq ℕ≡K)) (ℕⱼ (wfEq ℕ≡K))
+  in Ineq.ℕ≢ne! neK (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡! ℕ≡K)
+
+Empty≢ne : ∀ {K r Γ} → Neutral K → Γ ⊢ Empty ≡ K ^ r → ⊥
+Empty≢ne neK Empty≡K =
+  let r≡% = relevance-unicity (proj₁ (syntacticEq Empty≡K)) (Emptyⱼ (wfEq Empty≡K))
+  in Ineq.Empty≢ne% neK (PE.subst (λ rx → _ ⊢ _ ≡ _ ^ rx) r≡% Empty≡K)
+
+-- U != Empty is given easily by relevances
+U≢Empty : ∀ {Γ r r′} → Γ ⊢ Univ r ≡ Empty ^ r′ → ⊥
+U≢Empty U≡Empty =
+  let ⊢U , ⊢Empty = syntacticEq U≡Empty
+      e₁ = relevance-unicity ⊢U (Uⱼ (wfEq U≡Empty))
+      e₂ = relevance-unicity ⊢Empty (Emptyⱼ (wfEq U≡Empty))
+  in !≢% (PE.trans (PE.sym e₁) e₂)
+
+-- ℕ and Empty also by relevance
+ℕ≢Empty : ∀ {Γ r} → Γ ⊢ ℕ ≡ Empty ^ r → ⊥
+ℕ≢Empty ℕ≡Empty =
+  let ⊢ℕ , ⊢Empty = syntacticEq ℕ≡Empty
+      e₁ = relevance-unicity ⊢ℕ (ℕⱼ (wfEq ℕ≡Empty))
+      e₂ = relevance-unicity ⊢Empty (Emptyⱼ (wfEq ℕ≡Empty))
+  in !≢% (PE.trans (PE.sym e₁) e₂)
