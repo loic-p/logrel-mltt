@@ -31,9 +31,6 @@ data ΠNorm : Term → Set where
   Πₙ : ∀ {A r B} → ΠNorm B → ΠNorm (Π A ^ r ▹ B)
   ℕₙ : ΠNorm ℕ
   Emptyₙ : ΠNorm Empty
-  lamₙ : ∀ {t} → ΠNorm (lam t)
-  zeroₙ : ΠNorm zero
-  sucₙ  : ∀ {t} → ΠNorm (suc t)
   ne   : ∀ {n} → Neutral n → ΠNorm n
 
 ΠNorm-Π : ∀ {A rA B} → ΠNorm (Π A ^ rA ▹ B) → ΠNorm B
@@ -107,9 +104,6 @@ doΠNorm ⊢A = doΠNorm′ (reducible ⊢A)
 ΠNorm-whnf (Πₙ x) = Πₙ
 ΠNorm-whnf ℕₙ = ℕₙ
 ΠNorm-whnf Emptyₙ = Emptyₙ
-ΠNorm-whnf lamₙ = lamₙ
-ΠNorm-whnf zeroₙ = zeroₙ
-ΠNorm-whnf sucₙ = sucₙ
 ΠNorm-whnf (ne x) = ne x
 
 ΠNorm-noredTerm : ∀ {Γ A B T r} → Γ ⊢ A ⇒Π B ∷ T ^ r → ΠNorm A → ⊥

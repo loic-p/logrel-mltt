@@ -70,14 +70,14 @@ Univ-uniq′ e₁ e₂ w (var _ x) (var _ y) =
   in Uinjectivity (trans (trans (sym e₁) ⊢T≡T) e₂)
 Univ-uniq′ e₁ e₂ w (natrecⱼ x x₁ x₂ x₃) (natrecⱼ x₄ y y₁ y₂) = Uinjectivity (trans (sym e₁) e₂)
 Univ-uniq′ e₁ e₂ w (Emptyrecⱼ x x₁) (Emptyrecⱼ x₂ y) = Uinjectivity (trans (sym e₁) e₂)
-Univ-uniq′ e₁ e₂ w (lamⱼ x x₁) y = ⊥-elim (Ineq.U≢Π! (sym e₁))
+Univ-uniq′ e₁ e₂ (ne ()) (lamⱼ x x₁) y
 Univ-uniq′ e₁ e₂ (ne (∘ₙ n)) (_∘ⱼ_ {G = G} x x₁) (_∘ⱼ_ {G = G₁} y y₁) =
   let e₁′ = subst-Univ-typed {b = G} x₁ (U≡A (sym e₁))
       e₂′ = subst-Univ-typed {b = G₁} y₁ (U≡A (sym e₂))
       F≡F , rF≡rF , G≡G = injectivity (neTypeEq n x y)
   in Uinjectivity (PE.subst₂ (λ a b → _ ⊢ a ≡ b ^ _) e₁′ e₂′ G≡G)
-Univ-uniq′ e₁ e₂ w (zeroⱼ x) y = ⊥-elim (Ineq.U≢ℕ! (sym e₁))
-Univ-uniq′ e₁ e₂ w (sucⱼ x) y = ⊥-elim (Ineq.U≢ℕ! (sym e₁))
+Univ-uniq′ e₁ e₂ (ne ()) (zeroⱼ x) y
+Univ-uniq′ e₁ e₂ (ne ()) (sucⱼ x) y
 
 Univ-uniq : ∀ {Γ A r₁ r₂} → ΠNorm A
   → Γ ⊢ A ∷ Univ r₁ ^ ! → Γ ⊢ A ∷ Univ r₂ ^ ! → r₁ PE.≡ r₂
