@@ -538,9 +538,9 @@ mutual
                        [n] [n′] [n≡n′])
   fundamentalTermEq (proof-irrelevance ⊢t ⊢u) with fundamentalTerm ⊢t | fundamentalTerm ⊢u
   fundamentalTermEq {A = A} {t = t} {t′ = t′} (proof-irrelevance ⊢t ⊢u) | [Γ] , [A] , [t] | [Γ]′ , [A]′ , [u] =
-    let [t]′ = S.irrelevanceTerm {A = A} {t = t} [Γ] [Γ]′ [A] [A]′ [t]
-    in [Γ]′ , modelsTermEq [A]′ [t]′ [u]
-                           (PI.proof-irrelevanceᵛ {A = A} {t = t} {u = t′} [Γ]′ [A]′ [t]′ [u])
+    let [u]′ = S.irrelevanceTerm {A = A} {t = t′} [Γ]′ [Γ] [A]′ [A] [u]
+    in [Γ] , modelsTermEq [A] [t] [u]′
+                           (PI.proof-irrelevanceᵛ {A = A} {t = t} {u = t′} [Γ] [A] [t] [u]′)
 
 
 -- Fundamental theorem for substitutions.
