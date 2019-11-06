@@ -42,7 +42,7 @@ mutual
   -- Well-formed term of a type
   data _⊢_∷_^_ (Γ : Con Term) : Term → Term → Relevance → Set where
     ℕⱼ      : ⊢ Γ → Γ ⊢ ℕ ∷ U ^ !
-    Emptyⱼ :  ⊢ Γ → Γ ⊢ Empty ∷ Prop ^ !
+    Emptyⱼ :  ⊢ Γ → Γ ⊢ Empty ∷ SProp ^ !
     Πⱼ_▹_   : ∀ {F rF G rG}
            → Γ     ⊢ F ∷ (Univ rF) ^ !
            → Γ ∙ F ^ rF ⊢ G ∷ (Univ rG) ^ !

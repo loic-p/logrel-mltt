@@ -106,7 +106,7 @@ record EqRelSet : Set₁ where
 
     -- Empty type reflexivity
     ≅-Emptyrefl   : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ^ %
-    ≅ₜ-Emptyrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ∷ Prop ^ !
+    ≅ₜ-Emptyrefl  : ∀ {Γ} → ⊢ Γ → Γ ⊢ Empty ≅ Empty ∷ SProp ^ !
 
     -- Π-congurence
 

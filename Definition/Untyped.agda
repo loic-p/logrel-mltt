@@ -63,8 +63,8 @@ data Term : Set where
 U      : Term                     -- Universe.
 U = gen (Ukind !) []
 
-Prop : Term
-Prop = gen (Ukind %) []
+SProp : Term
+SProp = gen (Ukind %) []
 
 pattern Univ r = gen (Ukind r) []
 
