@@ -28,8 +28,7 @@ mutual
              → Γ ⊩⟨ l ⟩  A ≡ B / [A]
              → Γ ⊩⟨ l ⟩  t ∷ A / [A]
              → Γ ⊩⟨ l′ ⟩ t ∷ B / [B]
-  convTermT₁ (ℕᵥ D D′) A≡B t = t
-  convTermT₁ (Emptyᵥ D D′) A≡B t = t
+  convTermT₁ (ℕᵥ D D′) A≡B (ℕₜ n d n≡n prop) = (ℕₜ n d n≡n prop)
   convTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
              (neₜ k d (neNfₜ neK₂ ⊢k k≡k)) =
     let K≡K₁ = PE.subst (λ x → _ ⊢ _ ≡ x)
@@ -67,9 +66,9 @@ mutual
                                           ([G] [ρ] ⊢Δ [a]₁)
                                           ([G≡G′] [ρ] ⊢Δ [a]₁)
              in  convTerm₁ ([G] [ρ] ⊢Δ [a]₁) ([G]₁ [ρ] ⊢Δ [a]) [G≡G₁] ([f]₁ [ρ] ⊢Δ [a]₁))
-  convTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
-  convTermT₁ (emb⁰¹ x) A≡B t = convTermT₁ x A≡B t
-  convTermT₁ (emb¹⁰ x) A≡B t = convTermT₁ x A≡B t
+  convTermT₁ (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 ⊢Γ₁) A≡B t = t
+  convTermT₁ (emb⁰¹ PE.refl x) (ιx A≡B) (ιx t) = convTermT₁ x A≡B t
+  convTermT₁ (emb¹⁰ PE.refl x) A≡B t = ιx (convTermT₁ x A≡B t)
 
   -- Helper function for conversion of terms converting from right to left.
   convTermT₂ : ∀ {l l′ Γ A B t} {[A] : Γ ⊩⟨ l ⟩ A} {[B] : Γ ⊩⟨ l′ ⟩ B}
@@ -77,8 +76,7 @@ mutual
            → Γ ⊩⟨ l ⟩  A ≡ B / [A]
            → Γ ⊩⟨ l′ ⟩ t ∷ B / [B]
            → Γ ⊩⟨ l ⟩  t ∷ A / [A]
-  convTermT₂ (ℕᵥ D D′) A≡B t = t
-  convTermT₂ (Emptyᵥ D D′) A≡B t = t
+  convTermT₂ (ℕᵥ D D′) A≡B (ℕₜ n d n≡n prop) = ℕₜ n d n≡n prop
   convTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
              (neₜ k d (neNfₜ neK₂ ⊢k k≡k)) =
     let K₁≡K = PE.subst (λ x → _ ⊢ x ≡ _)
@@ -117,9 +115,9 @@ mutual
                                            ([G≡G′] [ρ] ⊢Δ [a])
               in  convTerm₂ ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁)
                             [G≡G₁] ([f]₁ [ρ] ⊢Δ [a]₁))
-  convTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t = t
-  convTermT₂ (emb⁰¹ x) A≡B t = convTermT₂ x A≡B t
-  convTermT₂ (emb¹⁰ x) A≡B t = convTermT₂ x A≡B t
+  convTermT₂ (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 ⊢Γ₁) A≡B t = t
+  convTermT₂ (emb⁰¹ PE.refl x) (ιx A≡B) t = ιx (convTermT₂ x A≡B t)
+  convTermT₂ (emb¹⁰ PE.refl x) A≡B (ιx t) = convTermT₂ x A≡B t
 
   -- Conversion of terms converting from left to right.
   convTerm₁ : ∀ {Γ A B t l l′} ([A] : Γ ⊩⟨ l ⟩ A) ([B] : Γ ⊩⟨ l′ ⟩ B)
@@ -151,8 +149,7 @@ mutual
                → Γ ⊩⟨ l ⟩  A ≡ B / [A]
                → Γ ⊩⟨ l ⟩  t ≡ u ∷ A / [A]
                → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B / [B]
-  convEqTermT₁ (ℕᵥ D D′) A≡B t≡u = t≡u
-  convEqTermT₁ (Emptyᵥ D D′) A≡B t≡u = t≡u
+  convEqTermT₁ (ℕᵥ D D′) A≡B (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
   convEqTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
                (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m)) =
     let K≡K₁ = PE.subst (λ x → _ ⊢ _ ≡ x)
@@ -185,9 +182,9 @@ mutual
                                             ([G≡G′] [ρ] ⊢Δ [a]₁)
                in  convEqTerm₁ ([G] [ρ] ⊢Δ [a]₁) ([G]₁ [ρ] ⊢Δ [a])
                                [G≡G₁] ([t≡u] [ρ] ⊢Δ [a]₁))
-  convEqTermT₁ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
-  convEqTermT₁ (emb⁰¹ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
-  convEqTermT₁ (emb¹⁰ x) A≡B t≡u = convEqTermT₁ x A≡B t≡u
+  convEqTermT₁ (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 ⊢Γ₁) A≡B t≡u = t≡u
+  convEqTermT₁ (emb⁰¹ PE.refl x) (ιx A≡B) (ιx t≡u) = convEqTermT₁ x A≡B t≡u
+  convEqTermT₁ (emb¹⁰ PE.refl x) A≡B t≡u = ιx (convEqTermT₁ x A≡B t≡u)
 
   -- Helper function for conversion of term equality converting from right to left.
   convEqTermT₂ : ∀ {l l′ Γ A B t u} {[A] : Γ ⊩⟨ l ⟩ A} {[B] : Γ ⊩⟨ l′ ⟩ B}
@@ -195,8 +192,7 @@ mutual
              → Γ ⊩⟨ l ⟩  A ≡ B / [A]
              → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B / [B]
              → Γ ⊩⟨ l ⟩  t ≡ u ∷ A / [A]
-  convEqTermT₂ (ℕᵥ D D′) A≡B t≡u = t≡u
-  convEqTermT₂ (Emptyᵥ D D′) A≡B t≡u = t≡u
+  convEqTermT₂ (ℕᵥ D D′) A≡B (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
   convEqTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
                (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m)) =
     let K₁≡K = PE.subst (λ x → _ ⊢ x ≡ _)
@@ -228,9 +224,9 @@ mutual
                                             ([G≡G′] [ρ] ⊢Δ [a])
                in  convEqTerm₂ ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁)
                                [G≡G₁] ([t≡u] [ρ] ⊢Δ [a]₁))
-  convEqTermT₂ (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) A≡B t≡u = t≡u
-  convEqTermT₂ (emb⁰¹ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
-  convEqTermT₂ (emb¹⁰ x) A≡B t≡u = convEqTermT₂ x A≡B t≡u
+  convEqTermT₂ (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 ⊢Γ₁) A≡B t≡u = t≡u
+  convEqTermT₂ (emb⁰¹ PE.refl x) (ιx A≡B) t≡u = ιx (convEqTermT₂ x A≡B t≡u)
+  convEqTermT₂ (emb¹⁰ PE.refl x) A≡B (ιx t≡u) = convEqTermT₂ x A≡B t≡u
 
   -- Conversion of term equality converting from left to right.
   convEqTerm₁ : ∀ {l l′ Γ A B t u} ([A] : Γ ⊩⟨ l ⟩ A) ([B] : Γ ⊩⟨ l′ ⟩ B)
