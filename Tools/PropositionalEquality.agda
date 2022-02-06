@@ -49,7 +49,7 @@ cong₄ f refl refl refl refl = refl
 
 -- Substitution (type-cast).
 
-subst : {A : Set} {a b : A} (F : A → Set) → a ≡ b → F a → F b
+subst : {A : Set} {a b : A} {ℓ : Agda.Primitive.Level} (F : A → Set ℓ) → a ≡ b → F a → F b
 subst F refl f = f
 
 -- Two substitutions simultaneously.
