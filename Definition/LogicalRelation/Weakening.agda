@@ -31,8 +31,8 @@ wkEqTermNe {ρ} [ρ] ⊢Δ (neNfₜ₌ neK neM k≡m) =
 -- Weakening of reducible natural numbers
 
 mutual
-  wkTermℕ : ∀ {ρ Γ Δ n} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
-          → Γ ⊩ℕ n ∷ℕ → Δ ⊩ℕ U.wk ρ n ∷ℕ
+  wkTermℕ : ∀ {ρ ℓ Γ Δ n} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
+          → _⊩ℕ_∷ℕ {ℓ = ℓ} Γ n → _⊩ℕ_∷ℕ {ℓ = ℓ} Δ (U.wk ρ n)
   wkTermℕ {ρ} [ρ] ⊢Δ (ℕₜ n d n≡n prop) =
     ℕₜ (U.wk ρ n) (wkRed:*:Term [ρ] ⊢Δ d)
        (≅ₜ-wk [ρ] ⊢Δ n≡n)
@@ -46,9 +46,9 @@ mutual
   wkNatural-prop ρ ⊢Δ (ne nf) = ne (wkTermNe ρ ⊢Δ nf)
 
 mutual
-  wkEqTermℕ : ∀ {ρ Γ Δ t u} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
-            → Γ ⊩ℕ t ≡ u ∷ℕ
-            → Δ ⊩ℕ U.wk ρ t ≡ U.wk ρ u ∷ℕ
+  wkEqTermℕ : ∀ {ρ ℓ Γ Δ t u} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
+            → _⊩ℕ_≡_∷ℕ {ℓ = ℓ} Γ t u
+            → _⊩ℕ_≡_∷ℕ {ℓ = ℓ} Δ (U.wk ρ t) (U.wk ρ u)
   wkEqTermℕ {ρ} [ρ] ⊢Δ (ℕₜ₌ k k′ d d′ t≡u prop) =
     ℕₜ₌ (U.wk ρ k) (U.wk ρ k′) (wkRed:*:Term [ρ] ⊢Δ d)
         (wkRed:*:Term [ρ] ⊢Δ d′) (≅ₜ-wk [ρ] ⊢Δ t≡u)
@@ -61,34 +61,12 @@ mutual
   wk[Natural]-prop ρ ⊢Δ zeroᵣ = zeroᵣ
   wk[Natural]-prop ρ ⊢Δ (ne x) = ne (wkEqTermNe ρ ⊢Δ x)
 
--- Empty
-wkTermEmpty : ∀ {ρ Γ Δ n} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
-  → Γ ⊩Empty n ∷Empty → Δ ⊩Empty U.wk ρ n ∷Empty
-wkTermEmpty {ρ} [ρ] ⊢Δ (Emptyₜ n d n≡n (ne prop)) =
-  Emptyₜ (U.wk ρ n) (wkRed:*:Term [ρ] ⊢Δ d)
-     (≅ₜ-wk [ρ] ⊢Δ n≡n)
-     (ne (wkTermNe [ρ] ⊢Δ prop))
-
-wk[Empty]-prop : ∀ {ρ Γ Δ n n′} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
-  → [Empty]-prop Γ n n′
-  → [Empty]-prop Δ (U.wk ρ n) (U.wk ρ n′)
-wk[Empty]-prop ρ ⊢Δ (ne x) = ne (wkEqTermNe ρ ⊢Δ x)
-
-wkEqTermEmpty : ∀ {ρ Γ Δ t u} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ)
-  → Γ ⊩Empty t ≡ u ∷Empty
-  → Δ ⊩Empty U.wk ρ t ≡ U.wk ρ u ∷Empty
-wkEqTermEmpty {ρ} [ρ] ⊢Δ (Emptyₜ₌ k k′ d d′ t≡u prop) =
-  Emptyₜ₌ (U.wk ρ k) (U.wk ρ k′) (wkRed:*:Term [ρ] ⊢Δ d)
-      (wkRed:*:Term [ρ] ⊢Δ d′) (≅ₜ-wk [ρ] ⊢Δ t≡u)
-      (wk[Empty]-prop [ρ] ⊢Δ prop)
-
 
 -- Weakening of the logical relation
 
 wk : ∀ {ρ Γ Δ A l} → ρ ∷ Δ ⊆ Γ → ⊢ Δ → Γ ⊩⟨ l ⟩ A → Δ ⊩⟨ l ⟩ U.wk ρ A
 wk ρ ⊢Δ (Uᵣ′ l′ l< ⊢Γ) = Uᵣ′ l′ l< ⊢Δ
 wk ρ ⊢Δ (ℕᵣ D) = ℕᵣ (wkRed:*: ρ ⊢Δ D)
-wk ρ ⊢Δ (Emptyᵣ D) = Emptyᵣ (wkRed:*: ρ ⊢Δ D)
 wk {ρ} [ρ] ⊢Δ (ne′ K D neK K≡K) =
   ne′ (U.wk ρ K) (wkRed:*: [ρ] ⊢Δ D) (wkNeutral ρ neK) (~-wk [ρ] ⊢Δ K≡K)
 wk {ρ} {Γ} {Δ} {A} {l} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) =
@@ -129,15 +107,14 @@ wk {ρ} {Γ} {Δ} {A} {l} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-e
                                          ([a]′ [ρ₁] [ρ] ⊢Δ₁ [a])
                                          ([a]′ [ρ₁] [ρ] ⊢Δ₁ [b])
                                          [a≡b]′))
-wk ρ ⊢Δ (emb 0<1 x) = emb 0<1 (wk ρ ⊢Δ x)
+wk ρ ⊢Δ (emb′ 0<1 x) = emb′ 0<1 (wk ρ ⊢Δ x)
 
 wkEq : ∀ {ρ Γ Δ A B l} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
        ([A] : Γ ⊩⟨ l ⟩ A)
      → Γ ⊩⟨ l ⟩ A ≡ B / [A]
      → Δ ⊩⟨ l ⟩ U.wk ρ A ≡ U.wk ρ B / wk [ρ] ⊢Δ [A]
-wkEq ρ ⊢Δ (Uᵣ′ _ _ _) PE.refl = PE.refl
-wkEq ρ ⊢Δ (ℕᵣ D) A≡B = wkRed* ρ ⊢Δ A≡B
-wkEq ρ ⊢Δ (Emptyᵣ D) A≡B = wkRed* ρ ⊢Δ A≡B
+wkEq ρ ⊢Δ (Uᵣ′ _ _ _) (U₌ PE.refl) = (U₌ PE.refl)
+wkEq ρ ⊢Δ (ℕᵣ D) (ℕ₌ A≡B) = (ℕ₌ (wkRed* ρ ⊢Δ A≡B))
 wkEq {ρ} [ρ] ⊢Δ (ne′ _ _ _ _) (ne₌ M D′ neM K≡M) =
   ne₌ (U.wk ρ M) (wkRed:*: [ρ] ⊢Δ D′)
       (wkNeutral ρ neM) (~-wk [ρ] ⊢Δ K≡M)
@@ -161,7 +138,7 @@ wkEq {ρ} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                             (irrelevance′ (wk-comp-subst ρ₁ ρ G)
                                           ([G] ([ρ₁] •ₜ [ρ]) ⊢Δ₁ [a]′))
                             ([G≡G′] ([ρ₁] •ₜ [ρ]) ⊢Δ₁ [a]′))
-wkEq ρ ⊢Δ (emb 0<1 x) A≡B = wkEq ρ ⊢Δ x A≡B
+wkEq ρ ⊢Δ (emb′ 0<1 x) (ιx A≡B) = ιx (wkEq ρ ⊢Δ x A≡B)
 
 wkTerm : ∀ {ρ Γ Δ A t l} ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
          ([A] : Γ ⊩⟨ l ⟩ A)
@@ -171,7 +148,7 @@ wkTerm {ρ} [ρ] ⊢Δ (Uᵣ′ .⁰ 0<1 ⊢Γ) (Uₜ A d typeA A≡A [t]) =
   Uₜ (U.wk ρ A) (wkRed:*:Term [ρ] ⊢Δ d)
      (wkType ρ typeA) (≅ₜ-wk [ρ] ⊢Δ A≡A) (wk [ρ] ⊢Δ [t])
 wkTerm ρ ⊢Δ (ℕᵣ D) [t] = wkTermℕ ρ ⊢Δ [t]
-wkTerm ρ ⊢Δ (Emptyᵣ D) [t] = wkTermEmpty ρ ⊢Δ [t]
+--
 wkTerm {ρ} [ρ] ⊢Δ (ne′ K D neK K≡K) (neₜ k d nf) =
   neₜ (U.wk ρ k) (wkRed:*:Term [ρ] ⊢Δ d) (wkTermNe [ρ] ⊢Δ nf)
 wkTerm {ρ} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Πₜ f d funcF f≡f [f] [f]₁) =
@@ -201,7 +178,7 @@ wkTerm {ρ} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Πₜ f d
         in  irrelevanceTerm″ (wk-comp-subst ρ₁ ρ G)
                               (PE.cong (λ x → x ∘ _) (PE.sym (wk-comp ρ₁ ρ _)))
                               [G]₁ [G]₂ ([f]₁ ([ρ₁] •ₜ [ρ]) ⊢Δ₁ [a]′))
-wkTerm ρ ⊢Δ (emb 0<1 x) t = wkTerm ρ ⊢Δ x t
+wkTerm ρ ⊢Δ (emb′ 0<1 x) (ιx t) = ιx (wkTerm ρ ⊢Δ x t)
 
 wkEqTerm : ∀ {ρ Γ Δ A t u l} ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
            ([A] : Γ ⊩⟨ l ⟩ A)
@@ -212,7 +189,6 @@ wkEqTerm {ρ} [ρ] ⊢Δ (Uᵣ′ .⁰ 0<1 ⊢Γ) (Uₜ₌ A B d d′ typeA type
       (wkType ρ typeA) (wkType ρ typeB) (≅ₜ-wk [ρ] ⊢Δ A≡B)
       (wk [ρ] ⊢Δ [t]) (wk [ρ] ⊢Δ [u]) (wkEq [ρ] ⊢Δ [t] [t≡u])
 wkEqTerm ρ ⊢Δ (ℕᵣ D) [t≡u] = wkEqTermℕ ρ ⊢Δ [t≡u]
-wkEqTerm ρ ⊢Δ (Emptyᵣ D) [t≡u] = wkEqTermEmpty ρ ⊢Δ [t≡u]
 wkEqTerm {ρ} [ρ] ⊢Δ (ne′ K D neK K≡K) (neₜ₌ k m d d′ nf) =
   neₜ₌ (U.wk ρ k) (U.wk ρ m)
        (wkRed:*:Term [ρ] ⊢Δ d) (wkRed:*:Term [ρ] ⊢Δ d′)
@@ -234,4 +210,4 @@ wkEqTerm {ρ} [ρ] ⊢Δ (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                                      (wk-comp-subst ρ₁ ρ G)
                                      [G]₁ [G]₂
                                      ([f≡g] ([ρ₁] •ₜ [ρ]) ⊢Δ₁ [a]′))
-wkEqTerm ρ ⊢Δ (emb 0<1 x) t≡u = wkEqTerm ρ ⊢Δ x t≡u
+wkEqTerm ρ ⊢Δ (emb′ 0<1 x) (ιx t≡u) = ιx (wkEqTerm ρ ⊢Δ x t≡u)
