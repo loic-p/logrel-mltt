@@ -65,9 +65,8 @@ mutual
   irrelevanceEqT : ∀ {Γ A B l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                        → ShapeView Γ l l′ A A p q
                        → Γ ⊩⟨ l ⟩ A ≡ B / p → Γ ⊩⟨ l′ ⟩ A ≡ B / q
-  irrelevanceEqT (ℕᵥ D D′) A≡B = A≡B
-  irrelevanceEqT (Emptyᵥ D D′) A≡B = A≡B
-  irrelevanceEqT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
+  irrelevanceEqT (ℕᵥ ℕA ℕB) (ℕ₌ x) = ℕ₌ x
+  irrelevanceEqT (ne (ne K D neK _) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
                  rewrite whrDet* (red D , ne neK) (red D₁ , ne neK₁) =
     ne₌ M D′ neM K≡M
   irrelevanceEqT {Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
@@ -83,11 +82,11 @@ mutual
                                          ([F]₁ [ρ] ⊢Δ) ([F] [ρ] ⊢Δ) [a]₁
               in  irrelevanceEq′ (PE.cong (λ y → wk (lift ρ) y [ _ ]) G≡G₁)
                                  ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁) ([G≡G′] [ρ] ⊢Δ [a]))
-  irrelevanceEqT (Uᵥ (Uᵣ _ _ _) (Uᵣ _ _ _)) A≡B = A≡B
-  irrelevanceEqT (emb⁰¹ x) A≡B = irrelevanceEqT x A≡B
-  irrelevanceEqT (emb¹⁰ x) A≡B = irrelevanceEqT x A≡B
+  irrelevanceEqT (Uᵥ _ _ _ _ _ _) (U₌ B≡U) = U₌ B≡U
+  irrelevanceEqT (emb⁰¹ PE.refl x) (ιx A≡B) = irrelevanceEqT x A≡B
+  irrelevanceEqT {Γ} {A} {B} {l} {.¹} (emb¹⁰ PE.refl x) A≡B = ιx (irrelevanceEqT x A≡B)
 
---------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
 
   -- Irrelevance for terms
   irrelevanceTerm : ∀ {Γ A t l l′} (p : Γ ⊩⟨ l ⟩ A) (q : Γ ⊩⟨ l′ ⟩ A)
@@ -122,8 +121,7 @@ mutual
   irrelevanceTermT : ∀ {Γ A t l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                          → ShapeView Γ l l′ A A p q
                          → Γ ⊩⟨ l ⟩ t ∷ A / p → Γ ⊩⟨ l′ ⟩ t ∷ A / q
-  irrelevanceTermT (ℕᵥ D D′) t = t
-  irrelevanceTermT (Emptyᵥ D D′) t = t
+  irrelevanceTermT (ℕᵥ D D′) (ℕₜ n d n≡n prop) = ℕₜ n d n≡n prop
   irrelevanceTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (neₜ k d nf)
                    with whrDet* (red D₁ , ne neK₁) (red D , ne neK)
   irrelevanceTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (neₜ k d nf)
@@ -150,11 +148,11 @@ mutual
                                         ([F]₁ [ρ] ⊢Δ) ([F] [ρ] ⊢Δ) [a]₁
              in  irrelevanceTerm′ (PE.cong (λ G → wk (lift ρ) G [ _ ]) G≡G₁)
                                   ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁) ([f]₁ [ρ] ⊢Δ [a]))
-  irrelevanceTermT (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) t = t
-  irrelevanceTermT (emb⁰¹ x) t = irrelevanceTermT x t
-  irrelevanceTermT (emb¹⁰ x) t = irrelevanceTermT x t
+  irrelevanceTermT (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 _) t = t
+  irrelevanceTermT (emb⁰¹ PE.refl x) (ιx t) = irrelevanceTermT x t
+  irrelevanceTermT (emb¹⁰ PE.refl x) t = ιx (irrelevanceTermT x t)
 
---------------------------------------------------------------------------------
+-- --------------------------------------------------------------------------------
 
   -- Irrelevance for term equality
   irrelevanceEqTerm : ∀ {Γ A t u l l′} (p : Γ ⊩⟨ l ⟩ A) (q : Γ ⊩⟨ l′ ⟩ A)
@@ -178,8 +176,7 @@ mutual
   irrelevanceEqTermT : ∀ {Γ A t u} {l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                            → ShapeView Γ l l′ A A p q
                            → Γ ⊩⟨ l ⟩ t ≡ u ∷ A / p → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ A / q
-  irrelevanceEqTermT (ℕᵥ D D′) t≡u = t≡u
-  irrelevanceEqTermT (Emptyᵥ D D′) t≡u = t≡u
+  irrelevanceEqTermT (ℕᵥ D D′) (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
   irrelevanceEqTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (neₜ₌ k m d d′ nf)
                      with whrDet* (red D₁ , ne neK₁) (red D , ne neK)
   irrelevanceEqTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (neₜ₌ k m d d′ nf)
@@ -201,6 +198,6 @@ mutual
                                           ([F]₁ [ρ] ⊢Δ) ([F] [ρ] ⊢Δ) [a]₁
                in  irrelevanceEqTerm′ (PE.cong (λ G → wk (lift ρ) G [ _ ]) G≡G₁)
                                      ([G] [ρ] ⊢Δ [a]) ([G]₁ [ρ] ⊢Δ [a]₁) ([f≡g] [ρ] ⊢Δ [a]))
-  irrelevanceEqTermT (Uᵥ (Uᵣ .⁰ 0<1 ⊢Γ) (Uᵣ .⁰ 0<1 ⊢Γ₁)) t≡u = t≡u
-  irrelevanceEqTermT (emb⁰¹ x) t≡u = irrelevanceEqTermT x t≡u
-  irrelevanceEqTermT (emb¹⁰ x) t≡u = irrelevanceEqTermT x t≡u
+  irrelevanceEqTermT (Uᵥ .⁰ 0<1 ⊢Γ .⁰ 0<1 ⊢Γ₁) t≡u = t≡u
+  irrelevanceEqTermT (emb⁰¹ PE.refl x) (ιx t≡u) = irrelevanceEqTermT x t≡u
+  irrelevanceEqTermT (emb¹⁰ PE.refl x) t≡u = ιx (irrelevanceEqTermT x t≡u)
