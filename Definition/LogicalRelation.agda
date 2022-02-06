@@ -326,7 +326,7 @@ open LogRel public using (Uᵣ; Πᵣ; Π₌; U₌ ; Uₜ; Uₜ₌ ; LRU ; LRℕ
 pattern Πₜ f d funcF f≡f [f] [f]₁ = f , d , funcF , f≡f , [f] , [f]₁
 pattern Πₜ₌ f g d d′ funcF funcG f≡g [f] [g] [f≡g] = f , g , d , d′ , funcF , funcG , f≡g , [f] , [g] , [f≡g]
 pattern ℕᵣ a = LRPack _ _ _ (LRℕ a)
-pattern emb a b = LRPack _ _ _ (LRemb a b)
+pattern emb′ a b = LRPack _ _ _ (LRemb a b)
 pattern Uᵣ′ a b c = LRPack _ _ _ (LRU c a b)
 pattern ne′ a b c d = LRPack _ _ _ (LRne (ne a b c d))
 pattern Πᵣ′ a b c d e f g h i = LRPack _ _ _ (LRΠ (Πᵣ a b c d e f g h i))
@@ -344,11 +344,11 @@ kit l = Kit _⊩¹U _⊩¹Π_ _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷
 -- a bit of repetition in "kit ¹" definition, would work better with Fin 2 for
 -- TypeLevel because you could recurse.
 
--- _⊩′⟨_⟩U : (Γ : Con Term ℓ) (l : TypeLevel) → Set
--- Γ ⊩′⟨ l ⟩U = Γ ⊩U where open LogRelKit (kit l)
+_⊩′⟨_⟩U : (Γ : Con Term) (l : TypeLevel) → Set (lsuc (lsuc (toLevel l)))
+Γ ⊩′⟨ l ⟩U = Γ ⊩U where open LogRelKit (kit l)
 
--- _⊩′⟨_⟩B⟨_⟩_ : (Γ : Con Term ℓ) (l : TypeLevel) (W : BindingType) → Term ℓ → Set
--- Γ ⊩′⟨ l ⟩B⟨ W ⟩ A = Γ ⊩B⟨ W ⟩ A where open LogRelKit (kit l)
+_⊩′⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) → Term → Set (lsuc (lsuc (toLevel l)))
+Γ ⊩′⟨ l ⟩Π A = Γ ⊩Π A where open LogRelKit (kit l)
 
 _⊩⟨_⟩_ : (Γ : Con Term) (l : TypeLevel) → Term → Set (lsuc (lsuc (toLevel l)))
 Γ ⊩⟨ l ⟩ A = Γ ⊩ A where open LogRelKit (kit l)

@@ -22,7 +22,7 @@ reflEq (Πᵣ′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G A≡A [F] [G] G-ext) =
   Π₌ _ _ D A≡A
      (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
      (λ ρ ⊢Δ [a] → reflEq ([G] ρ ⊢Δ [a]))
-reflEq (emb 0<1 [A]) = ιx (reflEq [A])
+reflEq (emb′ 0<1 [A]) = ιx (reflEq [A])
 
 reflNatural-prop : ∀ {Γ n}
                  → Natural-prop Γ n
@@ -49,4 +49,4 @@ reflEqTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Πₜ f d funcF f≡f
       (Πₜ f d funcF f≡f [f] [f]₁)
       (Πₜ f d funcF f≡f [f] [f]₁)
       (λ ρ ⊢Δ [a] → [f] ρ ⊢Δ [a] [a] (reflEqTerm ([F] ρ ⊢Δ) [a]))
-reflEqTerm (emb 0<1 [A]) (ιx t) = ιx (reflEqTerm [A] t)
+reflEqTerm (emb′ 0<1 [A]) (ιx t) = ιx (reflEqTerm [A] t)

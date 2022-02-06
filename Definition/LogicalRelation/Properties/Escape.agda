@@ -1,4 +1,4 @@
-{-# OPTIONS #-}
+{-# OPTIONS --without-K --safe #-}
 
 open import Definition.Typed.EqualityRelation
 
@@ -21,7 +21,7 @@ escape (Uᵣ′ l′ l< ⊢Γ) = Uⱼ ⊢Γ
 escape (ℕᵣ [ ⊢A , ⊢B , D ]) = ⊢A
 escape (ne′ K [ ⊢A , ⊢B , D ] neK K≡K) = ⊢A
 escape (Πᵣ′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G A≡A [F] [G] G-ext) = ⊢A
-escape (emb 0<1 [A]) = escape [A]
+escape (emb′ 0<1 [A]) = escape [A]
 
 -- Reducible type equality respect the equality relation.
 escapeEq : ∀ {l Γ A B} → ([A] : Γ ⊩⟨ l ⟩ A)
@@ -32,7 +32,7 @@ escapeEq (ℕᵣ [ ⊢A , ⊢B , D ]) (ℕ₌ D′) = ≅-red D D′ ℕₙ ℕ�
 escapeEq (ne′ K D neK K≡K) (ne₌ M D′ neM K≡M) = ≅-red (red D) (red D′) (ne neK) (ne neM) (~-to-≅ K≡M)
 escapeEq (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
   ≅-red (red D) D′ Πₙ Πₙ A≡B
-escapeEq (emb 0<1 A) (ιx A≡B) = escapeEq A A≡B
+escapeEq (emb′ 0<1 A) (ιx A≡B) = escapeEq A A≡B
 
 -- Reducible terms are well-formed.
 escapeTerm : ∀ {l Γ A t} → ([A] : Γ ⊩⟨ l ⟩ A)
@@ -46,7 +46,7 @@ escapeTerm (ne′ K D neK K≡K) (neₜ k [ ⊢t , ⊢u , d ] nf) =
 escapeTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                (f , [ ⊢t , ⊢u , d ] , funcF , f≡f , [f] , [f]₁) =
   conv ⊢t (sym (subset* (red D)))
-escapeTerm (emb 0<1 A) (ιx t) = escapeTerm A t
+escapeTerm (emb′ 0<1 A) (ιx t) = escapeTerm A t
 
 -- Reducible term equality respect the equality relation.
 escapeTermEq : ∀ {l Γ A t u} → ([A] : Γ ⊩⟨ l ⟩ A)
@@ -65,4 +65,4 @@ escapeTermEq (ne′ K D neK K≡K)
 escapeTermEq (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                  (Πₜ₌ f g d d′ funcF funcG f≡g [f] [g] [f≡g]) =
   ≅ₜ-red (red D) (redₜ d) (redₜ d′) Πₙ (functionWhnf funcF) (functionWhnf funcG) f≡g
-escapeTermEq (emb 0<1 A) (ιx t≡u) = escapeTermEq A t≡u
+escapeTermEq (emb′ 0<1 A) (ιx t≡u) = escapeTermEq A t≡u
