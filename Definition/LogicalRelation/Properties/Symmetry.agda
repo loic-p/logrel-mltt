@@ -23,8 +23,7 @@ mutual
          → ShapeView Γ l l′ A B [A] [B]
          → Γ ⊩⟨ l  ⟩ A ≡ B / [A]
          → Γ ⊩⟨ l′ ⟩ B ≡ A / [B]
-  symEqT (ℕᵥ D D′) A≡B = red D
-  symEqT (Emptyᵥ D D′) A≡B = red D
+  symEqT (ℕᵥ D D′) A≡B = (ℕ₌ (red D))
   symEqT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
          rewrite whrDet* (red D′ , ne neM) (red D₁ , ne neK₁) =
     ne₌ _ D neK
@@ -54,9 +53,9 @@ mutual
                                   ([G]₁ [ρ] ⊢Δ [a])
                                   (symEq ([G] [ρ] ⊢Δ [a]₁) [ρG′a]
                                          ([G≡G′] [ρ] ⊢Δ [a]₁)))
-  symEqT (Uᵥ (Uᵣ _ _ _) (Uᵣ _ _ _)) A≡B = PE.refl
-  symEqT (emb⁰¹ x) A≡B = symEqT x A≡B
-  symEqT (emb¹⁰ x) A≡B = symEqT x A≡B
+  symEqT (Uᵥ _ _ _ _ _ _) A≡B = U₌ PE.refl
+  symEqT (emb⁰¹ PE.refl x) (ιx A≡B) = symEqT x A≡B
+  symEqT (emb¹⁰ PE.refl x) A≡B = ιx (symEqT x A≡B)
 
   -- Symmetry of type equality.
   symEq : ∀ {Γ A B l l′} ([A] : Γ ⊩⟨ l ⟩ A) ([B] : Γ ⊩⟨ l′ ⟩ B)
@@ -77,11 +76,6 @@ symNatural-prop (sucᵣ (ℕₜ₌ k k′ d d′ t≡u prop)) =
 symNatural-prop zeroᵣ = zeroᵣ
 symNatural-prop (ne prop) = ne (symNeutralTerm prop)
 
-symEmpty-prop : ∀ {Γ k k′}
-                → [Empty]-prop Γ k k′
-                → [Empty]-prop Γ k′ k
-symEmpty-prop (ne prop) = ne (symNeutralTerm prop)
-
 -- Symmetry of term equality.
 symEqTerm : ∀ {l Γ A t u} ([A] : Γ ⊩⟨ l ⟩ A)
           → Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A]
@@ -90,12 +84,10 @@ symEqTerm (Uᵣ′ .⁰ 0<1 ⊢Γ) (Uₜ₌ A B d d′ typeA typeB A≡B [A] [B]
   Uₜ₌ B A d′ d typeB typeA (≅ₜ-sym A≡B) [B] [A] (symEq [A] [B] [A≡B])
 symEqTerm (ℕᵣ D) (ℕₜ₌ k k′ d d′ t≡u prop) =
   ℕₜ₌ k′ k d′ d (≅ₜ-sym t≡u) (symNatural-prop prop)
-symEqTerm (Emptyᵣ D) (Emptyₜ₌ k k′ d d′ t≡u prop) =
-  Emptyₜ₌ k′ k d′ d (≅ₜ-sym t≡u) (symEmpty-prop prop)
 symEqTerm (ne′ K D neK K≡K) (neₜ₌ k m d d′ nf) =
   neₜ₌ m k d′ d (symNeutralTerm nf)
 symEqTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
           (Πₜ₌ f g d d′ funcF funcG f≡g [f] [g] [f≡g]) =
   Πₜ₌ g f d′ d funcG funcF (≅ₜ-sym f≡g) [g] [f]
       (λ ρ ⊢Δ [a] → symEqTerm ([G] ρ ⊢Δ [a]) ([f≡g] ρ ⊢Δ [a]))
-symEqTerm (emb 0<1 x) t≡u = symEqTerm x t≡u
+symEqTerm (emb′ 0<1 x) (ιx t≡u) = ιx (symEqTerm x t≡u)
