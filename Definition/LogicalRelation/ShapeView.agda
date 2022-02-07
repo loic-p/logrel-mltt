@@ -28,11 +28,11 @@ data MaybeEmb (l : TypeLevel) (⊩⟨_⟩ : TypeLevel → Set) : Set where
 -- _⊩⟨_⟩U : (Γ : Con Term) (l : TypeLevel) → Set
 -- Γ ⊩⟨ l ⟩U = MaybeEmb l (λ l′ → Γ ⊩′⟨ l′ ⟩U)
 
--- _⊩⟨_⟩ℕ_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
--- Γ ⊩⟨ l ⟩ℕ A = MaybeEmb l (λ l′ → Γ ⊩ℕ A)
+_⊩⟨_⟩ℕ_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
+Γ ⊩⟨ l ⟩ℕ A = MaybeEmb l (λ l′ → Γ ⊩ℕ A)
 
--- _⊩⟨_⟩ne_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
--- Γ ⊩⟨ l ⟩ne A = MaybeEmb l (λ l′ → Γ ⊩ne A)
+_⊩⟨_⟩ne_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
+Γ ⊩⟨ l ⟩ne A = MaybeEmb l (λ l′ → Γ ⊩ne A)
 
 -- _⊩⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
 -- Γ ⊩⟨ l ⟩Π A = MaybeEmb l (λ l′ → Γ ⊩′⟨ l′ ⟩Π A)
@@ -43,13 +43,13 @@ data MaybeEmb (l : TypeLevel) (⊩⟨_⟩ : TypeLevel → Set) : Set where
 -- U-intr (noemb x) = Uᵣ x
 -- U-intr (emb 0<1 x) = emb 0<1 (U-intr x)
 
--- ℕ-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ℕ A → Γ ⊩⟨ l ⟩ A
--- ℕ-intr (noemb x) = ℕᵣ x
--- ℕ-intr (emb 0<1 x) = emb 0<1 (ℕ-intr x)
+ℕ-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ℕ A → Γ ⊩⟨ l ⟩ A
+ℕ-intr (noemb x) = ℕᵣ x
+ℕ-intr (emb 0<1 x) = emb′ 0<1 (ℕ-intr x)
 
--- ne-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ne A → Γ ⊩⟨ l ⟩ A
--- ne-intr (noemb x) = ne x
--- ne-intr (emb 0<1 x) = emb 0<1 (ne-intr x)
+ne-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ne A → Γ ⊩⟨ l ⟩ A
+ne-intr (noemb x) = LRPack _ _ _ (LRne x)
+ne-intr (emb 0<1 x) = emb′ 0<1 (ne-intr x)
 
 -- Π-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩Π A → Γ ⊩⟨ l ⟩ A
 -- Π-intr (noemb x) = Πᵣ x
@@ -67,36 +67,33 @@ data MaybeEmb (l : TypeLevel) (⊩⟨_⟩ : TypeLevel → Set) : Set where
 -- U-elim (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
 -- U-elim (emb 0<1 x) | emb () x₁
 
--- ℕ-elim′ : ∀ {A Γ l} → Γ ⊢ A ⇒* ℕ → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩ℕ A
--- ℕ-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢ℕ (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , ℕₙ)))
--- ℕ-elim′ D (ℕᵣ D′) = noemb D′
--- ℕ-elim′ D (ne′ K D′ neK K≡K) =
---   ⊥-elim (ℕ≢ne neK (whrDet* (D , ℕₙ) (red D′ , ne neK)))
--- ℕ-elim′ D (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
---   ⊥-elim (ℕ≢Π (whrDet* (D , ℕₙ) (red D′ , Πₙ)))
--- ℕ-elim′ D (Emptyᵣ D′) =
---   ⊥-elim (ℕ≢Empty (whrDet* (D , ℕₙ) (red D′ , Emptyₙ)))
--- ℕ-elim′ D (emb 0<1 x) with ℕ-elim′ D x
--- ℕ-elim′ D (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
--- ℕ-elim′ D (emb 0<1 x) | emb () x₂
+ℕ-elim′ : ∀ {A Γ l} → Γ ⊢ A ⇒* ℕ → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩ℕ A
+ℕ-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢ℕ (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , ℕₙ)))
+ℕ-elim′ D (ℕᵣ D′) = noemb D′
+ℕ-elim′ D (ne′ K D′ neK K≡K) =
+  ⊥-elim (ℕ≢ne neK (whrDet* (D , ℕₙ) (red D′ , ne neK)))
+ℕ-elim′ D (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
+  ⊥-elim (ℕ≢Π (whrDet* (D , ℕₙ) (red D′ , Πₙ)))
+ℕ-elim′ D (emb′ 0<1 x) with ℕ-elim′ D x
+ℕ-elim′ D (emb′ 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
+ℕ-elim′ D (emb′ 0<1 x) | emb () x₂
 
--- ℕ-elim : ∀ {Γ l} → Γ ⊩⟨ l ⟩ ℕ → Γ ⊩⟨ l ⟩ℕ ℕ
--- ℕ-elim [ℕ] = ℕ-elim′ (id (escape [ℕ])) [ℕ]
+ℕ-elim : ∀ {Γ l} → Γ ⊩⟨ l ⟩ ℕ → Γ ⊩⟨ l ⟩ℕ ℕ
+ℕ-elim [ℕ] = ℕ-elim′ (id (escape [ℕ])) [ℕ]
 
--- ne-elim′ : ∀ {A Γ l K} → Γ ⊢ A ⇒* K → Neutral K → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩ne A
--- ne-elim′ D neK (Uᵣ′ l′ l< ⊢Γ) =
---   ⊥-elim (U≢ne neK (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , ne neK)))
--- ne-elim′ D neK (ℕᵣ D′) = ⊥-elim (ℕ≢ne neK (whrDet* (red D′ , ℕₙ) (D , ne neK)))
--- ne-elim′ D neK (Emptyᵣ D′) = ⊥-elim (Empty≢ne neK (whrDet* (red D′ , Emptyₙ) (D , ne neK)))
--- ne-elim′ D neK (ne′ K D′ neK′ K≡K) = noemb (ne K D′ neK′ K≡K)
--- ne-elim′ D neK (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
---   ⊥-elim (Π≢ne neK (whrDet* (red D′ , Πₙ) (D , ne neK)))
--- ne-elim′ D neK (emb 0<1 x) with ne-elim′ D neK x
--- ne-elim′ D neK (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
--- ne-elim′ D neK (emb 0<1 x) | emb () x₂
+ne-elim′ : ∀ {A Γ l K} → Γ ⊢ A ⇒* K → Neutral K → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩ne A
+ne-elim′ D neK (Uᵣ′ l′ l< ⊢Γ) =
+  ⊥-elim (U≢ne neK (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , ne neK)))
+ne-elim′ D neK (ℕᵣ D′) = ⊥-elim (ℕ≢ne neK (whrDet* (red D′ , ℕₙ) (D , ne neK)))
+ne-elim′ D neK (ne′ K D′ neK′ K≡K) = noemb (ne K D′ neK′ K≡K)
+ne-elim′ D neK (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
+  ⊥-elim (Π≢ne neK (whrDet* (red D′ , Πₙ) (D , ne neK)))
+ne-elim′ D neK (emb′ 0<1 x) with ne-elim′ D neK x
+ne-elim′ D neK (emb′ 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
+ne-elim′ D neK (emb′ 0<1 x) | emb () x₂
 
--- ne-elim : ∀ {Γ l K} → Neutral K  → Γ ⊩⟨ l ⟩ K → Γ ⊩⟨ l ⟩ne K
--- ne-elim neK [K] = ne-elim′ (id (escape [K])) neK [K]
+ne-elim : ∀ {Γ l K} → Neutral K  → Γ ⊩⟨ l ⟩ K → Γ ⊩⟨ l ⟩ne K
+ne-elim neK [K] = ne-elim′ (id (escape [K])) neK [K]
 
 -- Π-elim′ : ∀ {A Γ F G l} → Γ ⊢ A ⇒* Π F ▹ G → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩Π A
 -- Π-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢Π (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , Πₙ)))
