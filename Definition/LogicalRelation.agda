@@ -17,6 +17,9 @@ import Tools.PropositionalEquality as PE
 data ι {ℓ : Level} (A : Set ℓ) : Set (lsuc ℓ) where
   ιx : A → ι A
 
+data ι′ {ℓ : Level} (A : Set) : Set ℓ where
+  ιx : A → ι′ A
+
 -- The different cases of the logical relation are spread out through out
 -- this file. This is due to them having different dependencies.
 
@@ -34,7 +37,7 @@ record _⊩ne_ (Γ : Con Term) (A : Term) : Set where
     K≡K : Γ ⊢ K ~ K ∷ U
 
 -- Neutral type equality
-record _⊩ne_≡_/_ {ℓ : Level} (Γ : Con Term) (A B : Term) ([A] : Γ ⊩ne A) : Set ℓ where
+record _⊩ne_≡_/_ (Γ : Con Term) (A B : Term) ([A] : Γ ⊩ne A) : Set where
   constructor ne₌
   open _⊩ne_ [A]
   field
@@ -53,7 +56,7 @@ record _⊩neNf_∷_ (Γ : Con Term) (k A : Term) : Set where
     k≡k  : Γ ⊢ k ~ k ∷ A
 
 -- Neutral term
-record _⊩ne_∷_/_ {ℓ : Level} (Γ : Con Term) (t A : Term) ([A] : Γ ⊩ne A) : Set ℓ where
+record _⊩ne_∷_/_ (Γ : Con Term) (t A : Term) ([A] : Γ ⊩ne A) : Set where
   inductive
   constructor neₜ
   open _⊩ne_ [A]
@@ -72,7 +75,7 @@ record _⊩neNf_≡_∷_ (Γ : Con Term) (k m A : Term) : Set where
     k≡m  : Γ ⊢ k ~ m ∷ A
 
 -- Neutral term equality
-record _⊩ne_≡_∷_/_ {ℓ : Level} (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩ne A) : Set ℓ where
+record _⊩ne_≡_∷_/_ (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩ne A) : Set where
   constructor neₜ₌
   open _⊩ne_ [A]
   field
@@ -88,12 +91,12 @@ _⊩ℕ_ : (Γ : Con Term) (A : Term) → Set
 Γ ⊩ℕ A = Γ ⊢ A :⇒*: ℕ
 
 -- Natural number type equality
-data _⊩ℕ_≡_ {ℓ : Level} (Γ : Con Term) (A B : Term) : Set ℓ where
+data _⊩ℕ_≡_ (Γ : Con Term) (A B : Term) : Set where
   ℕ₌ : Γ ⊢ B ⇒* ℕ → Γ ⊩ℕ A ≡ B
 
 mutual
   -- Natural number term
-  data _⊩ℕ_∷ℕ {ℓ : Level} (Γ : Con Term) (t : Term) : Set ℓ where
+  data _⊩ℕ_∷ℕ (Γ : Con Term) (t : Term) : Set where
     ℕₜ : (n : Term) (d : Γ ⊢ t :⇒*: n ∷ ℕ) (n≡n : Γ ⊢ n ≅ n ∷ ℕ)
          (prop : Natural-prop Γ n)
        → Γ ⊩ℕ t ∷ℕ
@@ -106,7 +109,7 @@ mutual
 
 mutual
   -- Natural number term equality
-  data _⊩ℕ_≡_∷ℕ {ℓ : Level} (Γ : Con Term) (t u : Term) : Set ℓ where
+  data _⊩ℕ_≡_∷ℕ (Γ : Con Term) (t u : Term) : Set where
     ℕₜ₌ : (k k′ : Term) (d : Γ ⊢ t :⇒*: k  ∷ ℕ) (d′ : Γ ⊢ u :⇒*: k′ ∷ ℕ)
           (k≡k′ : Γ ⊢ k ≅ k′ ∷ ℕ)
           (prop : [Natural]-prop Γ k k′) → Γ ⊩ℕ t ≡ u ∷ℕ
@@ -286,13 +289,13 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit (toLe
         ▸ (λ t → Γ ⊩¹U t ∷U/ l<)
         ▸ (λ t u → Γ ⊩¹U t ≡ u ∷U/ l<)
       LRℕ : ∀ {A} → Γ ⊩ℕ A → Γ ⊩LR A
-        ▸ (λ B → Γ ⊩ℕ A ≡ B)
-        ▸ (λ t → Γ ⊩ℕ t ∷ℕ)
-        ▸ (λ t u → Γ ⊩ℕ t ≡ u ∷ℕ)
+        ▸ (λ B → ι′ (Γ ⊩ℕ A ≡ B))
+        ▸ (λ t → ι′ (Γ ⊩ℕ t ∷ℕ))
+        ▸ (λ t u → ι′ (Γ ⊩ℕ t ≡ u ∷ℕ))
       LRne : ∀ {A} → (neA : Γ ⊩ne A) → Γ ⊩LR A
-        ▸ (λ B → Γ ⊩ne A ≡ B / neA)
-        ▸ (λ t → Γ ⊩ne t ∷ A / neA)
-        ▸ (λ t u → Γ ⊩ne t ≡ u ∷ A / neA)
+        ▸ (λ B → ι′ (Γ ⊩ne A ≡ B / neA))
+        ▸ (λ t → ι′ (Γ ⊩ne t ∷ A / neA))
+        ▸ (λ t u → ι′ (Γ ⊩ne t ≡ u ∷ A / neA))
       LRΠ : ∀ {A} → (ΠA : Γ ⊩¹Π A) → Γ ⊩LR A
         ▸ (λ B → Γ ⊩¹Π A ≡ B / ΠA)
         ▸ (λ t → Γ ⊩¹Π t ∷ A / ΠA)

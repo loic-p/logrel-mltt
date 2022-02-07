@@ -15,9 +15,9 @@ import Tools.PropositionalEquality as PE
 -- Reflexivity of reducible types.
 reflEq : ∀ {l Γ A} ([A] : Γ ⊩⟨ l ⟩ A) → Γ ⊩⟨ l ⟩ A ≡ A / [A]
 reflEq (Uᵣ′ l′ l< ⊢Γ) = (U₌ PE.refl)
-reflEq (ℕᵣ D) = (ℕ₌ (red D))
+reflEq (ℕᵣ D) = ιx (ℕ₌ (red D))
 reflEq (ne′ K [ ⊢A , ⊢B , D ] neK K≡K) =
-  ne₌ _ [ ⊢A , ⊢B , D ] neK K≡K
+  ιx (ne₌ _ [ ⊢A , ⊢B , D ] neK K≡K)
 reflEq (Πᵣ′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G A≡A [F] [G] G-ext) =
   Π₌ _ _ D A≡A
      (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
@@ -39,11 +39,11 @@ reflEqTerm : ∀ {l Γ A t} ([A] : Γ ⊩⟨ l ⟩ A)
            → Γ ⊩⟨ l ⟩ t ≡ t ∷ A / [A]
 reflEqTerm (Uᵣ′ ⁰ 0<1 ⊢Γ) (Uₜ A d typeA A≡A [A]) =
   Uₜ₌ A A d d typeA typeA A≡A [A] [A] (reflEq [A])
-reflEqTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
-  ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
-      (reflNatural-prop prop)
-reflEqTerm (ne′ K D neK K≡K) (neₜ k d (neNfₜ neK₁ ⊢k k≡k)) =
-  neₜ₌ k k d d (neNfₜ₌ neK₁ neK₁ k≡k)
+reflEqTerm (ℕᵣ D) (ιx (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop)) =
+  ιx (ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] t≡t
+      (reflNatural-prop prop))
+reflEqTerm (ne′ K D neK K≡K) (ιx (neₜ k d (neNfₜ neK₁ ⊢k k≡k))) =
+  ιx (neₜ₌ k k d d (neNfₜ₌ neK₁ neK₁ k≡k))
 reflEqTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Πₜ f d funcF f≡f [f] [f]₁) =
   Πₜ₌ f f d d funcF funcF f≡f
       (Πₜ f d funcF f≡f [f] [f]₁)

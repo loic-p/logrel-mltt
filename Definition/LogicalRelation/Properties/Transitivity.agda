@@ -25,14 +25,14 @@ mutual
            → Γ ⊩⟨ l ⟩  A ≡ B / [A]
            → Γ ⊩⟨ l′ ⟩ B ≡ C / [B]
            → Γ ⊩⟨ l ⟩  A ≡ C / [A]
-  transEqT (ℕᵥ D D′ D″) A≡B (ℕ₌ B≡C) = ℕ₌ B≡C
+  transEqT (ℕᵥ D D′ D″) A≡B (ιx (ℕ₌ B≡C)) = ιx (ℕ₌ B≡C)
   transEqT (ne (ne K [ ⊢A , ⊢B , D ] neK K≡K) (ne K₁ D₁ neK₁ _)
                (ne K₂ D₂ neK₂ _))
-           (ne₌ M D′ neM K≡M) (ne₌ M₁ D″ neM₁ K≡M₁)
+           (ιx (ne₌ M D′ neM K≡M)) (ιx (ne₌ M₁ D″ neM₁ K≡M₁))
            rewrite whrDet* (red D₁ , ne neK₁) (red D′ , ne neM)
                  | whrDet* (red D₂ , ne neK₂) (red D″ , ne neM₁) =
-    ne₌ M₁ D″ neM₁
-        (~-trans K≡M K≡M₁)
+    ιx (ne₌ M₁ D″ neM₁
+        (~-trans K≡M K≡M₁))
   transEqT {Γ} {l = l} {l′ = l′} {l″ = l″}
            (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁)
@@ -113,10 +113,10 @@ transEqTermNe (neNfₜ₌ neK neM k≡m) (neNfₜ₌ neK₁ neM₁ k≡m₁) =
   neNfₜ₌ neK neM₁ (~-trans k≡m k≡m₁)
 
 mutual
-  transEqTermℕ : ∀ {Γ ℓ n n′ n″}
-               → _⊩ℕ_≡_∷ℕ {ℓ = ℓ} Γ n n′
-               → _⊩ℕ_≡_∷ℕ {ℓ = ℓ} Γ n′ n″
-               → _⊩ℕ_≡_∷ℕ {ℓ = ℓ} Γ n n″
+  transEqTermℕ : ∀ {Γ n n′ n″}
+               → _⊩ℕ_≡_∷ℕ Γ n n′
+               → _⊩ℕ_≡_∷ℕ Γ n′ n″
+               → _⊩ℕ_≡_∷ℕ Γ n n″
   transEqTermℕ (ℕₜ₌ k k′ d d′ t≡u prop)
                (ℕₜ₌ k₁ k″ d₁ d″ t≡u₁ prop₁) =
     let k₁Whnf = naturalWhnf (proj₁ (split prop₁))
@@ -151,13 +151,13 @@ transEqTerm (Uᵣ′ .⁰ 0<1 ⊢Γ)
             rewrite whrDet*Term (redₜ d′ , typeWhnf typeB) (redₜ d₁ , typeWhnf typeA₁) =
   Uₜ₌ A B₁ d d₁′ typeA typeB₁ (≅ₜ-trans t≡u t≡u₁) [t] [u]₁
       (transEq [t] [u] [u]₁ [t≡u] (irrelevanceEq [t]₁ [u] [t≡u]₁))
-transEqTerm (ℕᵣ D) [t≡u] [u≡v] = transEqTermℕ [t≡u] [u≡v]
-transEqTerm (ne′ K D neK K≡K) (neₜ₌ k m d d′ (neNfₜ₌ neK₁ neM k≡m))
-                              (neₜ₌ k₁ m₁ d₁ d″ (neNfₜ₌ neK₂ neM₁ k≡m₁)) =
+transEqTerm (ℕᵣ D) (ιx [t≡u]) (ιx [u≡v]) = ιx (transEqTermℕ [t≡u] [u≡v])
+transEqTerm (ne′ K D neK K≡K) (ιx (neₜ₌ k m d d′ (neNfₜ₌ neK₁ neM k≡m)))
+                              (ιx (neₜ₌ k₁ m₁ d₁ d″ (neNfₜ₌ neK₂ neM₁ k≡m₁))) =
   let k₁≡m = whrDet*Term (redₜ d₁ , ne neK₂) (redₜ d′ , ne neM)
-  in  neₜ₌ k m₁ d d″
+  in ιx (neₜ₌ k m₁ d d″
            (neNfₜ₌ neK₁ neM₁
-                   (~-trans k≡m (PE.subst (λ x → _ ⊢ x ~ _ ∷ _) k₁≡m k≡m₁)))
+                   (~-trans k≡m (PE.subst (λ x → _ ⊢ x ~ _ ∷ _) k₁≡m k≡m₁))))
 transEqTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
             (Πₜ₌ f g d d′ funcF funcG f≡g [f] [g] [f≡g])
             (Πₜ₌ f₁ g₁ d₁ d₁′ funcF₁ funcG₁ f≡g₁ [f]₁ [g]₁ [f≡g]₁)

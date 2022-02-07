@@ -65,10 +65,10 @@ mutual
   irrelevanceEqT : ∀ {Γ A B l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                        → ShapeView Γ l l′ A A p q
                        → Γ ⊩⟨ l ⟩ A ≡ B / p → Γ ⊩⟨ l′ ⟩ A ≡ B / q
-  irrelevanceEqT (ℕᵥ ℕA ℕB) (ℕ₌ x) = ℕ₌ x
-  irrelevanceEqT (ne (ne K D neK _) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
+  irrelevanceEqT (ℕᵥ ℕA ℕB) (ιx (ℕ₌ x)) = ιx (ℕ₌ x)
+  irrelevanceEqT (ne (ne K D neK _) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (ne₌ M D′ neM K≡M))
                  rewrite whrDet* (red D , ne neK) (red D₁ , ne neK₁) =
-    ne₌ M D′ neM K≡M
+    ιx (ne₌ M D′ neM K≡M)
   irrelevanceEqT {Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                          (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                  (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
@@ -121,11 +121,11 @@ mutual
   irrelevanceTermT : ∀ {Γ A t l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                          → ShapeView Γ l l′ A A p q
                          → Γ ⊩⟨ l ⟩ t ∷ A / p → Γ ⊩⟨ l′ ⟩ t ∷ A / q
-  irrelevanceTermT (ℕᵥ D D′) (ℕₜ n d n≡n prop) = ℕₜ n d n≡n prop
-  irrelevanceTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (neₜ k d nf)
+  irrelevanceTermT (ℕᵥ D D′) (ιx (ℕₜ n d n≡n prop)) = ιx (ℕₜ n d n≡n prop)
+  irrelevanceTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (neₜ k d nf))
                    with whrDet* (red D₁ , ne neK₁) (red D , ne neK)
-  irrelevanceTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (neₜ k d nf)
-    | PE.refl = neₜ k d nf
+  irrelevanceTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (ιx (neₜ k d nf))
+    | PE.refl = ιx (neₜ k d nf)
   irrelevanceTermT {Γ} {t = t} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                                    (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                    (Πₜ f d funcF f≡f [f] [f]₁) =
@@ -176,11 +176,11 @@ mutual
   irrelevanceEqTermT : ∀ {Γ A t u} {l l′} {p : Γ ⊩⟨ l ⟩ A} {q : Γ ⊩⟨ l′ ⟩ A}
                            → ShapeView Γ l l′ A A p q
                            → Γ ⊩⟨ l ⟩ t ≡ u ∷ A / p → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ A / q
-  irrelevanceEqTermT (ℕᵥ D D′) (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
-  irrelevanceEqTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (neₜ₌ k m d d′ nf)
+  irrelevanceEqTermT (ℕᵥ D D′) (ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)) = ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)
+  irrelevanceEqTermT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (neₜ₌ k m d d′ nf))
                      with whrDet* (red D₁ , ne neK₁) (red D , ne neK)
-  irrelevanceEqTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (neₜ₌ k m d d′ nf)
-    | PE.refl = neₜ₌ k m d d′ nf
+  irrelevanceEqTermT (ne (ne K D neK K≡K) (ne .K D₁ neK₁ K≡K₁)) (ιx (neₜ₌ k m d d′ nf))
+    | PE.refl = ιx (neₜ₌ k m d d′ nf)
   irrelevanceEqTermT {Γ} {t = t} {u = u}
                      (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                          (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))

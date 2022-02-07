@@ -28,8 +28,8 @@ escapeEq : ∀ {l Γ A B} → ([A] : Γ ⊩⟨ l ⟩ A)
             → Γ ⊩⟨ l ⟩ A ≡ B / [A]
             → Γ ⊢ A ≅ B
 escapeEq (Uᵣ′ l' l< ⊢Γ) (U₌ PE.refl) = ≅-Urefl ⊢Γ
-escapeEq (ℕᵣ [ ⊢A , ⊢B , D ]) (ℕ₌ D′) = ≅-red D D′ ℕₙ ℕₙ (≅-ℕrefl (wf ⊢A))
-escapeEq (ne′ K D neK K≡K) (ne₌ M D′ neM K≡M) = ≅-red (red D) (red D′) (ne neK) (ne neM) (~-to-≅ K≡M)
+escapeEq (ℕᵣ [ ⊢A , ⊢B , D ]) (ιx (ℕ₌ D′)) = ≅-red D D′ ℕₙ ℕₙ (≅-ℕrefl (wf ⊢A))
+escapeEq (ne′ K D neK K≡K) (ιx (ne₌ M D′ neM K≡M)) = ≅-red (red D) (red D′) (ne neK) (ne neM) (~-to-≅ K≡M)
 escapeEq (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
   ≅-red (red D) D′ Πₙ Πₙ A≡B
 escapeEq (emb′ 0<1 A) (ιx A≡B) = escapeEq A A≡B
@@ -39,9 +39,9 @@ escapeTerm : ∀ {l Γ A t} → ([A] : Γ ⊩⟨ l ⟩ A)
               → Γ ⊩⟨ l ⟩ t ∷ A / [A]
               → Γ ⊢ t ∷ A
 escapeTerm (Uᵣ′ l′ l< ⊢Γ) (Uₜ A [ ⊢t , ⊢u , d ] typeA A≡A [A]) = ⊢t
-escapeTerm (ℕᵣ D) (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop) =
+escapeTerm (ℕᵣ D) (ιx (ℕₜ n [ ⊢t , ⊢u , d ] t≡t prop)) =
   conv ⊢t (sym (subset* (red D)))
-escapeTerm (ne′ K D neK K≡K) (neₜ k [ ⊢t , ⊢u , d ] nf) =
+escapeTerm (ne′ K D neK K≡K) (ιx (neₜ k [ ⊢t , ⊢u , d ] nf)) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                (f , [ ⊢t , ⊢u , d ] , funcF , f≡f , [f] , [f]₁) =
@@ -54,12 +54,12 @@ escapeTermEq : ∀ {l Γ A t u} → ([A] : Γ ⊩⟨ l ⟩ A)
                 → Γ ⊢ t ≅ u ∷ A
 escapeTermEq (Uᵣ′ l′ l< ⊢Γ) (Uₜ₌ A B d d′ typeA typeB A≡B [A] [B] [A≡B]) =
   ≅ₜ-red (id (Uⱼ ⊢Γ)) (redₜ d) (redₜ d′) Uₙ (typeWhnf typeA) (typeWhnf typeB) A≡B
-escapeTermEq (ℕᵣ D) (ℕₜ₌ k k′ d d′ k≡k′ prop) =
+escapeTermEq (ℕᵣ D) (ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)) =
   let natK , natK′ = split prop
   in  ≅ₜ-red (red D) (redₜ d) (redₜ d′) ℕₙ
              (naturalWhnf natK) (naturalWhnf natK′) k≡k′
 escapeTermEq (ne′ K D neK K≡K)
-                 (neₜ₌ k m d d′ (neNfₜ₌ neT neU t≡u)) =
+                 (ιx (neₜ₌ k m d d′ (neNfₜ₌ neT neU t≡u))) =
   ≅ₜ-red (red D) (redₜ d) (redₜ d′) (ne neK) (ne neT) (ne neU)
          (~-to-≅ₜ t≡u)
 escapeTermEq (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)

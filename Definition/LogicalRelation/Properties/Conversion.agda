@@ -28,14 +28,14 @@ mutual
              → Γ ⊩⟨ l ⟩  A ≡ B / [A]
              → Γ ⊩⟨ l ⟩  t ∷ A / [A]
              → Γ ⊩⟨ l′ ⟩ t ∷ B / [B]
-  convTermT₁ (ℕᵥ D D′) A≡B (ℕₜ n d n≡n prop) = (ℕₜ n d n≡n prop)
-  convTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
-             (neₜ k d (neNfₜ neK₂ ⊢k k≡k)) =
+  convTermT₁ (ℕᵥ D D′) A≡B (ιx (ℕₜ n d n≡n prop)) = ιx (ℕₜ n d n≡n prop)
+  convTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (ne₌ M D′ neM K≡M))
+             (ιx (neₜ k d (neNfₜ neK₂ ⊢k k≡k))) =
     let K≡K₁ = PE.subst (λ x → _ ⊢ _ ≡ x)
                         (whrDet* (red D′ , ne neM) (red D₁ , ne neK₁))
                         (≅-eq (~-to-≅ K≡M))
-    in  neₜ k (convRed:*: d K≡K₁)
-            (neNfₜ neK₂ (conv ⊢k K≡K₁) (~-conv k≡k K≡K₁))
+    in ιx (neₜ k (convRed:*: d K≡K₁)
+            (neNfₜ neK₂ (conv ⊢k K≡K₁) (~-conv k≡k K≡K₁)))
   convTermT₁ {Γ = Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                          (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
              (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
@@ -76,14 +76,14 @@ mutual
            → Γ ⊩⟨ l ⟩  A ≡ B / [A]
            → Γ ⊩⟨ l′ ⟩ t ∷ B / [B]
            → Γ ⊩⟨ l ⟩  t ∷ A / [A]
-  convTermT₂ (ℕᵥ D D′) A≡B (ℕₜ n d n≡n prop) = ℕₜ n d n≡n prop
-  convTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
-             (neₜ k d (neNfₜ neK₂ ⊢k k≡k)) =
+  convTermT₂ (ℕᵥ D D′) A≡B (ιx (ℕₜ n d n≡n prop)) = ιx (ℕₜ n d n≡n prop)
+  convTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (ne₌ M D′ neM K≡M))
+             (ιx (neₜ k d (neNfₜ neK₂ ⊢k k≡k))) =
     let K₁≡K = PE.subst (λ x → _ ⊢ x ≡ _)
                         (whrDet* (red D′ , ne neM) (red D₁ , ne neK₁))
                         (sym (≅-eq (~-to-≅ K≡M)))
-    in  neₜ k (convRed:*: d K₁≡K)
-            (neNfₜ neK₂ (conv ⊢k K₁≡K) (~-conv k≡k K₁≡K))
+    in ιx (neₜ k (convRed:*: d K₁≡K)
+            (neNfₜ neK₂ (conv ⊢k K₁≡K) (~-conv k≡k K₁≡K)))
   convTermT₂ {Γ = Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                          (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
              (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
@@ -149,15 +149,15 @@ mutual
                → Γ ⊩⟨ l ⟩  A ≡ B / [A]
                → Γ ⊩⟨ l ⟩  t ≡ u ∷ A / [A]
                → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B / [B]
-  convEqTermT₁ (ℕᵥ D D′) A≡B (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
-  convEqTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
-               (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m)) =
+  convEqTermT₁ (ℕᵥ D D′) A≡B (ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)) = ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)
+  convEqTermT₁ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (ne₌ M D′ neM K≡M))
+               (ιx (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m))) =
     let K≡K₁ = PE.subst (λ x → _ ⊢ _ ≡ x)
                         (whrDet* (red D′ , ne neM) (red D₁ , ne neK₁))
                         (≅-eq (~-to-≅ K≡M))
-    in  neₜ₌ k m (convRed:*: d K≡K₁)
+    in ιx (neₜ₌ k m (convRed:*: d K≡K₁)
                  (convRed:*: d′ K≡K₁)
-                 (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K≡K₁))
+                 (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K≡K₁)))
   convEqTermT₁ {Γ = Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                            (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])
@@ -192,14 +192,14 @@ mutual
              → Γ ⊩⟨ l ⟩  A ≡ B / [A]
              → Γ ⊩⟨ l′ ⟩ t ≡ u ∷ B / [B]
              → Γ ⊩⟨ l ⟩  t ≡ u ∷ A / [A]
-  convEqTermT₂ (ℕᵥ D D′) A≡B (ℕₜ₌ k k′ d d′ k≡k′ prop) = ℕₜ₌ k k′ d d′ k≡k′ prop
-  convEqTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
-               (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m)) =
+  convEqTermT₂ (ℕᵥ D D′) A≡B (ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)) = ιx (ℕₜ₌ k k′ d d′ k≡k′ prop)
+  convEqTermT₂ (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ιx (ne₌ M D′ neM K≡M))
+               (ιx (neₜ₌ k m d d′ (neNfₜ₌ neK₂ neM₁ k≡m))) =
     let K₁≡K = PE.subst (λ x → _ ⊢ x ≡ _)
                         (whrDet* (red D′ , ne neM) (red D₁ , ne neK₁))
                         (sym (≅-eq (~-to-≅ K≡M)))
-    in  neₜ₌ k m (convRed:*: d K₁≡K) (convRed:*: d′ K₁≡K)
-                 (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K₁≡K))
+    in ιx (neₜ₌ k m (convRed:*: d K₁≡K) (convRed:*: d′ K₁≡K)
+                 (neNfₜ₌ neK₂ neM₁ (~-conv k≡m K₁≡K)))
   convEqTermT₂ {Γ = Γ} (Πᵥ (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                            (Πᵣ F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
                (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′])

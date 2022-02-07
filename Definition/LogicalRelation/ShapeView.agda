@@ -158,18 +158,18 @@ goodCases (Uᵣ′ _ _ ⊢Γ) (ℕᵣ D) (U₌ PE.refl) = ⊥-elim (U≢ℕ (whn
 goodCases (Uᵣ′ _ _ ⊢Γ) (ne′ K D neK K≡K) (U₌ PE.refl) = ⊥-elim (U≢ne neK (whnfRed* (red D) Uₙ))
 goodCases (Uᵣ′ _ _ ⊢Γ) (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (U₌ PE.refl) =
   ⊥-elim (U≢Π (whnfRed* (red D) Uₙ))
-goodCases (ℕᵣ D) (Uᵣ′ _ _ ⊢Γ) (ℕ₌ A≡B) = ⊥-elim (U≢ℕ (whnfRed* A≡B Uₙ))
+goodCases (ℕᵣ D) (Uᵣ′ _ _ ⊢Γ) (ιx (ℕ₌ A≡B)) = ⊥-elim (U≢ℕ (whnfRed* A≡B Uₙ))
 goodCases (ℕᵣ ℕA) (ℕᵣ ℕB) A≡B = ℕᵥ ℕA ℕB
-goodCases (ℕᵣ D) (ne′ K D₁ neK K≡K) (ℕ₌ A≡B) =
+goodCases (ℕᵣ D) (ne′ K D₁ neK K≡K) (ιx (ℕ₌ A≡B)) =
   ⊥-elim (ℕ≢ne neK (whrDet* (A≡B , ℕₙ) (red D₁ , ne neK)))
-goodCases (ℕᵣ D) (Πᵣ′ F G D₁ ⊢F ⊢G A≡A [F] [G] G-ext) (ℕ₌ A≡B) =
+goodCases (ℕᵣ D) (Πᵣ′ F G D₁ ⊢F ⊢G A≡A [F] [G] G-ext) (ιx (ℕ₌ A≡B)) =
   ⊥-elim (ℕ≢Π (whrDet* (A≡B , ℕₙ) (red D₁ , Πₙ)))
-goodCases (ne′ K D neK K≡K) (Uᵣ′ _ _ ⊢Γ) (ne₌ M D′ neM K≡M) =
+goodCases (ne′ K D neK K≡K) (Uᵣ′ _ _ ⊢Γ) (ιx (ne₌ M D′ neM K≡M)) =
   ⊥-elim (U≢ne neM (whnfRed* (red D′) Uₙ))
-goodCases (ne′ K D neK K≡K) (ℕᵣ D₁) (ne₌ M D′ neM K≡M) =
+goodCases (ne′ K D neK K≡K) (ℕᵣ D₁) (ιx (ne₌ M D′ neM K≡M)) =
   ⊥-elim (ℕ≢ne neM (whrDet* (red D₁ , ℕₙ) (red D′ , ne neM)))
 goodCases (ne′ K D neK K≡K) (ne′ K′ D′ neK′ K≡K′) A≡B = ne (ne K D neK K≡K) (ne K′ D′ neK′ K≡K′)
-goodCases (ne′ K D neK K≡K) (Πᵣ′ F G D₁ ⊢F ⊢G A≡A [F] [G] G-ext) (ne₌ M D′ neM K≡M) =
+goodCases (ne′ K D neK K≡K) (Πᵣ′ F G D₁ ⊢F ⊢G A≡A [F] [G] G-ext) (ιx (ne₌ M D′ neM K≡M)) =
   ⊥-elim (Π≢ne neM (whrDet* (red D₁ , Πₙ) (red D′ , ne neM)))
 goodCases (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (Uᵣ′ _ _ ⊢Γ)
           (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
