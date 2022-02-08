@@ -347,8 +347,12 @@ kit l = Kit _⊩¹U _⊩¹Π_ _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷
 -- a bit of repetition in "kit ¹" definition, would work better with Fin 2 for
 -- TypeLevel because you could recurse.
 
-_⊩′⟨_⟩U : (Γ : Con Term) (l : TypeLevel) → Set (lsuc (lsuc (toLevel l)))
-Γ ⊩′⟨ l ⟩U = Γ ⊩U where open LogRelKit (kit l)
+record _⊩′⟨_⟩U (Γ : Con Term) (l : TypeLevel) : Set where
+  constructor Uᵣ
+  field
+    l′ : TypeLevel
+    l< : l′ < l
+    ⊢Γ : ⊢ Γ
 
 _⊩′⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) → Term → Set (lsuc (lsuc (toLevel l)))
 Γ ⊩′⟨ l ⟩Π A = Γ ⊩Π A where open LogRelKit (kit l)

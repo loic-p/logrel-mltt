@@ -24,24 +24,21 @@ redSubst* : ∀ {A B l Γ}
           → ∃ λ ([A] : Γ ⊩⟨ l ⟩ A)
           → Γ ⊩⟨ l ⟩ A ≡ B / [A]
 redSubst* D (Uᵣ′ l′ l< ⊢Γ) rewrite redU* D =
-  Uᵣ′ l′ l< ⊢Γ , PE.refl
+  Uᵣ′ l′ l< ⊢Γ , U₌ PE.refl
 redSubst* D (ℕᵣ [ ⊢B , ⊢ℕ , D′ ]) =
   let ⊢A = redFirst* D
-  in  ℕᵣ ([ ⊢A , ⊢ℕ , D ⇨* D′ ]) , D′
-redSubst* D (Emptyᵣ [ ⊢B , ⊢Empty , D′ ]) =
-  let ⊢A = redFirst* D
-  in  Emptyᵣ ([ ⊢A , ⊢Empty , D ⇨* D′ ]) , D′
+  in  ℕᵣ ([ ⊢A , ⊢ℕ , D ⇨* D′ ]) , ιx (ℕ₌ D′)
 redSubst* D (ne′ K [ ⊢B , ⊢K , D′ ] neK K≡K) =
   let ⊢A = redFirst* D
   in  (ne′ K [ ⊢A , ⊢K , D ⇨* D′ ] neK K≡K)
-  ,   (ne₌ _ [ ⊢B , ⊢K , D′ ] neK K≡K)
+  ,  ιx (ne₌ _ [ ⊢B , ⊢K , D′ ] neK K≡K)
 redSubst* D (Πᵣ′ F G [ ⊢B , ⊢ΠFG , D′ ] ⊢F ⊢G A≡A [F] [G] G-ext) =
   let ⊢A = redFirst* D
   in  (Πᵣ′ F G [ ⊢A , ⊢ΠFG , D ⇨* D′ ] ⊢F ⊢G A≡A [F] [G] G-ext)
   ,   (Π₌ _ _ D′ A≡A (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
         (λ ρ ⊢Δ [a] → reflEq ([G] ρ ⊢Δ [a])))
-redSubst* D (emb 0<1 x) with redSubst* D x
-redSubst* D (emb 0<1 x) | y , y₁ = emb 0<1 y , y₁
+redSubst* D (emb′ 0<1 x) with redSubst* D x
+redSubst* D (emb′ 0<1 x) | y , y₁ = emb′ 0<1 y , ιx y₁
 
 -- Weak head expansion of reducible terms.
 redSubst*Term : ∀ {A t u l Γ}
@@ -56,25 +53,18 @@ redSubst*Term t⇒u (Uᵣ′ .⁰ 0<1 ⊢Γ) (Uₜ A [ ⊢t , ⊢u , d ] typeA A
       q = redSubst* (univ* t⇒u) (univEq (Uᵣ′ ⁰ 0<1 ⊢Γ) (Uₜ A [d] typeA A≡A [u]))
   in Uₜ A [d′] typeA A≡A (proj₁ q)
   ,  Uₜ₌ A A [d′] [d] typeA typeA A≡A (proj₁ q) [u] (proj₂ q)
-redSubst*Term t⇒u (ℕᵣ D) (ℕₜ n [ ⊢u , ⊢n , d ] n≡n prop) =
+redSubst*Term t⇒u (ℕᵣ D) (ιx (ℕₜ n [ ⊢u , ⊢n , d ] n≡n prop)) =
   let A≡ℕ  = subset* (red D)
       ⊢t   = conv (redFirst*Term t⇒u) A≡ℕ
       t⇒u′ = conv* t⇒u A≡ℕ
-  in  ℕₜ n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] n≡n prop
-  ,   ℕₜ₌ n n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] [ ⊢u , ⊢n , d ]
-          n≡n (reflNatural-prop prop)
-redSubst*Term t⇒u (Emptyᵣ D) (Emptyₜ n [ ⊢u , ⊢n , d ] n≡n prop) =
-  let A≡Empty  = subset* (red D)
-      ⊢t   = conv (redFirst*Term t⇒u) A≡Empty
-      t⇒u′ = conv* t⇒u A≡Empty
-  in  Emptyₜ n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] n≡n prop
-  ,   Emptyₜ₌ n n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] [ ⊢u , ⊢n , d ]
-          n≡n (reflEmpty-prop prop)
-redSubst*Term t⇒u (ne′ K D neK K≡K) (neₜ k [ ⊢t , ⊢u , d ] (neNfₜ neK₁ ⊢k k≡k)) =
+  in ιx (ℕₜ n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] n≡n prop)
+  , ιx (ℕₜ₌ n n [ ⊢t , ⊢n , t⇒u′ ⇨∷* d ] [ ⊢u , ⊢n , d ]
+          n≡n (reflNatural-prop prop))
+redSubst*Term t⇒u (ne′ K D neK K≡K) (ιx (neₜ k [ ⊢t , ⊢u , d ] (neNfₜ neK₁ ⊢k k≡k))) =
   let A≡K  = subset* (red D)
       [d]  = [ ⊢t , ⊢u , d ]
       [d′] = [ conv (redFirst*Term t⇒u) A≡K , ⊢u , conv* t⇒u A≡K ⇨∷* d ]
-  in  neₜ k [d′] (neNfₜ neK₁ ⊢k k≡k) , neₜ₌ k k [d′] [d] (neNfₜ₌ neK₁ neK₁ k≡k)
+  in ιx (neₜ k [d′] (neNfₜ neK₁ ⊢k k≡k)) , ιx (neₜ₌ k k [d′] [d] (neNfₜ₌ neK₁ neK₁ k≡k))
 redSubst*Term {A} {t} {u} {l} {Γ} t⇒u (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
                   (Πₜ f [ ⊢t , ⊢u , d ] funcF f≡f [f] [f]₁) =
   let A≡ΠFG = subset* (red D)
@@ -86,7 +76,9 @@ redSubst*Term {A} {t} {u} {l} {Γ} t⇒u (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G]
           (Πₜ f [d′] funcF f≡f [f] [f]₁)
           (Πₜ f [d] funcF f≡f [f] [f]₁)
           (λ [ρ] ⊢Δ [a] → reflEqTerm ([G] [ρ] ⊢Δ [a]) ([f]₁ [ρ] ⊢Δ [a]))
-redSubst*Term t⇒u (emb 0<1 x) [u] = redSubst*Term t⇒u x [u]
+redSubst*Term t⇒u (emb′ 0<1 x) (ιx [u]) =
+  let x = redSubst*Term t⇒u x [u] in
+  ιx (proj₁ x) , ιx (proj₂ x)
 
 -- Weak head expansion of reducible types with single reduction step.
 redSubst : ∀ {A B l Γ}

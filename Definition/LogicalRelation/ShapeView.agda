@@ -19,14 +19,14 @@ open import Tools.Empty using (⊥; ⊥-elim)
 import Tools.PropositionalEquality as PE
 
 -- Type for maybe embeddings of reducible types
-data MaybeEmb (l : TypeLevel) (⊩⟨_⟩ : TypeLevel → Set) : Set where
+data MaybeEmb {ℓ : Level} (l : TypeLevel) (⊩⟨_⟩ : TypeLevel → Set ℓ) : Set ℓ where
   noemb : ⊩⟨ l ⟩ → MaybeEmb l ⊩⟨_⟩
   emb   : ∀ {l′} → l′ < l → MaybeEmb l′ ⊩⟨_⟩ → MaybeEmb l ⊩⟨_⟩
 
 -- Specific reducible types with possible embedding
 
--- _⊩⟨_⟩U : (Γ : Con Term) (l : TypeLevel) → Set
--- Γ ⊩⟨ l ⟩U = MaybeEmb l (λ l′ → Γ ⊩′⟨ l′ ⟩U)
+_⊩⟨_⟩U : (Γ : Con Term) (l : TypeLevel) → Set
+Γ ⊩⟨ l ⟩U = MaybeEmb l (λ l′ → Γ ⊩′⟨ l′ ⟩U)
 
 _⊩⟨_⟩ℕ_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
 Γ ⊩⟨ l ⟩ℕ A = MaybeEmb l (λ l′ → Γ ⊩ℕ A)
@@ -39,9 +39,9 @@ _⊩⟨_⟩ne_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
 
 -- -- Construct a general reducible type from a specific
 
--- U-intr : ∀ {Γ l} → Γ ⊩⟨ l ⟩U → Γ ⊩⟨ l ⟩ U
--- U-intr (noemb x) = Uᵣ x
--- U-intr (emb 0<1 x) = emb 0<1 (U-intr x)
+U-intr : ∀ {Γ l} → Γ ⊩⟨ l ⟩U → Γ ⊩⟨ l ⟩ U
+U-intr (noemb (Uᵣ l′ l< ⊢Γ)) = Uᵣ′ l′ l< ⊢Γ
+U-intr (emb 0<1 x) = emb′ 0<1 (U-intr x)
 
 ℕ-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ℕ A → Γ ⊩⟨ l ⟩ A
 ℕ-intr (noemb x) = ℕᵣ x
@@ -57,15 +57,14 @@ ne-intr (emb 0<1 x) = emb′ 0<1 (ne-intr x)
 
 -- -- Construct a specific reducible type from a general with some criterion
 
--- U-elim : ∀ {Γ l} → Γ ⊩⟨ l ⟩ U → Γ ⊩⟨ l ⟩U
--- U-elim (Uᵣ′ l′ l< ⊢Γ) = noemb (Uᵣ l′ l< ⊢Γ)
--- U-elim (ℕᵣ D) = ⊥-elim (U≢ℕ (whnfRed* (red D) Uₙ))
--- U-elim (Emptyᵣ D) = ⊥-elim (U≢Empty (whnfRed* (red D) Uₙ))
--- U-elim (ne′ K D neK K≡K) = ⊥-elim (U≢ne neK (whnfRed* (red D) Uₙ))
--- U-elim (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) = ⊥-elim (U≢Π (whnfRed* (red D) Uₙ))
--- U-elim (emb 0<1 x) with U-elim x
--- U-elim (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
--- U-elim (emb 0<1 x) | emb () x₁
+U-elim : ∀ {Γ l} → Γ ⊩⟨ l ⟩ U → Γ ⊩⟨ l ⟩U
+U-elim (Uᵣ′ l′ l< ⊢Γ) = noemb (Uᵣ l′ l< ⊢Γ)
+U-elim (ℕᵣ D) = ⊥-elim (U≢ℕ (whnfRed* (red D) Uₙ))
+U-elim (ne′ K D neK K≡K) = ⊥-elim (U≢ne neK (whnfRed* (red D) Uₙ))
+U-elim (Πᵣ′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) = ⊥-elim (U≢Π (whnfRed* (red D) Uₙ))
+U-elim (emb′ 0<1 x) with U-elim x
+U-elim (emb′ 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
+U-elim (emb′ 0<1 x) | emb () x₁
 
 ℕ-elim′ : ∀ {A Γ l} → Γ ⊢ A ⇒* ℕ → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩ℕ A
 ℕ-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢ℕ (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , ℕₙ)))
