@@ -34,8 +34,15 @@ _⊩⟨_⟩ℕ_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
 _⊩⟨_⟩ne_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
 Γ ⊩⟨ l ⟩ne A = MaybeEmb l (λ l′ → Γ ⊩ne A)
 
--- _⊩⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set
--- Γ ⊩⟨ l ⟩Π A = MaybeEmb l (λ l′ → Γ ⊩′⟨ l′ ⟩Π A)
+-- a hack forced on us by varying universe levels
+-- it causes ugly code duplication later on
+-- oh well
+_⊩″⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) → Term → Set₃
+Γ ⊩″⟨ ⁰ ⟩Π A = ι (Γ ⊩′⟨ ⁰ ⟩Π A)
+Γ ⊩″⟨ ¹ ⟩Π A = Γ ⊩′⟨ ¹ ⟩Π A
+
+_⊩⟨_⟩Π_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → Set₃
+Γ ⊩⟨ l ⟩Π A = MaybeEmb l (λ l′ → Γ ⊩″⟨ l′ ⟩Π A)
 
 -- -- Construct a general reducible type from a specific
 
@@ -51,9 +58,10 @@ ne-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩ne A → Γ ⊩⟨ l ⟩ A
 ne-intr (noemb x) = LRPack _ _ _ (LRne x)
 ne-intr (emb 0<1 x) = emb′ 0<1 (ne-intr x)
 
--- Π-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩Π A → Γ ⊩⟨ l ⟩ A
--- Π-intr (noemb x) = Πᵣ x
--- Π-intr (emb 0<1 x) = emb 0<1 (Π-intr x)
+Π-intr : ∀ {A Γ l} → Γ ⊩⟨ l ⟩Π A → Γ ⊩⟨ l ⟩ A
+Π-intr {l = ⁰} (noemb (ιx x)) = LRPack _ _ _ (LRΠ x)
+Π-intr {l = ¹} (noemb x) = LRPack _ _ _ (LRΠ x)
+Π-intr (emb 0<1 x) = emb′ 0<1 (Π-intr x)
 
 -- -- Construct a specific reducible type from a general with some criterion
 
@@ -94,20 +102,21 @@ ne-elim′ D neK (emb′ 0<1 x) | emb () x₂
 ne-elim : ∀ {Γ l K} → Neutral K  → Γ ⊩⟨ l ⟩ K → Γ ⊩⟨ l ⟩ne K
 ne-elim neK [K] = ne-elim′ (id (escape [K])) neK [K]
 
--- Π-elim′ : ∀ {A Γ F G l} → Γ ⊢ A ⇒* Π F ▹ G → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩Π A
--- Π-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢Π (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , Πₙ)))
--- Π-elim′ D (ℕᵣ D′) = ⊥-elim (ℕ≢Π (whrDet* (red D′ , ℕₙ) (D , Πₙ)))
--- Π-elim′ D (Emptyᵣ D′) = ⊥-elim (Empty≢Π (whrDet* (red D′ , Emptyₙ) (D , Πₙ)))
--- Π-elim′ D (ne′ K D′ neK K≡K) =
---   ⊥-elim (Π≢ne neK (whrDet* (D , Πₙ) (red D′ , ne neK)))
--- Π-elim′ D (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
---   noemb (Πᵣ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext)
--- Π-elim′ D (emb 0<1 x) with Π-elim′ D x
--- Π-elim′ D (emb 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
--- Π-elim′ D (emb 0<1 x) | emb () x₂
+Π-elim′ : ∀ {A Γ F G l} → Γ ⊢ A ⇒* Π F ▹ G → Γ ⊩⟨ l ⟩ A → Γ ⊩⟨ l ⟩Π A
+Π-elim′ D (Uᵣ′ l′ l< ⊢Γ) = ⊥-elim (U≢Π (whrDet* (id (Uⱼ ⊢Γ) , Uₙ) (D , Πₙ)))
+Π-elim′ D (ℕᵣ D′) = ⊥-elim (ℕ≢Π (whrDet* (red D′ , ℕₙ) (D , Πₙ)))
+Π-elim′ D (ne′ K D′ neK K≡K) =
+  ⊥-elim (Π≢ne neK (whrDet* (D , Πₙ) (red D′ , ne neK)))
+Π-elim′ {l = ⁰} D (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
+  noemb (ιx (Πᵣ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext))
+Π-elim′ {l = ¹} D (Πᵣ′ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext) =
+  noemb (Πᵣ F G D′ ⊢F ⊢G A≡A [F] [G] G-ext)
+Π-elim′ D (emb′ 0<1 x) with Π-elim′ D x
+Π-elim′ D (emb′ 0<1 x) | noemb x₁ = emb 0<1 (noemb x₁)
+Π-elim′ D (emb′ 0<1 x) | emb () x₂
 
--- Π-elim : ∀ {Γ F G l} → Γ ⊩⟨ l ⟩ Π F ▹ G → Γ ⊩⟨ l ⟩Π Π F ▹ G
--- Π-elim [Π] = Π-elim′ (id (escape [Π])) [Π]
+Π-elim : ∀ {Γ F G l} → Γ ⊩⟨ l ⟩ Π F ▹ G → Γ ⊩⟨ l ⟩Π Π F ▹ G
+Π-elim [Π] = Π-elim′ (id (escape [Π])) [Π]
 
 -- -- Extract a type and a level from a maybe embedding
 -- extractMaybeEmb : ∀ {l ⊩⟨_⟩} → MaybeEmb l ⊩⟨_⟩ → ∃ λ l′ → ⊩⟨ l′ ⟩
