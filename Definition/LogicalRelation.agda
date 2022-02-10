@@ -199,6 +199,13 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit (toLe
       [u]   : Γ ⊩ u
       [t≡u] : Γ ⊩ t ≡ u / [t]
 
+  -- technically speaking, this mutual block is *still* induction-recursion
+  -- however, we removed the central part that defines reducibility of types, and
+  -- the induction-recursion is only here to have the main inductive split into
+  -- records for _⊩¹Π_
+  -- We could unpack the definition of the records into the main inductive relation
+  -- and get rid of induction-recursion altogether, but this would require quite a
+  -- bit of reformulation and it is obviously trivial.
   mutual
     -- Reducibility of Π:
 
