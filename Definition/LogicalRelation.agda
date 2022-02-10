@@ -199,137 +199,140 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit (toLe
       [u]   : Γ ⊩ u
       [t≡u] : Γ ⊩ t ≡ u / [t]
 
-  -- technically speaking, this mutual block is *still* induction-recursion
-  -- however, we removed the central part that defines reducibility of types, and
-  -- the induction-recursion is only here to have the main inductive split into
-  -- records for _⊩¹Π_
-  -- We could unpack the definition of the records into the main inductive relation
-  -- and get rid of induction-recursion altogether, but this would require quite a
-  -- bit of reformulation and it is obviously trivial.
-  mutual
-    -- Reducibility of Π:
+  RedRel : Set (lsuc (lsuc (lsuc (toLevel l))))
+  RedRel = Con Term → Term → (Term → Set (lsuc (toLevel l))) → (Term → Set (lsuc (toLevel l))) → (Term → Term → Set (lsuc (toLevel l))) → Set (lsuc (lsuc (toLevel l)))
 
-    -- Π-type
-    record _⊩¹Π_ (Γ : Con Term) (A : Term) : Set (lsuc (lsuc (toLevel l))) where
-      inductive
-      eta-equality
-      constructor Πᵣ
-      field
-        F : Term
-        G : Term
-        D : Γ ⊢ A :⇒*: Π F ▹ G
-        ⊢F : Γ ⊢ F
-        ⊢G : Γ ∙ F ⊢ G
-        A≡A : Γ ⊢ Π F ▹ G ≅ Π F ▹ G
-        [F] : ∀ {ρ Δ} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ) → Δ ⊩¹ U.wk ρ F
-        [G] : ∀ {ρ Δ a}
+  record _⊩⁰_/_ (Γ : Con Term) (A : Term) (_⊩_▸_▸_▸_ : RedRel) : Set (lsuc (lsuc (toLevel l))) where
+    inductive
+    eta-equality
+    constructor LRPack
+    field
+      ⊩Eq : Term → Set (lsuc (toLevel l))
+      ⊩Term : Term → Set (lsuc (toLevel l))
+      ⊩EqTerm : Term → Term → Set (lsuc (toLevel l))
+      ⊩LR : Γ ⊩ A ▸ ⊩Eq ▸ ⊩Term ▸ ⊩EqTerm
+
+  _⊩⁰_≡_/_ : {R : RedRel} (Γ : Con Term) (A B : Term) → Γ ⊩⁰ A / R → Set (lsuc (toLevel l))
+  Γ ⊩⁰ A ≡ B / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩Red = ⊩Eq B
+
+  _⊩⁰_∷_/_ : {R : RedRel} (Γ : Con Term) (t A : Term) → Γ ⊩⁰ A / R → Set (lsuc (toLevel l))
+  Γ ⊩⁰ t ∷ A / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩Red = ⊩Term t
+
+  _⊩⁰_≡_∷_/_ : {R : RedRel} (Γ : Con Term) (t u A : Term) → Γ ⊩⁰ A / R → Set (lsuc (toLevel l))
+  Γ ⊩⁰ t ≡ u ∷ A / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩Red = ⊩EqTerm t u
+
+  record _⊩¹Π_/_ (Γ : Con Term) (A : Term) (R : RedRel) : Set (lsuc (lsuc (toLevel l))) where
+    inductive
+    eta-equality
+    constructor Πᵣ
+    field
+      F : Term
+      G : Term
+      D : Γ ⊢ A :⇒*: Π F ▹ G
+      ⊢F : Γ ⊢ F
+      ⊢G : Γ ∙ F ⊢ G
+      A≡A : Γ ⊢ Π F ▹ G ≅ Π F ▹ G
+      [F] : ∀ {ρ Δ} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ) → Δ ⊩⁰ U.wk ρ F / R
+      [G] : ∀ {ρ Δ a}
+          → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+          → Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ
+          → Δ ⊩⁰ U.wk (lift ρ) G [ a ] / R
+      G-ext : ∀ {ρ Δ a b}
             → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-            → Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ
-            → Δ ⊩¹ U.wk (lift ρ) G [ a ]
-        G-ext : ∀ {ρ Δ a b}
-              → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-              → ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-              → ([b] : Δ ⊩¹ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-              → Δ ⊩¹ a ≡ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ
-              → Δ ⊩¹ U.wk (lift ρ) G [ a ] ≡ U.wk (lift ρ) G [ b ] / [G] [ρ] ⊢Δ [a]
+            → ([a] : Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+            → ([b] : Δ ⊩⁰ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+            → Δ ⊩⁰ a ≡ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ
+            → Δ ⊩⁰ U.wk (lift ρ) G [ a ] ≡ U.wk (lift ρ) G [ b ] / [G] [ρ] ⊢Δ [a]
 
-    -- Π-type equality
-    record _⊩¹Π_≡_/_ (Γ : Con Term) (A B : Term) ([A] : Γ ⊩¹Π A) : Set (lsuc (toLevel l)) where
-      inductive
-      eta-equality
-      constructor Π₌
-      open _⊩¹Π_ [A]
-      field
-        F′     : Term
-        G′     : Term
-        D′     : Γ ⊢ B ⇒* Π F′ ▹ G′
-        A≡B    : Γ ⊢ Π F ▹ G ≅ Π F′ ▹ G′
-        [F≡F′] : ∀ {ρ Δ}
-               → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-               → Δ ⊩¹ U.wk ρ F ≡ U.wk ρ F′ / [F] [ρ] ⊢Δ
-        [G≡G′] : ∀ {ρ Δ a}
-               → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-               → ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-               → Δ ⊩¹ U.wk (lift ρ) G [ a ] ≡ U.wk (lift ρ) G′ [ a ] / [G] [ρ] ⊢Δ [a]
+  record _⊩¹Π_≡_/_ {R : RedRel} (Γ : Con Term) (A B : Term) ([A] : Γ ⊩¹Π A / R) : Set (lsuc (toLevel l)) where
+    inductive
+    eta-equality
+    constructor Π₌
+    open _⊩¹Π_/_ [A]
+    field
+      F′     : Term
+      G′     : Term
+      D′     : Γ ⊢ B ⇒* Π F′ ▹ G′
+      A≡B    : Γ ⊢ Π F ▹ G ≅ Π F′ ▹ G′
+      [F≡F′] : ∀ {ρ Δ}
+             → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+             → Δ ⊩⁰ U.wk ρ F ≡ U.wk ρ F′ / [F] [ρ] ⊢Δ
+      [G≡G′] : ∀ {ρ Δ a}
+             → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+             → ([a] : Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+             → Δ ⊩⁰ U.wk (lift ρ) G [ a ] ≡ U.wk (lift ρ) G′ [ a ] / [G] [ρ] ⊢Δ [a]
 
-    -- Term of Π-type
-    _⊩¹Π_∷_/_ : (Γ : Con Term) (t A : Term) ([A] : Γ ⊩¹Π A) → Set (lsuc (toLevel l))
-    Γ ⊩¹Π t ∷ A / Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext =
-      ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ▹ G
-            × Function f
-            × Γ ⊢ f ≅ f ∷ Π F ▹ G
-            × (∀ {ρ Δ a b}
-              → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-                ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-                ([b] : Δ ⊩¹ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-                ([a≡b] : Δ ⊩¹ a ≡ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-              → Δ ⊩¹ U.wk ρ f ∘ a ≡ U.wk ρ f ∘ b ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
-            × (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-              → ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-              → Δ ⊩¹ U.wk ρ f ∘ a ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
-    -- Issue: Agda complains about record use not being strictly positive.
-    --        Therefore we have to use ×
+  -- Term of Π-type
+  _⊩¹Π_∷_/_ : {R : RedRel} (Γ : Con Term) (t A : Term) ([A] : Γ ⊩¹Π A / R) → Set (lsuc (toLevel l))
+  Γ ⊩¹Π t ∷ A / Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext =
+    ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ▹ G
+          × Function f
+          × Γ ⊢ f ≅ f ∷ Π F ▹ G
+          × (∀ {ρ Δ a b}
+            → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+              ([a] : Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+              ([b] : Δ ⊩⁰ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+              ([a≡b] : Δ ⊩⁰ a ≡ b ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+            → Δ ⊩⁰ U.wk ρ f ∘ a ≡ U.wk ρ f ∘ b ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
+          × (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+            → ([a] : Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+            → Δ ⊩⁰ U.wk ρ f ∘ a ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
+  -- Issue: Agda complains about record use not being strictly positive.
+  --        Therefore we have to use ×
 
 
-    -- Term equality of Π-type
-    _⊩¹Π_≡_∷_/_ : (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩¹Π A) → Set (lsuc (toLevel l))
-    Γ ⊩¹Π t ≡ u ∷ A / Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext =
-      let [A] = Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext
-      in  ∃₂ λ f g →
-          Γ ⊢ t :⇒*: f ∷ Π F ▹ G
-      ×   Γ ⊢ u :⇒*: g ∷ Π F ▹ G
-      ×   Function f
-      ×   Function g
-      ×   Γ ⊢ f ≅ g ∷ Π F ▹ G
-      ×   Γ ⊩¹Π t ∷ A / [A]
-      ×   Γ ⊩¹Π u ∷ A / [A]
-      ×   (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
-          → ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
-          → Δ ⊩¹ U.wk ρ f ∘ a ≡ U.wk ρ g ∘ a ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
-    -- Issue: Same as above.
+  -- Term equality of Π-type
+  _⊩¹Π_≡_∷_/_ : {R : RedRel} (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩¹Π A / R) → Set (lsuc (toLevel l))
+  Γ ⊩¹Π t ≡ u ∷ A / Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext =
+    let [A] = Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext
+    in  ∃₂ λ f g →
+        Γ ⊢ t :⇒*: f ∷ Π F ▹ G
+    ×   Γ ⊢ u :⇒*: g ∷ Π F ▹ G
+    ×   Function f
+    ×   Function g
+    ×   Γ ⊢ f ≅ g ∷ Π F ▹ G
+    ×   Γ ⊩¹Π t ∷ A / [A]
+    ×   Γ ⊩¹Π u ∷ A / [A]
+    ×   (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
+        → ([a] : Δ ⊩⁰ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
+        → Δ ⊩⁰ U.wk ρ f ∘ a ≡ U.wk ρ g ∘ a ∷ U.wk (lift ρ) G [ a ] / [G] [ρ] ⊢Δ [a])
+  -- Issue: Same as above.
 
 
-    -- Logical relation definition
-    data _⊩LR_▸_▸_▸_ (Γ : Con Term) : Term → (Term → Set (lsuc (toLevel l))) → (Term → Set (lsuc (toLevel l))) → (Term → Term → Set (lsuc (toLevel l))) → Set (lsuc (lsuc (toLevel l))) where
-      LRU : (⊢Γ : ⊢ Γ) → (l' : TypeLevel) → (l< : l' < l) → Γ ⊩LR U
-        ▸ (λ B → Γ ⊩¹U≡ B)
-        ▸ (λ t → Γ ⊩¹U t ∷U/ l<)
-        ▸ (λ t u → Γ ⊩¹U t ≡ u ∷U/ l<)
-      LRℕ : ∀ {A} → Γ ⊩ℕ A → Γ ⊩LR A
-        ▸ (λ B → ι′ (Γ ⊩ℕ A ≡ B))
-        ▸ (λ t → ι′ (Γ ⊩ℕ t ∷ℕ))
-        ▸ (λ t u → ι′ (Γ ⊩ℕ t ≡ u ∷ℕ))
-      LRne : ∀ {A} → (neA : Γ ⊩ne A) → Γ ⊩LR A
-        ▸ (λ B → ι′ (Γ ⊩ne A ≡ B / neA))
-        ▸ (λ t → ι′ (Γ ⊩ne t ∷ A / neA))
-        ▸ (λ t u → ι′ (Γ ⊩ne t ≡ u ∷ A / neA))
-      LRΠ : ∀ {A} → (ΠA : Γ ⊩¹Π A) → Γ ⊩LR A
-        ▸ (λ B → Γ ⊩¹Π A ≡ B / ΠA)
-        ▸ (λ t → Γ ⊩¹Π t ∷ A / ΠA)
-        ▸ (λ t u → Γ ⊩¹Π t ≡ u ∷ A / ΠA)
-      LRemb : ∀ {A l′} (l< : l′ < l) (let open LogRelKit (rec l<)) ([A] : Γ ⊩ A) → Γ ⊩LR A
-        ▸ (λ B → ι (Γ ⊩ A ≡ B / [A]))
-        ▸ (λ t → ι (Γ ⊩ t ∷ A / [A]))
-        ▸ (λ t u → ι (Γ ⊩ t ≡ u ∷ A / [A]))
+  -- Logical relation definition
+  data _⊩LR_▸_▸_▸_ : RedRel where
+    LRU : ∀ {Γ} (⊢Γ : ⊢ Γ) → (l' : TypeLevel) → (l< : l' < l) → Γ ⊩LR U
+      ▸ (λ B → Γ ⊩¹U≡ B)
+      ▸ (λ t → Γ ⊩¹U t ∷U/ l<)
+      ▸ (λ t u → Γ ⊩¹U t ≡ u ∷U/ l<)
+    LRℕ : ∀ {Γ A} → Γ ⊩ℕ A → Γ ⊩LR A
+      ▸ (λ B → ι′ (Γ ⊩ℕ A ≡ B))
+      ▸ (λ t → ι′ (Γ ⊩ℕ t ∷ℕ))
+      ▸ (λ t u → ι′ (Γ ⊩ℕ t ≡ u ∷ℕ))
+    LRne : ∀ {Γ A} → (neA : Γ ⊩ne A) → Γ ⊩LR A
+      ▸ (λ B → ι′ (Γ ⊩ne A ≡ B / neA))
+      ▸ (λ t → ι′ (Γ ⊩ne t ∷ A / neA))
+      ▸ (λ t u → ι′ (Γ ⊩ne t ≡ u ∷ A / neA))
+    LRΠ : ∀ {Γ A} → (ΠA : Γ ⊩¹Π A / _⊩LR_▸_▸_▸_) → Γ ⊩LR A
+      ▸ (λ B → Γ ⊩¹Π A ≡ B / ΠA)
+      ▸ (λ t → Γ ⊩¹Π t ∷ A / ΠA)
+      ▸ (λ t u → Γ ⊩¹Π t ≡ u ∷ A / ΠA)
+    LRemb : ∀ {Γ A l′} (l< : l′ < l) (let open LogRelKit (rec l<)) ([A] : Γ ⊩ A) → Γ ⊩LR A
+      ▸ (λ B → ι (Γ ⊩ A ≡ B / [A]))
+      ▸ (λ t → ι (Γ ⊩ t ∷ A / [A]))
+      ▸ (λ t u → ι (Γ ⊩ t ≡ u ∷ A / [A]))
 
-    record _⊩¹_ (Γ : Con Term) (A : Term) : Set (lsuc (lsuc (toLevel l))) where
-      inductive
-      eta-equality
-      constructor LRPack
-      field
-        ⊩Eq : Term → Set (lsuc (toLevel l))
-        ⊩Term : Term → Set (lsuc (toLevel l))
-        ⊩EqTerm : Term → Term → Set (lsuc (toLevel l))
-        ⊩LR : Γ ⊩LR A ▸ ⊩Eq ▸ ⊩Term ▸ ⊩EqTerm
+  _⊩¹_ : (Γ : Con Term) → (A : Term) → Set (lsuc (lsuc (toLevel l)))
+  Γ ⊩¹ A = Γ ⊩⁰ A / _⊩LR_▸_▸_▸_
 
-    _⊩¹_≡_/_ : (Γ : Con Term) (A B : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
-    Γ ⊩¹ A ≡ B / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩LR = ⊩Eq B
+  _⊩¹_≡_/_ : (Γ : Con Term) (A B : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
+  Γ ⊩¹ A ≡ B / [A] = Γ ⊩⁰ A ≡ B / [A]
 
-    _⊩¹_∷_/_ : (Γ : Con Term) (t A : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
-    Γ ⊩¹ t ∷ A / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩LR = ⊩Term t
+  _⊩¹_∷_/_ : (Γ : Con Term) (t A : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
+  Γ ⊩¹ t ∷ A / [A] = Γ ⊩⁰ t ∷ A / [A]
 
-    _⊩¹_≡_∷_/_ : (Γ : Con Term) (t u A : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
-    Γ ⊩¹ t ≡ u ∷ A / LRPack ⊩Eq ⊩Term ⊩EqTerm ⊩LR = ⊩EqTerm t u
+  _⊩¹_≡_∷_/_ : (Γ : Con Term) (t u A : Term) → Γ ⊩¹ A → Set (lsuc (toLevel l))
+  Γ ⊩¹ t ≡ u ∷ A / [A] = Γ ⊩⁰ t ≡ u ∷ A / [A]
 
 open LogRel public using (Uᵣ; Πᵣ; Π₌; U₌ ; Uₜ; Uₜ₌ ; LRU ; LRℕ ; LRne ; LRΠ ; LRemb ; LRPack)
 
@@ -342,14 +345,14 @@ pattern ne′ a b c d = LRPack _ _ _ (LRne (ne a b c d))
 pattern Πᵣ′ a b c d e f g h i = LRPack _ _ _ (LRΠ (Πᵣ a b c d e f g h i))
 
 kit₀ : LogRelKit (lsuc (lzero))
-kit₀ = Kit _⊩¹U _⊩¹Π_ _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷_/_ where open LogRel ⁰ (λ ())
+kit₀ = Kit _⊩¹U (λ Γ A → Γ ⊩¹Π A / _⊩LR_▸_▸_▸_) _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷_/_ where open LogRel ⁰ (λ ())
 
 logRelRec : ∀ l {l′} → l′ < l → LogRelKit (toLevel l)
 logRelRec ⁰ = λ ()
 logRelRec ¹ 0<1 = kit₀
 
 kit : ∀ (l : TypeLevel) → LogRelKit (lsuc (toLevel l))
-kit l = Kit _⊩¹U _⊩¹Π_ _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷_/_ where open LogRel l (logRelRec l)
+kit l = Kit _⊩¹U (λ Γ A → Γ ⊩¹Π A / _⊩LR_▸_▸_▸_) _⊩¹_ _⊩¹_≡_/_ _⊩¹_∷_/_ _⊩¹_≡_∷_/_ where open LogRel l (logRelRec l)
 
 -- a bit of repetition in "kit ¹" definition, would work better with Fin 2 for
 -- TypeLevel because you could recurse.
@@ -375,10 +378,3 @@ _⊩⟨_⟩_∷_/_ : (Γ : Con Term) (l : TypeLevel) (t A : Term) → Γ ⊩⟨ 
 
 _⊩⟨_⟩_≡_∷_/_ : (Γ : Con Term) (l : TypeLevel) (t u A : Term) → Γ ⊩⟨ l ⟩ A → Set (lsuc (toLevel l))
 Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A] = Γ ⊩ t ≡ u ∷ A / [A] where open LogRelKit (kit l)
-
--- Difficulté: la relation logique ⁰ et la relation logique ¹ n'ont pas le même type
--- En effet, la première arrive dans Set₂ et la seconde dans Set₃.
--- (Au lieu de Set₁ et Set₂ à cause de complexités de l'encodage)
-
--- Du coup, on ne sait pas trop si on va bien pouvoir faire marcher les lemmes du style
--- transitivité, symétrie, etc.
