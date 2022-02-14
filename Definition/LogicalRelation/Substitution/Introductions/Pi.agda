@@ -30,7 +30,7 @@ import Tools.PropositionalEquality as PE
 Πᵛ : ∀ {F G Γ l}
      ([Γ] : ⊩ᵛ Γ)
      ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
-   → Γ ∙ F ⊩ᵛ⟨ l ⟩ G / [Γ] ∙ [F]
+   → Γ ∙ F ⊩ᵛ⟨ l ⟩ G / ([Γ] ∙″ [F])
    → Γ ⊩ᵛ⟨ l ⟩ Π F ▹ G / [Γ]
 Πᵛ {F} {G} {Γ} {l} [Γ] [F] [G] {Δ = Δ} {σ = σ} ⊢Δ [σ] =
   let [F]σ {σ′} [σ′] = [F] {σ = σ′} ⊢Δ [σ′]
@@ -45,14 +45,14 @@ import Tools.PropositionalEquality as PE
       [G]a : ∀ {ρ Δ₁} a ([ρ] : ρ ∷ Δ₁ ⊆ Δ) (⊢Δ₁ : ⊢ Δ₁)
              ([a] : Δ₁ ⊩⟨ l ⟩ a ∷ subst (ρ •ₛ σ) F
                 / proj₁ ([F] ⊢Δ₁ (wkSubstS [Γ] ⊢Δ ⊢Δ₁ [ρ] [σ])))
-           → Σ (Δ₁ ⊩⟨ l ⟩ subst (consSubst (ρ •ₛ σ) a) G)
+           → Σω₁ (Δ₁ ⊩⟨ l ⟩ subst (consSubst (ρ •ₛ σ) a) G)
                (λ [Aσ] →
                {σ′ : Nat → Term} →
-               (Σ (Δ₁ ⊩ˢ tail σ′ ∷ Γ / [Γ] / ⊢Δ₁)
+               (Σω₂ (Δ₁ ⊩ˢ tail σ′ ∷ Γ / [Γ] / ⊢Δ₁)
                (λ [tailσ] →
                   Δ₁ ⊩⟨ l ⟩ head σ′ ∷ subst (tail σ′) F / proj₁ ([F] ⊢Δ₁ [tailσ]))) →
                Δ₁ ⊩ˢ consSubst (ρ •ₛ σ) a ≡ σ′ ∷ Γ ∙ F /
-               [Γ] ∙ [F] / ⊢Δ₁ /
+               [Γ] ∙″ [F] / ⊢Δ₁ /
                consSubstS {t = a} {A = F} [Γ] ⊢Δ₁ (wkSubstS [Γ] ⊢Δ ⊢Δ₁ [ρ] [σ]) [F]
                [a] →
                Δ₁ ⊩⟨ l ⟩ subst (consSubst (ρ •ₛ σ) a) G ≡
@@ -142,16 +142,16 @@ import Tools.PropositionalEquality as PE
 Π-congᵛ : ∀ {F G H E Γ l}
           ([Γ] : ⊩ᵛ Γ)
           ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
-          ([G] : Γ ∙ F ⊩ᵛ⟨ l ⟩ G / [Γ] ∙ [F])
+          ([G] : Γ ∙ F ⊩ᵛ⟨ l ⟩ G / ([Γ] ∙″ [F]))
           ([H] : Γ ⊩ᵛ⟨ l ⟩ H / [Γ])
-          ([E] : Γ ∙ H ⊩ᵛ⟨ l ⟩ E / [Γ] ∙ [H])
+          ([E] : Γ ∙ H ⊩ᵛ⟨ l ⟩ E / ([Γ] ∙″ [H]))
           ([F≡H] : Γ ⊩ᵛ⟨ l ⟩ F ≡ H / [Γ] / [F])
-          ([G≡E] : Γ ∙ F ⊩ᵛ⟨ l ⟩ G ≡ E / [Γ] ∙ [F] / [G])
+          ([G≡E] : Γ ∙ F ⊩ᵛ⟨ l ⟩ G ≡ E / [Γ] ∙″ [F] / [G])
         → Γ ⊩ᵛ⟨ l ⟩ Π F ▹ G ≡ Π H ▹ E / [Γ] / Πᵛ {F} {G} [Γ] [F] [G]
 Π-congᵛ {F} {G} {H} {E} [Γ] [F] [G] [H] [E] [F≡H] [G≡E] {σ = σ} ⊢Δ [σ] =
   let [ΠFG] = Πᵛ {F} {G} [Γ] [F] [G]
       [σΠFG] = proj₁ ([ΠFG] ⊢Δ [σ])
-      _ , Πᵣ F′ G′ D′ ⊢F′ ⊢G′ A≡A′ [F]′ [G]′ G-ext′ = extractMaybeEmb (Π-elim [σΠFG])
+      Πᵣ F′ G′ D′ ⊢F′ ⊢G′ A≡A′ [F]′ [G]′ G-ext′ = extractMaybeEmbΠ (Π-elim [σΠFG])
       [σF] = proj₁ ([F] ⊢Δ [σ])
       ⊢σF = escape [σF]
       [σG] = proj₁ ([G] (⊢Δ ∙ ⊢σF) (liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]))
@@ -184,9 +184,9 @@ import Tools.PropositionalEquality as PE
 -- Validity of Π as a term.
 Πᵗᵛ : ∀ {F G Γ} ([Γ] : ⊩ᵛ Γ)
       ([F] : Γ ⊩ᵛ⟨ ¹ ⟩ F / [Γ])
-      ([U] : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ U / [Γ] ∙ [F])
+      ([U] : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ U / ([Γ] ∙″ [F]))
     → Γ ⊩ᵛ⟨ ¹ ⟩ F ∷ U / [Γ] / Uᵛ [Γ]
-    → Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ∷ U / [Γ] ∙ [F] / (λ {Δ} {σ} → [U] {Δ} {σ})
+    → Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ∷ U / [Γ] ∙″ [F] / (λ {Δ} {σ} → [U] {Δ} {σ})
     → Γ ⊩ᵛ⟨ ¹ ⟩ Π F ▹ G ∷ U / [Γ] / Uᵛ [Γ]
 Πᵗᵛ {F} {G} {Γ} [Γ] [F] [U] [Fₜ] [Gₜ] {Δ = Δ} {σ = σ} ⊢Δ [σ] =
   let [liftσ] = liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]
@@ -201,12 +201,12 @@ import Tools.PropositionalEquality as PE
                                            (proj₁ ([Gₜ] (⊢Δ ∙ ⊢F) [liftσ])))
       [F]₀ = univᵛ {F} [Γ] (Uᵛ [Γ]) [Fₜ]
       [Gₜ]′ = S.irrelevanceTerm {A = U} {t = G}
-                                (_∙_ {A = F} [Γ] [F]) (_∙_ {A = F} [Γ] [F]₀)
+                                (_∙″_ {A = F} [Γ] [F]) (_∙″_ {A = F} [Γ] [F]₀)
                                 (λ {Δ} {σ} → [U] {Δ} {σ})
-                                (λ {Δ} {σ} → Uᵛ (_∙_ {A = F} [Γ] [F]₀) {Δ} {σ})
+                                (λ {Δ} {σ} → Uᵛ (_∙″_ {A = F} [Γ] [F]₀) {Δ} {σ})
                                 [Gₜ]
-      [G]₀ = univᵛ {G} (_∙_ {A = F} [Γ] [F]₀)
-                   (λ {Δ} {σ} → Uᵛ (_∙_ {A = F} [Γ] [F]₀) {Δ} {σ})
+      [G]₀ = univᵛ {G} (_∙″_ {A = F} [Γ] [F]₀)
+                   (λ {Δ} {σ} → Uᵛ (_∙″_ {A = F} [Γ] [F]₀) {Δ} {σ})
                    (λ {Δ} {σ} → [Gₜ]′ {Δ} {σ})
       [ΠFG] = (Πᵛ {F} {G} [Γ] [F]₀ [G]₀) ⊢Δ [σ]
   in  Uₜ (Π subst σ F ▹ subst (liftSubst σ) G) (idRedTerm:*: (Πⱼ ⊢Fₜ ▹ ⊢Gₜ))
@@ -246,16 +246,16 @@ import Tools.PropositionalEquality as PE
            ([Γ] : ⊩ᵛ Γ)
            ([F] : Γ ⊩ᵛ⟨ ¹ ⟩ F / [Γ])
            ([H] : Γ ⊩ᵛ⟨ ¹ ⟩ H / [Γ])
-           ([UF] : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ U / [Γ] ∙ [F])
-           ([UH] : Γ ∙ H ⊩ᵛ⟨ ¹ ⟩ U / [Γ] ∙ [H])
+           ([UF] : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ U / ([Γ] ∙″ [F]))
+           ([UH] : Γ ∙ H ⊩ᵛ⟨ ¹ ⟩ U / ([Γ] ∙″ [H]))
            ([F]ₜ : Γ ⊩ᵛ⟨ ¹ ⟩ F ∷ U / [Γ] / Uᵛ [Γ])
-           ([G]ₜ : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ∷ U / [Γ] ∙ [F]
+           ([G]ₜ : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ∷ U / [Γ] ∙″ [F]
                                 / (λ {Δ} {σ} → [UF] {Δ} {σ}))
            ([H]ₜ : Γ ⊩ᵛ⟨ ¹ ⟩ H ∷ U / [Γ] / Uᵛ [Γ])
-           ([E]ₜ : Γ ∙ H ⊩ᵛ⟨ ¹ ⟩ E ∷ U / [Γ] ∙ [H]
+           ([E]ₜ : Γ ∙ H ⊩ᵛ⟨ ¹ ⟩ E ∷ U / [Γ] ∙″ [H]
                                 / (λ {Δ} {σ} → [UH] {Δ} {σ}))
            ([F≡H]ₜ : Γ ⊩ᵛ⟨ ¹ ⟩ F ≡ H ∷ U / [Γ] / Uᵛ [Γ])
-           ([G≡E]ₜ : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ≡ E ∷ U / [Γ] ∙ [F]
+           ([G≡E]ₜ : Γ ∙ F ⊩ᵛ⟨ ¹ ⟩ G ≡ E ∷ U / [Γ] ∙″ [F]
                                   / (λ {Δ} {σ} → [UF] {Δ} {σ}))
          → Γ ⊩ᵛ⟨ ¹ ⟩ Π F ▹ G ≡ Π H ▹ E ∷ U / [Γ] / Uᵛ [Γ]
 Π-congᵗᵛ {F} {G} {H} {E}
@@ -265,18 +265,18 @@ import Tools.PropositionalEquality as PE
       [liftFσ] = liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]
       [liftHσ] = liftSubstS {F = H} [Γ] ⊢Δ [H] [σ]
       [F]ᵤ = univᵛ {F} [Γ] (Uᵛ [Γ]) [F]ₜ
-      [G]ᵤ₁ = univᵛ {G} {l′ = ⁰} (_∙_ {A = F} [Γ] [F])
+      [G]ᵤ₁ = univᵛ {G} {l′ = ⁰} (_∙″_ {A = F} [Γ] [F])
                     (λ {Δ} {σ} → [UF] {Δ} {σ}) [G]ₜ
-      [G]ᵤ = S.irrelevance {A = G} (_∙_ {A = F} [Γ] [F])
-                           (_∙_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁
+      [G]ᵤ = S.irrelevance {A = G} (_∙″_ {A = F} [Γ] [F])
+                           (_∙″_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁
       [H]ᵤ = univᵛ {H} [Γ] (Uᵛ [Γ]) [H]ₜ
-      [E]ᵤ = S.irrelevance {A = E} (_∙_ {A = H} [Γ] [H]) (_∙_ {A = H} [Γ] [H]ᵤ)
-                           (univᵛ {E} {l′ = ⁰} (_∙_ {A = H} [Γ] [H])
+      [E]ᵤ = S.irrelevance {A = E} (_∙″_ {A = H} [Γ] [H]) (_∙″_ {A = H} [Γ] [H]ᵤ)
+                           (univᵛ {E} {l′ = ⁰} (_∙″_ {A = H} [Γ] [H])
                                   (λ {Δ} {σ} → [UH] {Δ} {σ}) [E]ₜ)
       [F≡H]ᵤ = univEqᵛ {F} {H} [Γ] (Uᵛ [Γ]) [F]ᵤ [F≡H]ₜ
-      [G≡E]ᵤ = S.irrelevanceEq {A = G} {B = E} (_∙_ {A = F} [Γ] [F])
-                               (_∙_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁ [G]ᵤ
-                 (univEqᵛ {G} {E} (_∙_ {A = F} [Γ] [F])
+      [G≡E]ᵤ = S.irrelevanceEq {A = G} {B = E} (_∙″_ {A = F} [Γ] [F])
+                               (_∙″_ {A = F} [Γ] [F]ᵤ) [G]ᵤ₁ [G]ᵤ
+                 (univEqᵛ {G} {E} (_∙″_ {A = F} [Γ] [F])
                           (λ {Δ} {σ} → [UF] {Δ} {σ}) [G]ᵤ₁ [G≡E]ₜ)
       ΠFGₜ = Πⱼ escapeTerm {l = ¹} (Uᵣ′ ⁰ 0<1 ⊢Δ) (proj₁ ([F]ₜ ⊢Δ [σ]))
              ▹  escapeTerm (proj₁ ([UF] (⊢Δ ∙ ⊢F) [liftFσ]))
