@@ -72,54 +72,64 @@ data ι″ {ℓ} (A : Set ℓ) : Agda.Primitive.Setω where
 -- The validity judgements:
 -- We consider expressions that satisfy these judgments valid
 
-mutual
-  -- Validity of contexts
-  -- we could do that with omega instead of ³
-  data _⊩V_▸_ : (Γ : Con Term)
-    → (_⊩ˢ_∷/_ : (Δ : Con Term) → Subst → ⊢ Δ → Set₂)
-    → ((Δ : Con Term) → (σ σ′ : Subst) → (⊢Δ : ⊢ Δ) → (Δ ⊩ˢ σ ∷/ ⊢Δ) → Set₂)
-    → Set₃ where
-    Vε : ε ⊩V (λ Δ σ ⊢Δ → ⊤′)
-      ▸ (λ Δ σ σ′ ⊢Δ [σ] → ⊤′)
-    V∙ : ∀ {Γ A l}
-      → ([Γ] : ⊩ᵛ Γ)
-      → ([A] : ∀ {Δ σ} (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
-                   → Σ (Δ ⊩³⟨ l ⟩ subst σ A)
-                       (λ [Aσ] → ∀ {σ′} ([σ′] : Δ ⊩ˢ σ′ ∷ Γ / [Γ] / ⊢Δ)
-                               → ([σ≡σ′] : Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
-                               → Δ ⊩³⟨ l ⟩ subst σ A ≡ subst σ′ A / [Aσ]))
-      → Γ ∙ A
-          ⊩V (λ Δ σ ⊢Δ → Σ (Δ ⊩ˢ tail σ ∷ Γ / [Γ] / ⊢Δ)
-                           (λ [tailσ] → (Δ ⊩³⟨ l ⟩ head σ ∷ subst (tail σ) A / proj₁ ([A] ⊢Δ [tailσ]))))
-          ▸ (λ Δ σ σ′ ⊢Δ [σ] → (Δ ⊩ˢ tail σ ≡ tail σ′ ∷ Γ / [Γ] / ⊢Δ / proj₁ [σ]) ×
-               (Δ ⊩³⟨ l ⟩ head σ ≡ head σ′ ∷ subst (tail σ) A / proj₁ ([A] ⊢Δ (proj₁ [σ]))))
+ValRel : Set₄
+ValRel = (Γ : Con Term) → (⊩Subst : (Δ : Con Term) → Subst → ⊢ Δ → Set₂)
+    → (⊩EqSubst : (Δ : Con Term) → (σ σ′ : Subst) → (⊢Δ : ⊢ Δ) → (⊩Subst Δ σ ⊢Δ) → Set₂)
+    → Set₃
 
-  record ⊩ᵛ_ (Γ : Con Term) : Set₃ where
-    inductive
-    eta-equality
-    constructor VPack
-    field
-      ⊩Subst : (Δ : Con Term) → Subst → ⊢ Δ → Set₂
-      ⊩EqSubst : (Δ : Con Term) → (σ σ′ : Subst) → (⊢Δ : ⊢ Δ) → (⊩Subst Δ σ ⊢Δ) → Set₂
-      ⊩V : Γ ⊩V ⊩Subst ▸ ⊩EqSubst
+record ⊩ᵛ⁰_/_ (Γ : Con Term) (_⊩_▸_ : ValRel) : Set₃ where
+  inductive
+  eta-equality
+  constructor VPack
+  field
+    ⊩Subst : (Δ : Con Term) → Subst → ⊢ Δ → Set₂
+    ⊩EqSubst : (Δ : Con Term) → (σ σ′ : Subst) → (⊢Δ : ⊢ Δ) → (⊩Subst Δ σ ⊢Δ) → Set₂
+    ⊩V : Γ ⊩ ⊩Subst ▸ ⊩EqSubst
 
-  -- Logical relation for substitutions from a valid context
-  _⊩ˢ_∷_/_/_ : (Δ : Con Term) (σ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
-             → Set₂
-  Δ ⊩ˢ σ ∷ Γ / VPack ⊩Subst ⊩EqSubst ⊩V / ⊢Δ = ⊩Subst Δ σ ⊢Δ
+_⊩ˢ⁰_∷_/_/_ : {R : ValRel} (Δ : Con Term) (σ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ⁰ Γ / R) (⊢Δ : ⊢ Δ)
+           → Set₂
+Δ ⊩ˢ⁰ σ ∷ Γ / VPack ⊩Subst ⊩EqSubst ⊩V / ⊢Δ = ⊩Subst Δ σ ⊢Δ
 
-  _⊩ˢ_≡_∷_/_/_/_ : (Δ : Con Term) (σ σ′ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ Γ)
-                   (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ) → Set₂
-  Δ ⊩ˢ σ ≡ σ′ ∷ Γ / VPack ⊩Subst ⊩EqSubst ⊩V / ⊢Δ / [σ] = ⊩EqSubst Δ σ σ′ ⊢Δ [σ]
+_⊩ˢ⁰_≡_∷_/_/_/_ : {R : ValRel} (Δ : Con Term) (σ σ′ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ⁰ Γ / R)
+                 (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ⁰ σ ∷ Γ / [Γ] / ⊢Δ) → Set₂
+Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / VPack ⊩Subst ⊩EqSubst ⊩V / ⊢Δ / [σ] = ⊩EqSubst Δ σ σ′ ⊢Δ [σ]
 
-  -- Validity of types
-  _⊩ᵛ⟨_⟩_/_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ Γ → Set₃
-  _⊩ᵛ⟨_⟩_/_ Γ l A [Γ] =
-    ∀ {Δ σ} (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
-    → Σ (Δ ⊩³⟨ l ⟩ subst σ A) (λ [Aσ]
-      → ∀ {σ′} ([σ′] : Δ ⊩ˢ σ′ ∷ Γ / [Γ] / ⊢Δ)
-        ([σ≡σ′] : Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
-      → Δ ⊩³⟨ l ⟩ subst σ A ≡ subst σ′ A / [Aσ])
+-- Validity of types
+_⊩ᵛ⁰⟨_⟩_/_ : {R : ValRel} (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ⁰ Γ / R → Set₃
+_⊩ᵛ⁰⟨_⟩_/_ Γ l A [Γ] =
+  ∀ {Δ σ} (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ⁰ σ ∷ Γ / [Γ] / ⊢Δ)
+  → Σ (Δ ⊩³⟨ l ⟩ subst σ A) (λ [Aσ]
+    → ∀ {σ′} ([σ′] : Δ ⊩ˢ⁰ σ′ ∷ Γ / [Γ] / ⊢Δ)
+      ([σ≡σ′] : Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
+    → Δ ⊩³⟨ l ⟩ subst σ A ≡ subst σ′ A / [Aσ])
+
+data _⊩V_▸_ : ValRel where
+  Vε : ε
+    ⊩V (λ Δ σ ⊢Δ → ⊤′)
+    ▸ (λ Δ σ σ′ ⊢Δ [σ] → ⊤′)
+  V∙ : ∀ {Γ A l}
+    → ([Γ] : ⊩ᵛ⁰ Γ / _⊩V_▸_)
+    → ([A] : Γ ⊩ᵛ⁰⟨ l ⟩ A / [Γ])
+    → Γ ∙ A
+        ⊩V (λ Δ σ ⊢Δ → Σ (Δ ⊩ˢ⁰ tail σ ∷ Γ / [Γ] / ⊢Δ)
+                         (λ [tailσ] → (Δ ⊩³⟨ l ⟩ head σ ∷ subst (tail σ) A / proj₁ ([A] ⊢Δ [tailσ]))))
+        ▸ (λ Δ σ σ′ ⊢Δ [σ] → (Δ ⊩ˢ⁰ tail σ ≡ tail σ′ ∷ Γ / [Γ] / ⊢Δ / proj₁ [σ]) ×
+             (Δ ⊩³⟨ l ⟩ head σ ≡ head σ′ ∷ subst (tail σ) A / proj₁ ([A] ⊢Δ (proj₁ [σ]))))
+
+⊩ᵛ : Con Term → Set₃
+⊩ᵛ Γ = ⊩ᵛ⁰ Γ / _⊩V_▸_
+
+_⊩ˢ_∷_/_/_ : (Δ : Con Term) (σ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
+           → Set₂
+Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ = Δ ⊩ˢ⁰ σ ∷ Γ / [Γ] / ⊢Δ
+
+_⊩ˢ_≡_∷_/_/_/_ : (Δ : Con Term) (σ σ′ : Subst) (Γ : Con Term) ([Γ] : ⊩ᵛ Γ)
+                 (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ) → Set₂
+Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ] = Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ]
+
+-- Validity of types
+_⊩ᵛ⟨_⟩_/_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ Γ → Set₃
+Γ ⊩ᵛ⟨ l ⟩ A / [Γ] = Γ ⊩ᵛ⁰⟨ l ⟩ A / [Γ]
 
 -- Validity of terms
 _⊩ᵛ⟨_⟩_∷_/_/_ : (Γ : Con Term) (l : TypeLevel) (t A : Term) ([Γ] : ⊩ᵛ Γ)
