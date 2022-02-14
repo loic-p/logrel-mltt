@@ -10,3 +10,6 @@ data ⊥ : Set where
 
 ⊥-elim : ∀ {a} {A : Set a} → ⊥ → A
 ⊥-elim ()
+
+⊥-elimω : ∀ {A : Agda.Primitive.Setω} → ⊥ → A
+⊥-elimω ()
