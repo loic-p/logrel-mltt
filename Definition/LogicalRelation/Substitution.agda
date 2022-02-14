@@ -157,5 +157,8 @@ _⊩ᵛ_⇒_∷_/_ : (Γ : Con Term) (t u A : Term) ([Γ] : ⊩ᵛ Γ) → Setω
 Γ ⊩ᵛ t ⇒ u ∷ A / [Γ] = ∀ {Δ σ} (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
                        → Δ ⊢ subst σ t ⇒ subst σ u ∷ subst σ A
 
+_∙″_ : ∀ {Γ A l} → ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ l ⟩ A / [Γ] → ⊩ᵛ (Γ ∙ A)
+[Γ] ∙″ [A] = (VPack _ _ (V∙ [Γ] [A]))
+
 pattern ε′ = (VPack _ _ Vε)
 pattern _∙′_ [Γ] [A] = (VPack _ _ (V∙ [Γ] [A]))

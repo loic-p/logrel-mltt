@@ -46,7 +46,7 @@ consSubstS : ∀ {l σ t A Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
            ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
            ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
            ([t] : Δ ⊩⟨ l ⟩ t ∷ subst σ A / proj₁ ([A] ⊢Δ [σ]))
-         → Δ ⊩ˢ consSubst σ t ∷ Γ ∙ A / (VPack _ _ (V∙ [Γ] [A])) / ⊢Δ
+         → Δ ⊩ˢ consSubst σ t ∷ Γ ∙ A / [Γ] ∙″ [A] / ⊢Δ
 consSubstS [Γ] ⊢Δ [σ] [A] [t] = [σ] , [t]
 
 -- Extend a valid substitution equality with a term
@@ -55,7 +55,7 @@ consSubstSEq : ∀ {l σ σ′ t A Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
              ([σ≡σ′] : Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
              ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
              ([t] : Δ ⊩⟨ l ⟩ t ∷ subst σ A / proj₁ ([A] ⊢Δ [σ]))
-           → Δ ⊩ˢ consSubst σ t ≡ consSubst σ′ t ∷ Γ ∙ A / (VPack _ _ (V∙ [Γ] [A])) / ⊢Δ
+           → Δ ⊩ˢ consSubst σ t ≡ consSubst σ′ t ∷ Γ ∙ A / [Γ] ∙″ [A] / ⊢Δ
                / consSubstS {t = t} {A = A} [Γ] ⊢Δ [σ] [A] [t]
 consSubstSEq [Γ] ⊢Δ [σ] [σ≡σ′] [A] [t] =
   [σ≡σ′] , reflEqTerm (proj₁ ([A] ⊢Δ [σ])) [t]
@@ -111,7 +111,7 @@ wk1SubstSEq {l} {F} {σ} {Γ} {Δ} [Γ] ⊢Δ ⊢F [σ] [σ≡σ′] =
 liftSubstS : ∀ {l F σ Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
              ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
              ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
-           → (Δ ∙ subst σ F) ⊩ˢ liftSubst σ ∷ Γ ∙ F / (VPack _ _ (V∙ [Γ] [F]))
+           → (Δ ∙ subst σ F) ⊩ˢ liftSubst σ ∷ Γ ∙ F / [Γ] ∙″ [F]
                              / (⊢Δ ∙ escape (proj₁ ([F] ⊢Δ [σ])))
 liftSubstS {F = F} {σ = σ} {Δ = Δ} [Γ] ⊢Δ [F] [σ] =
   let ⊢F = escape (proj₁ ([F] ⊢Δ [σ]))
@@ -126,7 +126,7 @@ liftSubstSEq : ∀ {l F σ σ′ Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
              ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
              ([σ] : Δ ⊩ˢ σ ∷ Γ / [Γ] / ⊢Δ)
              ([σ≡σ′] : Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
-           → (Δ ∙ subst σ F) ⊩ˢ liftSubst σ ≡ liftSubst σ′ ∷ Γ ∙ F / (VPack _ _ (V∙ [Γ] [F]))
+           → (Δ ∙ subst σ F) ⊩ˢ liftSubst σ ≡ liftSubst σ′ ∷ Γ ∙ F / [Γ] ∙″ [F]
                              / (⊢Δ ∙ escape (proj₁ ([F] ⊢Δ [σ])))
                              / liftSubstS {F = F} [Γ] ⊢Δ [F] [σ]
 liftSubstSEq {F = F} {σ = σ} {σ′ = σ′} {Δ = Δ} [Γ] ⊢Δ [F] [σ] [σ≡σ′] =
@@ -151,7 +151,7 @@ mutual
   idSubstS ε′ = tt
   idSubstS {Γ = Γ ∙ A} ([Γ] ∙′ [A]) =
     let ⊢Γ = soundContext [Γ]
-        ⊢Γ∙A = soundContext (VPack _ _ (V∙ [Γ] [A]))
+        ⊢Γ∙A = soundContext ([Γ] ∙″ [A])
         ⊢Γ∙A′ = ⊢Γ ∙ escape (proj₁ ([A] ⊢Γ (idSubstS [Γ])))
         [A]′ = wk1SubstS {F = subst idSubst A} [Γ] ⊢Γ
                          (escape (proj₁ ([A] (soundContext [Γ])
