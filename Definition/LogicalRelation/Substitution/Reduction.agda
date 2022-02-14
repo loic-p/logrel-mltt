@@ -17,8 +17,8 @@ redSubstTermᵛ : ∀ {A t u l Γ}
               → Γ ⊩ᵛ t ⇒ u ∷ A / [Γ]
               → ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
               → Γ ⊩ᵛ⟨ l ⟩ u ∷ A / [Γ] / [A]
-              → Γ ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] / [A]
-              × Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A]
+              → (Γ ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] / [A])
+              ×ω₃ (Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A])
 redSubstTermᵛ [Γ] t⇒u [A] [u] =
   (λ ⊢Δ [σ] →
      let [σA] = proj₁ ([A] ⊢Δ [σ])

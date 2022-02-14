@@ -20,7 +20,7 @@ wk1ᵛ : ∀ {A F Γ l}
       ([Γ] : ⊩ᵛ Γ)
       ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
     → Γ ⊩ᵛ⟨ l ⟩ A / [Γ]
-    → Γ ∙ F ⊩ᵛ⟨ l ⟩ wk1 A / [Γ] ∙ [F]
+    → Γ ∙ F ⊩ᵛ⟨ l ⟩ wk1 A / (VPack _ _ (V∙ [Γ] [F]))
 wk1ᵛ {A} [Γ] [F] [A] ⊢Δ [σ] =
   let [σA] = proj₁ ([A] ⊢Δ (proj₁ [σ]))
       [σA]′ = irrelevance′ (PE.sym (subst-wk A)) [σA]
@@ -37,7 +37,7 @@ wk1Eqᵛ : ∀ {A B F Γ l}
          ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
          ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
          ([A≡B] : Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A])
-       → Γ ∙ F ⊩ᵛ⟨ l ⟩ wk1 A ≡ wk1 B / [Γ] ∙ [F] / wk1ᵛ {A} {F} [Γ] [F] [A]
+       → Γ ∙ F ⊩ᵛ⟨ l ⟩ wk1 A ≡ wk1 B / (VPack _ _ (V∙ [Γ] [F])) / wk1ᵛ {A} {F} [Γ] [F] [A]
 wk1Eqᵛ {A} {B} [Γ] [F] [A] [A≡B] ⊢Δ [σ] =
   let [σA] = proj₁ ([A] ⊢Δ (proj₁ [σ]))
       [σA]′ = irrelevance′ (PE.sym (subst-wk A)) [σA]
