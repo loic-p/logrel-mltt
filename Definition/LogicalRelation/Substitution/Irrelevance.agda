@@ -22,8 +22,8 @@ irrelevanceSubst : ∀ {σ Γ Δ}
                    (⊢Δ ⊢Δ′ : ⊢ Δ)
                  → Δ ⊩ˢ σ ∷ Γ / [Γ]  / ⊢Δ
                  → Δ ⊩ˢ σ ∷ Γ / [Γ]′ / ⊢Δ′
-irrelevanceSubst ε ε ⊢Δ ⊢Δ′ [σ] = tt
-irrelevanceSubst ([Γ] ∙ [A]) ([Γ]′ ∙ [A]′) ⊢Δ ⊢Δ′ ([tailσ] , [headσ]) =
+irrelevanceSubst ε′ ε′ ⊢Δ ⊢Δ′ [σ] = tt
+irrelevanceSubst ([Γ] ∙′ [A]) ([Γ]′ ∙′ [A]′) ⊢Δ ⊢Δ′ ([tailσ] , [headσ]) =
   let [tailσ]′ = irrelevanceSubst [Γ] [Γ]′ ⊢Δ ⊢Δ′ [tailσ]
   in  [tailσ]′
   ,   LR.irrelevanceTerm (proj₁ ([A] ⊢Δ [tailσ]))
@@ -50,8 +50,8 @@ irrelevanceSubstEq : ∀ {σ σ′ Γ Δ}
                      ([σ]′ : Δ ⊩ˢ σ ∷ Γ / [Γ]′ / ⊢Δ′)
                    → Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ]  / ⊢Δ  / [σ]
                    → Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ]′ / ⊢Δ′ / [σ]′
-irrelevanceSubstEq ε ε ⊢Δ ⊢Δ′ [σ] [σ]′ [σ≡σ′] = tt
-irrelevanceSubstEq ([Γ] ∙ [A]) ([Γ]′ ∙ [A]′) ⊢Δ ⊢Δ′ [σ] [σ]′ [σ≡σ′] =
+irrelevanceSubstEq ε′ ε′ ⊢Δ ⊢Δ′ [σ] [σ]′ [σ≡σ′] = tt
+irrelevanceSubstEq ([Γ] ∙′ [A]) ([Γ]′ ∙′ [A]′) ⊢Δ ⊢Δ′ [σ] [σ]′ [σ≡σ′] =
   irrelevanceSubstEq [Γ] [Γ]′ ⊢Δ ⊢Δ′ (proj₁ [σ]) (proj₁ [σ]′) (proj₁ [σ≡σ′])
   , LR.irrelevanceEqTerm (proj₁ ([A] ⊢Δ  (proj₁ [σ])))
                             (proj₁ ([A]′ ⊢Δ′ (proj₁ [σ]′)))
@@ -78,8 +78,8 @@ irrelevanceLift : ∀ {l A F H Γ}
               ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
               ([H] : Γ ⊩ᵛ⟨ l ⟩ H / [Γ])
               ([F≡H] : Γ ⊩ᵛ⟨ l ⟩ F ≡ H / [Γ] / [F])
-            → Γ ∙ F ⊩ᵛ⟨ l ⟩ A / [Γ] ∙ [F]
-            → Γ ∙ H ⊩ᵛ⟨ l ⟩ A / [Γ] ∙ [H]
+            → Γ ∙ F ⊩ᵛ⟨ l ⟩ A / (VPack _ _ (V∙ [Γ] [F]))
+            → Γ ∙ H ⊩ᵛ⟨ l ⟩ A / (VPack _ _ (V∙ [Γ] [H]))
 irrelevanceLift [Γ] [F] [H] [F≡H] [A] ⊢Δ ([tailσ] , [headσ]) =
   let [σ]′ = [tailσ] , convTerm₂ (proj₁ ([F] ⊢Δ [tailσ]))
                                  (proj₁ ([H] ⊢Δ [tailσ]))
@@ -146,9 +146,9 @@ irrelevanceTermLift : ∀ {l A F H t Γ}
               ([F] : Γ ⊩ᵛ⟨ l ⟩ F / [Γ])
               ([H] : Γ ⊩ᵛ⟨ l ⟩ H / [Γ])
               ([F≡H] : Γ ⊩ᵛ⟨ l ⟩ F ≡ H / [Γ] / [F])
-              ([A] : Γ ∙ F ⊩ᵛ⟨ l ⟩ A / [Γ] ∙ [F])
-            → Γ ∙ F ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] ∙ [F] / [A]
-            → Γ ∙ H ⊩ᵛ⟨ l ⟩ t ∷ A / [Γ] ∙ [H]
+              ([A] : Γ ∙ F ⊩ᵛ⟨ l ⟩ A / (VPack _ _ (V∙ [Γ] [F])))
+            → Γ ∙ F ⊩ᵛ⟨ l ⟩ t ∷ A / (VPack _ _ (V∙ [Γ] [F])) / [A]
+            → Γ ∙ H ⊩ᵛ⟨ l ⟩ t ∷ A / (VPack _ _ (V∙ [Γ] [H]))
                            / irrelevanceLift {A = A} {F = F} {H = H}
                                              [Γ] [F] [H] [F≡H] [A]
 irrelevanceTermLift [Γ] [F] [H] [F≡H] [A] [t] ⊢Δ ([tailσ] , [headσ]) =
