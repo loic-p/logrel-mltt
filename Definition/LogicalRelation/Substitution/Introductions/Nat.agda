@@ -18,7 +18,7 @@ open import Tools.Product
 
 -- Validity of the natural number type.
 ℕᵛ : ∀ {Γ l} ([Γ] : ⊩ᵛ Γ) → Γ ⊩ᵛ⟨ l ⟩ ℕ / [Γ]
-ℕᵛ [Γ] ⊢Δ [σ] = ℕᵣ (idRed:*: (ℕⱼ ⊢Δ)) , λ _ x₂ → id (ℕⱼ ⊢Δ)
+ℕᵛ [Γ] ⊢Δ [σ] = ℕᵣ (idRed:*: (ℕⱼ ⊢Δ)) , λ _ x₂ → ιx (ℕ₌ (id (ℕⱼ ⊢Δ)))
 
 -- Validity of the natural number type as a term.
 ℕᵗᵛ : ∀ {Γ} ([Γ] : ⊩ᵛ Γ)
@@ -27,15 +27,15 @@ open import Tools.Product
                      [ℕ] = ℕᵣ (idRed:*: (ℕⱼ ⊢Δ))
                  in  Uₜ ℕ (idRedTerm:*: ⊢ℕ) ℕₙ (≅ₜ-ℕrefl ⊢Δ) [ℕ]
                  ,   (λ x x₁ → Uₜ₌ ℕ ℕ (idRedTerm:*: ⊢ℕ) (idRedTerm:*: ⊢ℕ) ℕₙ ℕₙ
-                                   (≅ₜ-ℕrefl ⊢Δ) [ℕ] [ℕ] (id (ℕⱼ ⊢Δ)))
+                                   (≅ₜ-ℕrefl ⊢Δ) [ℕ] [ℕ] (ιx (ℕ₌ (id (ℕⱼ ⊢Δ)))))
 
 -- Validity of zero.
 zeroᵛ : ∀ {Γ l} ([Γ] : ⊩ᵛ Γ)
       → Γ ⊩ᵛ⟨ l ⟩ zero ∷ ℕ / [Γ] / ℕᵛ [Γ]
 zeroᵛ [Γ] ⊢Δ [σ] =
-  ℕₜ zero (idRedTerm:*: (zeroⱼ ⊢Δ)) (≅ₜ-zerorefl ⊢Δ) zeroᵣ
-    , (λ _ x₁ → ℕₜ₌ zero zero (idRedTerm:*: (zeroⱼ ⊢Δ)) (idRedTerm:*: (zeroⱼ ⊢Δ))
-                    (≅ₜ-zerorefl ⊢Δ) zeroᵣ)
+  ιx (ℕₜ zero (idRedTerm:*: (zeroⱼ ⊢Δ)) (≅ₜ-zerorefl ⊢Δ) zeroᵣ)
+    , (λ _ x₁ → ιx (ℕₜ₌ zero zero (idRedTerm:*: (zeroⱼ ⊢Δ)) (idRedTerm:*: (zeroⱼ ⊢Δ))
+                    (≅ₜ-zerorefl ⊢Δ) zeroᵣ))
 
 -- Validity of successor of valid natural numbers.
 sucᵛ : ∀ {Γ n l} ([Γ] : ⊩ᵛ Γ)
