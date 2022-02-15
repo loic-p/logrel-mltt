@@ -48,7 +48,7 @@ injectivity′ (noemb (Πᵣ F G D ⊢F ⊢G A≡A [F] [G] G-ext))
                                    (PE.trans (wkSingleSubstId _) (PE.sym E≡G′))
                                    (PE.sym F≡F₁) [G]₁ [G]′ [G≡E]₁
   in  escapeEq [F]′ [F≡H]′ , escapeEq [G]′ [G≡E]′
-injectivity′ (emb 0<1 x) [ΠFG≡ΠHE] = injectivity′ x [ΠFG≡ΠHE]
+injectivity′ (emb 0<1 x) (ιx [ΠFG≡ΠHE]) = injectivity′ x [ΠFG≡ΠHE]
 
 -- Injectivity of Π
 injectivity : ∀ {Γ F G H E} → Γ ⊢ Π F ▹ G ≡ Π H ▹ E → Γ ⊢ F ≡ H × Γ ∙ F ⊢ G ≡ E

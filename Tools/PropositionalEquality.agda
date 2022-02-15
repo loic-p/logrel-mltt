@@ -54,7 +54,7 @@ subst F refl f = f
 
 -- Two substitutions simultaneously.
 
-subst₂ : ∀ {A B : Set} {a a′ b b′} (F : A → B → Set)
+subst₂ : ∀ {A B : Set} {a a′ b b′} {ℓ : Agda.Primitive.Level} (F : A → B → Set ℓ)
        → a ≡ a′ → b ≡ b′ → F a b → F a′ b′
 subst₂ F refl refl f = f
 

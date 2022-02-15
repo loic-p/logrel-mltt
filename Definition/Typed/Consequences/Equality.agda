@@ -18,8 +18,8 @@ import Tools.PropositionalEquality as PE
 U≡A′ : ∀ {A Γ l} ([U] : Γ ⊩⟨ l ⟩U)
     → Γ ⊩⟨ l ⟩ U ≡ A / (U-intr [U])
     → A PE.≡ U
-U≡A′ (noemb [U]) [U≡A] = [U≡A]
-U≡A′ (emb 0<1 [U]) [U≡A] = U≡A′ [U] [U≡A]
+U≡A′ (noemb [U]) (U₌ [U≡A]) = [U≡A]
+U≡A′ (emb 0<1 [U]) (ιx [U≡A]) = U≡A′ [U] [U≡A]
 
 -- If A is judgmentally equal to U, then A is propsitionally equal to U.
 U≡A : ∀ {A Γ}
@@ -33,8 +33,8 @@ U≡A {A} U≡A | [U] , [A] , [U≡A] =
     → Γ ⊩⟨ l ⟩ ℕ ≡ A / (ℕ-intr [ℕ])
     → Whnf A
     → A PE.≡ ℕ
-ℕ≡A′ (noemb x) [ℕ≡A] whnfA = whnfRed* [ℕ≡A] whnfA
-ℕ≡A′ (emb 0<1 [ℕ]) [ℕ≡A] whnfA = ℕ≡A′ [ℕ] [ℕ≡A] whnfA
+ℕ≡A′ (noemb x) (ιx (ℕ₌ [ℕ≡A])) whnfA = whnfRed* [ℕ≡A] whnfA
+ℕ≡A′ (emb 0<1 [ℕ]) (ιx [ℕ≡A]) whnfA = ℕ≡A′ [ℕ] [ℕ≡A] whnfA
 
 -- If A in WHNF is judgmentally equal to ℕ, then A is propsitionally equal to ℕ.
 ℕ≡A : ∀ {A Γ}
@@ -45,30 +45,14 @@ U≡A {A} U≡A | [U] , [A] , [U≡A] =
 ℕ≡A {A} ℕ≡A whnfA | [ℕ] , [A] , [ℕ≡A] =
   ℕ≡A′ (ℕ-elim [ℕ]) (irrelevanceEq [ℕ] (ℕ-intr (ℕ-elim [ℕ])) [ℕ≡A]) whnfA
 
--- If A in WHNF is judgmentally equal to Empty, then A is propositionally equal to Empty.
-Empty≡A′ : ∀ {A Γ l} ([Empty] : Γ ⊩⟨ l ⟩Empty Empty)
-    → Γ ⊩⟨ l ⟩ Empty ≡ A / (Empty-intr [Empty])
-    → Whnf A
-    → A PE.≡ Empty
-Empty≡A′ (noemb x) [Empty≡A] whnfA = whnfRed* [Empty≡A] whnfA
-Empty≡A′ (emb 0<1 [Empty]) [Empty≡A] whnfA = Empty≡A′ [Empty] [Empty≡A] whnfA
-
-Empty≡A : ∀ {A Γ}
-    → Γ ⊢ Empty ≡ A
-    → Whnf A
-    → A PE.≡ Empty
-Empty≡A {A} Empty≡A whnfA with reducibleEq Empty≡A
-Empty≡A {A} Empty≡A whnfA | [Empty] , [A] , [Empty≡A] =
-  Empty≡A′ (Empty-elim [Empty]) (irrelevanceEq [Empty] (Empty-intr (Empty-elim [Empty])) [Empty≡A]) whnfA
-
 ne≡A′ : ∀ {A K Γ l}
      → ([K] : Γ ⊩⟨ l ⟩ne K)
      → Γ ⊩⟨ l ⟩ K ≡ A / (ne-intr [K])
      → Whnf A
      → ∃ λ M → Neutral M × A PE.≡ M
-ne≡A′ (noemb [K]) (ne₌ M D′ neM K≡M) whnfA =
+ne≡A′ (noemb [K]) (ιx (ne₌ M D′ neM K≡M)) whnfA =
   M , neM , (whnfRed* (red D′) whnfA)
-ne≡A′ (emb 0<1 [K]) [K≡A] whnfA = ne≡A′ [K] [K≡A] whnfA
+ne≡A′ (emb 0<1 [K]) (ιx [K≡A]) whnfA = ne≡A′ [K] [K≡A] whnfA
 
 -- If A in WHNF is judgmentally equal to K, then there exists a M such that
 -- A is propsitionally equal to M.
@@ -88,7 +72,7 @@ ne≡A {A} neK ne≡A whnfA | [ne] , [A] , [ne≡A] =
     → ∃₂ λ H E → A PE.≡ Π H ▹ E
 Π≡A′ (noemb [Π]) (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) whnfA =
   F′ , G′ , whnfRed* D′ whnfA
-Π≡A′ (emb 0<1 [Π]) [Π≡A] whnfA = Π≡A′ [Π] [Π≡A] whnfA
+Π≡A′ (emb 0<1 [Π]) (ιx [Π≡A]) whnfA = Π≡A′ [Π] [Π≡A] whnfA
 
 -- If A is judgmentally equal to Π F ▹ G, then there exists H and E such that
 -- A is propsitionally equal to  Π H ▹ E.

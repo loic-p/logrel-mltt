@@ -38,27 +38,13 @@ canonicity′ : ∀ {t l}
              → ([ℕ] : ε ⊩⟨ l ⟩ℕ ℕ)
              → ε ⊩⟨ l ⟩ t ∷ ℕ / ℕ-intr [ℕ]
              → ∃ λ k → ε ⊢ t ≡ sucᵏ k ∷ ℕ
-canonicity′ (noemb [ℕ]) (ℕₜ n d n≡n prop) =
+canonicity′ (noemb [ℕ]) (ιx (ℕₜ n d n≡n prop)) =
   let a , b = canonicity″ prop
   in  a , trans (subset*Term (redₜ d)) b
-canonicity′ (emb 0<1 [ℕ]) [t] = canonicity′ [ℕ] [t]
+canonicity′ (emb 0<1 [ℕ]) (ιx [t]) = canonicity′ [ℕ] [t]
 
 -- Canonicity of natural numbers
 canonicity : ∀ {t} → ε ⊢ t ∷ ℕ → ∃ λ k → ε ⊢ t ≡ sucᵏ k ∷ ℕ
 canonicity ⊢t with reducibleTerm ⊢t
 canonicity ⊢t | [ℕ] , [t] =
   canonicity′ (ℕ-elim [ℕ]) (irrelevanceTerm [ℕ] (ℕ-intr (ℕ-elim [ℕ])) [t])
-
--- Canonicity for Empty
-
-¬Empty′ : ∀ {n} → ε ⊩Empty n ∷Empty → ⊥
-¬Empty′ (Emptyₜ n _ n≡n (ne (neNfₜ neN ⊢n _))) =
-  noNe ⊢n neN
-
-¬Empty : ∀ {n} → ε ⊢ n ∷ Empty → ⊥
-¬Empty {n} ⊢n =
-  let [Empty] , [n] = reducibleTerm ⊢n
-      [Empty]′ = Emptyᵣ {l = ¹} ([ Emptyⱼ ε , Emptyⱼ ε , id (Emptyⱼ ε) ])
-      [n]′ = irrelevanceTerm [Empty] [Empty]′ [n]
-
-  in ¬Empty′ [n]′
