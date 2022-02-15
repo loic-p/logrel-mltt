@@ -37,6 +37,16 @@ Therefore, the gap in strength between the two theories is precisely measured by
 of additional universes. It would be interesting to see how low we can bring this gap
 (of course, Gödel's theorem tells us that it will always be non-zero).
 
+### How can I be sure you did not cheat? ###
+
+Agda features Induction-Recursion and a lot more universes than just 5, and as I can tell 
+there is no way to disable these. So how do we know I haven't used these features in a
+hidden way?
+
+I am afraid there is no other way than going through the code. At the very least, I have
+ported the definition of reducibility to Coq (which does not feature induction-recursion)
+and it works fine. Porting the entirety of the development would be a lot of work, though!
+
 ### Dependencies ###
 
 This project is written in Agda. It has been tested to be working with Agda version 2.6.2.
