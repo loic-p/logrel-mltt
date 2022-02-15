@@ -11,6 +11,7 @@ open import Definition.Typed.Weakening
 open import Definition.Typed.Properties
 open import Definition.LogicalRelation
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

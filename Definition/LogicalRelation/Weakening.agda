@@ -12,6 +12,7 @@ open import Definition.Typed.Weakening as T hiding (wk; wkEq; wkTerm; wkEqTerm)
 open import Definition.LogicalRelation
 open import Definition.LogicalRelation.Irrelevance
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

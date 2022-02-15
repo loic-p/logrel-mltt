@@ -19,6 +19,7 @@ open import Definition.LogicalRelation.Substitution.Properties
 open import Definition.LogicalRelation.Substitution.Conversion
 open import Definition.LogicalRelation.Substitution.Weakening
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

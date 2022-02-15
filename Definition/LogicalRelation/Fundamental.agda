@@ -25,24 +25,6 @@ open import Tools.Unit
 open import Tools.Nat
 import Tools.PropositionalEquality as PE
 
-∃ω₃ : {A : Setω} → (A → Setω) → Setω
-∃ω₃ = Σω₃ _
-
-∃ω₃² : {A : Setω} {B : A → Setω}
-     (C : (x : A) → B x → Setω) → Setω
-∃ω₃² C = ∃ω₃ λ a → ∃ω₃ λ b → C a b
-
-record Σω₄ (A : Setω₁) (B : A → Setω) : Setω₁ where
-  constructor _,_
-  field
-    proj₁ : A
-    proj₂ : B proj₁
-
-open Σω₄ public
-
-∃ω₄ : {A : Setω₁} → (A → Setω) → Setω₁
-∃ω₄ = Σω₄ _
-
 mutual
   -- Fundamental theorem for contexts.
   valid : ∀ {Γ} → ⊢ Γ → ⊩ᵛ Γ

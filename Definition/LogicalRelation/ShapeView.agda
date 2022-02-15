@@ -14,6 +14,7 @@ open import Definition.LogicalRelation
 open import Definition.LogicalRelation.Properties.Escape
 open import Definition.LogicalRelation.Properties.Reflexivity
 
+open import Tools.Embedding
 open import Tools.Product
 open import Tools.Empty using (⊥; ⊥-elim ; ⊥-elimω)
 import Tools.PropositionalEquality as PE

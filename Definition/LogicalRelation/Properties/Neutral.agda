@@ -16,6 +16,7 @@ open import Definition.LogicalRelation.Properties.Reflexivity
 open import Definition.LogicalRelation.Properties.Escape
 open import Definition.LogicalRelation.Properties.Symmetry
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

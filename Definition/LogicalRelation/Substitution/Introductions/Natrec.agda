@@ -23,6 +23,7 @@ open import Definition.LogicalRelation.Substitution.Introductions.Nat
 open import Definition.LogicalRelation.Substitution.Introductions.Pi
 open import Definition.LogicalRelation.Substitution.Introductions.SingleSubst
 
+open import Tools.Embedding
 open import Tools.Product
 open import Tools.Empty
 import Tools.PropositionalEquality as PE

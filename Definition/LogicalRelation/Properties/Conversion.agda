@@ -13,6 +13,7 @@ open import Definition.LogicalRelation
 open import Definition.LogicalRelation.ShapeView
 open import Definition.LogicalRelation.Irrelevance
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

@@ -12,6 +12,9 @@ module README where
 
 -- A minimal library necessary for formalization:
 
+-- Embedding types into larger universes
+import Tools.Embedding
+
 -- The empty type and its elimination rule.
 import Tools.Empty
 
@@ -165,9 +168,6 @@ import Definition.Typed.Consequences.Reduction
 -- Strong equality of types.
 import Definition.Typed.Consequences.Equality
 
--- Syntactic inequality of types.
-import Definition.Typed.Consequences.Inequality
-
 -- Substiution in judgements and substitution composition.
 import Definition.Typed.Consequences.Substitution
 
@@ -179,49 +179,3 @@ import Definition.Typed.Consequences.InverseUniv
 
 -- Consistency of the type theory.
 import Definition.Typed.Consequences.Consistency
-
-
-------------------
--- DECIDABILITY --
-------------------
-
--- Conversion algorithm definition.
-import Definition.Conversion
-
--- Properties of conversion algorithm:
-
--- Context equality and its properties:
--- * Context conversion of typing judgements.
--- * Context conversion of reductions and algorithmic equality.
--- * Reflexivity and symmetry of context equality.
-import Definition.Conversion.Stability
-
--- Soundness of the conversion algorithm.
-import Definition.Conversion.Soundness
-
--- Conversion property of algorithmic equality.
-import Definition.Conversion.Conversion
-
--- Decidability of the conversion algorithm.
-import Definition.Conversion.Decidable
-
--- Symmetry of the conversion algorithm.
-import Definition.Conversion.Symmetry
-
--- Transitivity of the conversion algorithm.
-import Definition.Conversion.Transitivity
-
--- Weakening of the conversion algorithm.
-import Definition.Conversion.Weakening
-
--- WHNF and neutral lifting of the conversion algorithm.
-import Definition.Conversion.Lift
-
--- Generic equality relation instance for the conversion algorithm.
-import Definition.Conversion.EqRelInstance
-
--- Completeness of conversion algorithm.
-import Definition.Conversion.Consequences.Completeness
-
--- Decidability of judgemental conversion.
-import Definition.Typed.Decidable

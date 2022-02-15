@@ -11,6 +11,7 @@ open import Definition.LogicalRelation
 open import Definition.LogicalRelation.ShapeView
 open import Definition.LogicalRelation.Irrelevance
 
+open import Tools.Embedding
 
 -- Helper function for reducible terms of type U for specific type derivations.
 univEq′ : ∀ {l Γ A} ([U] : Γ ⊩⟨ l ⟩U) → Γ ⊩⟨ l ⟩ A ∷ U / U-intr [U] → Γ ⊩⟨ ⁰ ⟩ A

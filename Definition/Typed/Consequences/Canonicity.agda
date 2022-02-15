@@ -13,6 +13,7 @@ open import Definition.LogicalRelation.Irrelevance
 open import Definition.LogicalRelation.ShapeView
 open import Definition.LogicalRelation.Fundamental.Reducibility
 
+open import Tools.Embedding
 open import Tools.Empty
 open import Tools.Nat
 open import Tools.Product

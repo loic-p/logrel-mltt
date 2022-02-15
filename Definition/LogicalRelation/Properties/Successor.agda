@@ -12,6 +12,7 @@ open import Definition.LogicalRelation
 open import Definition.LogicalRelation.Irrelevance
 open import Definition.LogicalRelation.ShapeView
 
+open import Tools.Embedding
 open import Tools.Product
 
 

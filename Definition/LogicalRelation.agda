@@ -11,14 +11,8 @@ open import Definition.Typed.Weakening
 open import Agda.Primitive
 
 open import Tools.Product
+open import Tools.Embedding
 import Tools.PropositionalEquality as PE
-
-
-data ι {ℓ : Level} (A : Set ℓ) : Set (lsuc ℓ) where
-  ιx : A → ι A
-
-data ι′ {ℓ : Level} (A : Set) : Set ℓ where
-  ιx : A → ι′ A
 
 -- The different cases of the logical relation are spread out through out
 -- this file. This is due to them having different dependencies.

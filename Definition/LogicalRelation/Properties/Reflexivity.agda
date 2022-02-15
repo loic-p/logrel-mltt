@@ -8,6 +8,7 @@ open import Definition.Untyped
 open import Definition.Typed
 open import Definition.LogicalRelation
 
+open import Tools.Embedding
 open import Tools.Product
 import Tools.PropositionalEquality as PE
 

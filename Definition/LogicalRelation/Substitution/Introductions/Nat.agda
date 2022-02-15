@@ -13,6 +13,7 @@ open import Definition.LogicalRelation.Properties
 open import Definition.LogicalRelation.Substitution
 open import Definition.LogicalRelation.Substitution.Introductions.Universe
 
+open import Tools.Embedding
 open import Tools.Product
 
 
