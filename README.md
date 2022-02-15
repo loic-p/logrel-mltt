@@ -39,7 +39,7 @@ of additional universes. It would be interesting to see how low we can bring thi
 
 ### How can I be sure you did not cheat? ###
 
-Agda features Induction-Recursion and a lot more universes than just 5, and as I can tell 
+Agda features Induction-Recursion and a lot more universes than just 5, and as far as I can tell 
 there is no way to disable these. So how do we know I haven't used these features in a
 hidden way?
 
