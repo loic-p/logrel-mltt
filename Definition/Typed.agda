@@ -29,7 +29,6 @@ mutual
   -- Well-formed type
   data _⊢_ (Γ : Con Term) : Term → Set where
     ℕⱼ    : ⊢ Γ → Γ ⊢ ℕ
-    Emptyⱼ : ⊢ Γ -> Γ ⊢ Empty
     Uⱼ    : ⊢ Γ → Γ ⊢ U
     Πⱼ_▹_ : ∀ {F G}
          → Γ     ⊢ F
@@ -42,7 +41,6 @@ mutual
   -- Well-formed term of a type
   data _⊢_∷_ (Γ : Con Term) : Term → Term → Set where
     ℕⱼ      : ⊢ Γ → Γ ⊢ ℕ ∷ U
-    Emptyⱼ :  ⊢ Γ → Γ ⊢ Empty ∷ U
     Πⱼ_▹_   : ∀ {F G}
            → Γ     ⊢ F ∷ U
            → Γ ∙ F ⊢ G ∷ U
@@ -70,8 +68,6 @@ mutual
            → Γ       ⊢ s ∷ Π ℕ ▹ (G ▹▹ G [ suc (var Nat.zero) ]↑)
            → Γ       ⊢ n ∷ ℕ
            → Γ       ⊢ natrec G z s n ∷ G [ n ]
-    Emptyrecⱼ : ∀ {A e}
-           -> Γ ⊢ A -> Γ ⊢ e ∷ Empty -> Γ ⊢ Emptyrec A e ∷ A
     conv   : ∀ {t A B}
            → Γ ⊢ t ∷ A
            → Γ ⊢ A ≡ B
@@ -155,10 +151,6 @@ mutual
                 → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑)
                 → Γ     ⊢ natrec F z s (suc n) ≡ (s ∘ n) ∘ (natrec F z s n)
                         ∷ F [ suc n ]
-    Emptyrec-cong : ∀ {A A' e e'}
-                → Γ ⊢ A ≡ A'
-                → Γ ⊢ e ≡ e' ∷ Empty
-                → Γ ⊢ Emptyrec A e ≡ Emptyrec A' e' ∷ A
 
 -- Term reduction
 data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
@@ -193,10 +185,6 @@ data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var Nat.zero) ]↑)
                → Γ     ⊢ natrec F z s (suc n) ⇒ (s ∘ n) ∘ (natrec F z s n)
                        ∷ F [ suc n ]
-  Emptyrec-subst : ∀ {n n′ A}
-               → Γ ⊢ A
-               → Γ     ⊢ n ⇒ n′ ∷ Empty
-               → Γ     ⊢ Emptyrec A n ⇒ Emptyrec A n′ ∷ A
 
 -- Type reduction
 data _⊢_⇒_ (Γ : Con Term) : Term → Term → Set where

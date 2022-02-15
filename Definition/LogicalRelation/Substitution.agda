@@ -27,14 +27,6 @@ record Σω₀ {ℓ} (A : Set ℓ) (B : A → Setω) : Setω where
 
 open Σω₀ public
 
-record Σω₁ {ℓ} (A : Set ℓ) (B : A → Setω) : Setω₁ where
-  constructor _,_
-  field
-    proj₁ : A
-    proj₂ : B proj₁
-
-open Σω₁ public
-
 record Σω₂ {ℓ} (A : Setω) (B : A → Set ℓ) : Setω where
   constructor _,_
   field
@@ -83,10 +75,10 @@ _⊩ˢ⁰_≡_∷_/_/_/_ : {R : ValRel} (Δ : Con Term) (σ σ′ : Subst) (Γ :
 Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / VPack ⊩Subst ⊩EqSubst ⊩V / ⊢Δ / [σ] = ⊩EqSubst Δ σ σ′ ⊢Δ [σ]
 
 -- Validity of types
-_⊩ᵛ⁰⟨_⟩_/_ : {R : ValRel} (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ⁰ Γ / R → Setω₁
+_⊩ᵛ⁰⟨_⟩_/_ : {R : ValRel} (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ⁰ Γ / R → Setω
 _⊩ᵛ⁰⟨_⟩_/_ Γ l A [Γ] =
   ∀ {Δ σ} (⊢Δ : ⊢ Δ) ([σ] : Δ ⊩ˢ⁰ σ ∷ Γ / [Γ] / ⊢Δ)
-  → Σω₁ (Δ ⊩⟨ l ⟩ subst σ A) (λ [Aσ]
+  → Σω₀ (Δ ⊩⟨ l ⟩ subst σ A) (λ [Aσ]
     → ∀ {σ′} ([σ′] : Δ ⊩ˢ⁰ σ′ ∷ Γ / [Γ] / ⊢Δ)
       ([σ≡σ′] : Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ])
     → Δ ⊩⟨ l ⟩ subst σ A ≡ subst σ′ A / [Aσ])
@@ -116,7 +108,7 @@ _⊩ˢ_≡_∷_/_/_/_ : (Δ : Con Term) (σ σ′ : Subst) (Γ : Con Term) ([Γ]
 Δ ⊩ˢ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ] = Δ ⊩ˢ⁰ σ ≡ σ′ ∷ Γ / [Γ] / ⊢Δ / [σ]
 
 -- Validity of types
-_⊩ᵛ⟨_⟩_/_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ Γ → Setω₁
+_⊩ᵛ⟨_⟩_/_ : (Γ : Con Term) (l : TypeLevel) (A : Term) → ⊩ᵛ Γ → Setω
 Γ ⊩ᵛ⟨ l ⟩ A / [Γ] = Γ ⊩ᵛ⁰⟨ l ⟩ A / [Γ]
 
 -- Validity of terms
@@ -144,7 +136,7 @@ _⊩ᵛ⟨_⟩_≡_∷_/_/_ : (Γ : Con Term) (l : TypeLevel) (t u A : Term) ([�
 
 -- Valid term equality with validity of its type and terms
 record [_⊩ᵛ⟨_⟩_≡_∷_/_] (Γ : Con Term) (l : TypeLevel)
-                       (t u A : Term) ([Γ] : ⊩ᵛ Γ) : Setω₁ where
+                       (t u A : Term) ([Γ] : ⊩ᵛ Γ) : Setω where
   constructor modelsTermEq
   field
     [A]   : Γ ⊩ᵛ⟨ l ⟩ A / [Γ]
