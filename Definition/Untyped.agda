@@ -6,6 +6,10 @@ module Definition.Untyped where
 
 open import Tools.Nat
 open import Tools.Product
+open import Tools.Empty
+open import Tools.Unit
+open import Tools.Nullary
+open import Tools.Maybe
 import Tools.PropositionalEquality as PE
 
 
@@ -47,6 +51,96 @@ data Term : Set where
   suc    : (t : Term)       → Term  -- Successor.
   natrec : (A t u v : Term) → Term  -- Recursor (A is a binder).
 
+data _==_ : (t u : Term) → Set where
+  Uₑ : U == U
+  Πₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → Π t ▹ u == Π t′ ▹ u′
+  ℕₑ : ℕ == ℕ
+  varₑ : ∀ {x} → var x == var x
+  lamₑ : ∀ {t t′} → t == t′ → lam t == lam t′
+  appₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → (t ∘ u) == (t′ ∘ u′)
+  zeroₑ : zero == zero
+  sucₑ : ∀ {t t′} → t == t′ → suc t == suc t′
+  natrecₑ : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == natrec A′ t′ u′ v′
+  ηvarleft : ∀ {x} → lam ((var x) ∘ (var 0)) == var x
+  ηappleft : ∀ {t t′ u u′} → t == t′ → u == u′ → lam ((t ∘ u) ∘ (var 0)) == (t′ ∘ u′)
+  ηnatrecleft : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → lam ((natrec A t u v) ∘ (var 0)) == natrec A′ t′ u′ v′
+  ηvarright : ∀ {x} → var x == lam ((var x) ∘ (var 0))
+  ηappright : ∀ {t t′ u u′} → t == t′ → u == u′ → (t ∘ u) == lam ((t′ ∘ u′) ∘ (var 0))
+  ηnatrecright : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == lam ((natrec A′ t′ u′ v′) ∘ (var 0))
+
+view : (t u : Term) → Maybe (t == u)
+view (lam t) (lam t′) with (view t t′)
+view (lam t) (lam t′) | just p = just (lamₑ p)
+view (lam t) (lam t′) | nothing = nothing
+view (lam ((var x) ∘ (var 0))) (var y) with (x ≟ y)
+view (lam ((var x) ∘ (var 0))) (var y) | yes PE.refl = just ηvarleft
+view (lam ((var x) ∘ (var 0))) (var y) | no ¬p = nothing
+view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) with (view t t′) | (view u u′)
+view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) | just pt | just pu = just (ηappleft pt pu)
+view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) | _ | _ = nothing
+view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) | just pA | just pt | just pu | just pv = just (ηnatrecleft pA pt pu pv)
+view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
+view (var x) (lam ((var y) ∘ (var 0))) with (x ≟ y)
+view (var x) (lam ((var y) ∘ (var 0))) | yes PE.refl = just ηvarright
+view (var x) (lam ((var y) ∘ (var 0))) | no ¬p = nothing
+view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) with (view t t′) | (view u u′)
+view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) | just pt | just pu = just (ηappright pt pu)
+view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) | _ | _ = nothing
+view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | just pA | just pt | just pu | just pv = just (ηnatrecright pA pt pu pv)
+view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | _ | _ | _ | _ = nothing
+view U U = just Uₑ
+view (Π A ▹ B) (Π C ▹ D) with (view A C) | (view B D)
+view (Π A ▹ B) (Π C ▹ D) | just pA | just pB = just (Πₑ pA pB)
+view (Π A ▹ B) (Π C ▹ D) | _ | _ = nothing
+view ℕ ℕ = just ℕₑ
+view (var x) (var y) with (x ≟ y)
+view (var x) (var .x) | yes PE.refl = just varₑ
+view (var x) (var y) | no ¬p = nothing
+view (t ∘ u) (t′ ∘ u′) with (view t t′) | (view u u′)
+view (t ∘ u) (t′ ∘ u′) | just pt | just pu = just (appₑ pt pu)
+view (t ∘ u) (t′ ∘ u′) | _ | _ = nothing
+view zero zero = just zeroₑ
+view (suc t) (suc t′) with (view t t′)
+view (suc t) (suc t′) | just p = just (sucₑ p)
+view (suc t) (suc t′) | nothing = nothing
+view (natrec A t u v) (natrec A′ t′ u′ v′) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+view (natrec A t u v) (natrec A′ t′ u′ v′) | just pA | just pt | just pu | just pv = just (natrecₑ pA pt pu pv)
+view (natrec A t u v) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
+view t t′ = nothing
+
+view-diag : (t u : Term) → (e : t == u) → (view t u PE.≡ just e)
+view-diag .U .U Uₑ = PE.refl
+view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+view-diag .ℕ .ℕ ℕₑ = PE.refl
+view-diag .(var x) .(var x) (varₑ {x}) with (x ≟ x)
+view-diag .(var x) .(var x) (varₑ {x}) | yes p = {!!}
+view-diag .(var x) .(var x) (varₑ {x}) | no ¬p = ⊥-elim (¬p (PE.refl))
+view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
+view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) | just .e | PE.refl = PE.refl
+view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+view-diag .zero .zero zeroₑ = PE.refl
+view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
+view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) | just .e | PE.refl = PE.refl
+view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+  | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+view-diag (var x) (lam .(var x ∘ var 0)) ηvarright = {!!}
+view-diag (lam .(var x ∘ var 0)) (var x) ηvarleft = {!!}
+view-diag (lam .((_ ∘ _) ∘ var 0)) (y ∘ y₁) (ηappleft e e₁) = {!!}
+view-diag (lam .(natrec _ _ _ _ ∘ var 0)) (natrec y y₁ y₂ y₃) (ηnatrecleft e e₁ e₂ e₃) = {!!}
+view-diag (x ∘ x₁) (lam .((_ ∘ _) ∘ var 0)) (ηappright e e₁) = {!!}
+view-diag (natrec x x₁ x₂ x₃) (lam .(natrec _ _ _ _ ∘ var 0)) (ηnatrecright e e₁ e₂ e₃) = {!!}
+
+==-dec : (t u : Term) → Dec (t == u)
+==-dec t u with (view t u)
+==-dec t u | just e = yes e
+==-dec t u | nothing = no λ e → {!view-diag t u e!}
 
 -- Injectivity of term constructors w.r.t. propositional equality.
 
