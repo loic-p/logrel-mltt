@@ -1,6 +1,6 @@
 -- Raw terms, weakening (renaming) and substitution.
 
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --safe #-}
 
 module Definition.Untyped where
 
@@ -51,7 +51,11 @@ data Term : Set where
   suc    : (t : Term)       → Term  -- Successor.
   natrec : (A t u v : Term) → Term  -- Recursor (A is a binder).
 
+-- maybe we want an explicit description of "distinct" rather then "equal"
+-- unfortunately, the most naive way to describe distinct is with n^2 constructors
+-- so let's see how far we can get with "not equal"
 data _==_ : (t u : Term) → Set where
+  -- diagonal constructors
   Uₑ : U == U
   Πₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → Π t ▹ u == Π t′ ▹ u′
   ℕₑ : ℕ == ℕ
@@ -61,6 +65,7 @@ data _==_ : (t u : Term) → Set where
   zeroₑ : zero == zero
   sucₑ : ∀ {t t′} → t == t′ → suc t == suc t′
   natrecₑ : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == natrec A′ t′ u′ v′
+  -- eta for neutral constructor vs lambda
   ηvarleft : ∀ {x} → lam ((var x) ∘ (var 0)) == var x
   ηappleft : ∀ {t t′ u u′} → t == t′ → u == u′ → lam ((t ∘ u) ∘ (var 0)) == (t′ ∘ u′)
   ηnatrecleft : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → lam ((natrec A t u v) ∘ (var 0)) == natrec A′ t′ u′ v′
@@ -69,6 +74,7 @@ data _==_ : (t u : Term) → Set where
   ηnatrecright : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == lam ((natrec A′ t′ u′ v′) ∘ (var 0))
 
 view : (t u : Term) → Maybe (t == u)
+--first all the diagonal constructors
 view (lam t) (lam t′) with (view t t′)
 view (lam t) (lam t′) | just p = just (lamₑ p)
 view (lam t) (lam t′) | nothing = nothing
@@ -90,6 +96,7 @@ view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) | _ | _ = nothing
 view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
 view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | just pA | just pt | just pu | just pv = just (ηnatrecright pA pt pu pv)
 view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | _ | _ | _ | _ = nothing
+--now the eta versions of the (potentially) neutral constructors
 view U U = just Uₑ
 view (Π A ▹ B) (Π C ▹ D) with (view A C) | (view B D)
 view (Π A ▹ B) (Π C ▹ D) | just pA | just pB = just (Πₑ pA pB)
@@ -111,36 +118,49 @@ view (natrec A t u v) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
 view t t′ = nothing
 
 view-diag : (t u : Term) → (e : t == u) → (view t u PE.≡ just e)
+--diagonal constructors
 view-diag .U .U Uₑ = PE.refl
 view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
 view-diag .ℕ .ℕ ℕₑ = PE.refl
 view-diag .(var x) .(var x) (varₑ {x}) with (x ≟ x)
-view-diag .(var x) .(var x) (varₑ {x}) | yes p = {!!}
-view-diag .(var x) .(var x) (varₑ {x}) | no ¬p = ⊥-elim (¬p (PE.refl))
+... | yes PE.refl = PE.refl
+... | no ¬p = ⊥-elim (¬p (PE.refl))
 view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
-view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) | just .e | PE.refl = PE.refl
+... | just .e | PE.refl = PE.refl
 view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
 view-diag .zero .zero zeroₑ = PE.refl
 view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
-view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) | just .e | PE.refl = PE.refl
+... | just .e | PE.refl = PE.refl
 view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
   with (view A A′) | (view t t′) | (view u u′) | (view v v′)
     | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
-view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
-  | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
-view-diag (var x) (lam .(var x ∘ var 0)) ηvarright = {!!}
-view-diag (lam .(var x ∘ var 0)) (var x) ηvarleft = {!!}
-view-diag (lam .((_ ∘ _) ∘ var 0)) (y ∘ y₁) (ηappleft e e₁) = {!!}
-view-diag (lam .(natrec _ _ _ _ ∘ var 0)) (natrec y y₁ y₂ y₃) (ηnatrecleft e e₁ e₂ e₃) = {!!}
-view-diag (x ∘ x₁) (lam .((_ ∘ _) ∘ var 0)) (ηappright e e₁) = {!!}
-view-diag (natrec x x₁ x₂ x₃) (lam .(natrec _ _ _ _ ∘ var 0)) (ηnatrecright e e₁ e₂ e₃) = {!!}
+... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+--eta laws
+view-diag (var x) (lam .(var x ∘ var 0)) ηvarright with (x ≟ x)
+... | yes PE.refl = PE.refl
+... | no ¬p = ⊥-elim (¬p (PE.refl))
+view-diag (lam .(var x ∘ var 0)) (var x) ηvarleft with (x ≟ x)
+... | yes PE.refl = PE.refl
+... | no ¬p = ⊥-elim (¬p (PE.refl))
+view-diag (lam .((t ∘ u) ∘ var 0)) .(t′ ∘ u′) (ηappleft {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+view-diag .(t ∘ u) (lam .((t′ ∘ u′) ∘ var 0)) (ηappright {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+view-diag (lam .(natrec A t u v ∘ var 0)) .(natrec A′ t′ u′ v′) (ηnatrecleft {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+view-diag .(natrec A t u v) (lam .((natrec A′ t′ u′ v′) ∘ var 0)) (ηnatrecright {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
 
 ==-dec : (t u : Term) → Dec (t == u)
-==-dec t u with (view t u)
+==-dec t u with (view t u) in eq
 ==-dec t u | just e = yes e
-==-dec t u | nothing = no λ e → {!view-diag t u e!}
+==-dec t u | nothing = no λ e → inversion (PE.trans (PE.sym (view-diag t u e)) eq)
 
 -- Injectivity of term constructors w.r.t. propositional equality.
 
