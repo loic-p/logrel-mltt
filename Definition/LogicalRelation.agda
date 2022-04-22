@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation where
 
 open import Definition.Untyped as U
 open import Definition.Typed
@@ -28,7 +25,6 @@ record _⊩ne_ (Γ : Con Term) (A : Term) : Set where
     K   : Term
     D   : Γ ⊢ A :⇒*: K
     neK : Neutral K
-    K≡K : Γ ⊢ K ~ K ∷ U
 
 -- Neutral type equality
 record _⊩ne_≡_/_ (Γ : Con Term) (A B : Term) ([A] : Γ ⊩ne A) : Set where
@@ -38,16 +34,15 @@ record _⊩ne_≡_/_ (Γ : Con Term) (A B : Term) ([A] : Γ ⊩ne A) : Set where
     M   : Term
     D′  : Γ ⊢ B :⇒*: M
     neM : Neutral M
-    K≡M : Γ ⊢ K ~ M ∷ U
+    K==M : K == M
 
--- Neutral term in WHNF
+-- Neutral term in normal form
 record _⊩neNf_∷_ (Γ : Con Term) (k A : Term) : Set where
   inductive
   constructor neNfₜ
   field
     neK  : Neutral k
     ⊢k   : Γ ⊢ k ∷ A
-    k≡k  : Γ ⊢ k ~ k ∷ A
 
 -- Neutral term
 record _⊩ne_∷_/_ (Γ : Con Term) (t A : Term) ([A] : Γ ⊩ne A) : Set where
@@ -59,14 +54,14 @@ record _⊩ne_∷_/_ (Γ : Con Term) (t A : Term) ([A] : Γ ⊩ne A) : Set where
     d   : Γ ⊢ t :⇒*: k ∷ K
     nf  : Γ ⊩neNf k ∷ K
 
--- Neutral term equality in WHNF
+-- Neutral term equality in normal form
 record _⊩neNf_≡_∷_ (Γ : Con Term) (k m A : Term) : Set where
   inductive
   constructor neNfₜ₌
   field
     neK  : Neutral k
     neM  : Neutral m
-    k≡m  : Γ ⊢ k ~ m ∷ A
+    k≡m  : k == m
 
 -- Neutral term equality
 record _⊩ne_≡_∷_/_ (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩ne A) : Set where
@@ -88,44 +83,16 @@ _⊩ℕ_ : (Γ : Con Term) (A : Term) → Set
 _⊩ℕ_≡_ : (Γ : Con Term) (A B : Term) → Set
 Γ ⊩ℕ A ≡ B = Γ ⊢ B ⇒* ℕ
 
-mutual
-  -- Natural number term
-  data _⊩ℕ_∷ℕ (Γ : Con Term) (t : Term) : Set where
-    ℕₜ : (n : Term) (d : Γ ⊢ t :⇒*: n ∷ ℕ) (n≡n : Γ ⊢ n ≅ n ∷ ℕ)
-         (prop : Natural-prop Γ n)
-       → Γ ⊩ℕ t ∷ℕ
+-- Natural number term
+data _⊩ℕ_∷ℕ (Γ : Con Term) (t : Term) : Set where
+  ℕₜ : (n : Term) (d : Γ ⊢ t :⇒*: n ∷ ℕ)
+       (natn : Natural n)
+     → Γ ⊩ℕ t ∷ℕ
 
-  -- WHNF property of natural number terms
-  data Natural-prop (Γ : Con Term) : (n : Term) → Set where
-    suc  : ∀ {n} → Γ ⊩ℕ n ∷ℕ → Natural-prop Γ (suc n)
-    zero : Natural-prop Γ zero
-    ne   : ∀ {n} → Γ ⊩neNf n ∷ ℕ → Natural-prop Γ n
-
-mutual
-  -- Natural number term equality
-  data _⊩ℕ_≡_∷ℕ (Γ : Con Term) (t u : Term) : Set where
-    ℕₜ₌ : (k k′ : Term) (d : Γ ⊢ t :⇒*: k  ∷ ℕ) (d′ : Γ ⊢ u :⇒*: k′ ∷ ℕ)
-          (k≡k′ : Γ ⊢ k ≅ k′ ∷ ℕ)
-          (prop : [Natural]-prop Γ k k′) → Γ ⊩ℕ t ≡ u ∷ℕ
-
-  -- WHNF property of Natural number term equality
-  data [Natural]-prop (Γ : Con Term) : (n n′ : Term) → Set where
-    suc : ∀ {n n′} → Γ ⊩ℕ n ≡ n′ ∷ℕ → [Natural]-prop Γ (suc n) (suc n′)
-    zero : [Natural]-prop Γ zero zero
-    ne : ∀ {n n′} → Γ ⊩neNf n ≡ n′ ∷ ℕ → [Natural]-prop Γ n n′
-
--- Natural extraction from term WHNF property
-natural : ∀ {Γ n} → Natural-prop Γ n → Natural n
-natural (suc x) = suc
-natural zero = zero
-natural (ne (neNfₜ neK ⊢k k≡k)) = ne neK
-
--- Natural extraction from term equality WHNF property
-split : ∀ {Γ a b} → [Natural]-prop Γ a b → Natural a × Natural b
-split (suc x) = suc , suc
-split zero = zero , zero
-split (ne (neNfₜ₌ neK neM k≡m)) = ne neK , ne neM
-
+data _⊩ℕ_≡_∷ℕ (Γ : Con Term) (t u : Term) : Set where
+  ℕₜ₌ : (n m : Term) (d : Γ ⊢ t :⇒*: n ∷ ℕ) (d′ : Γ ⊢ u :⇒*: m ∷ ℕ)
+        (natn : Natural n) (natm : Natural m) (n≡m : n == m)
+     → Γ ⊩ℕ t ≡ u ∷ℕ
 
 -- Type levels
 
@@ -173,7 +140,6 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       A     : Term
       d     : Γ ⊢ t :⇒*: A ∷ U
       typeA : Type A
-      A≡A   : Γ ⊢ A ≅ A ∷ U
       [t]   : Γ ⊩ t
 
   -- Universe term equality
@@ -186,7 +152,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       d′    : Γ ⊢ u :⇒*: B ∷ U
       typeA : Type A
       typeB : Type B
-      A≡B   : Γ ⊢ A ≅ B ∷ U
+      --A≡B   : Γ ⊢ A ≡ B ∷ U
       [t]   : Γ ⊩ t
       [u]   : Γ ⊩ u
       [t≡u] : Γ ⊩ t ≡ u / [t]
@@ -198,6 +164,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     -- Π-type
     record _⊩¹Π_ (Γ : Con Term) (A : Term) : Set where
       inductive
+      eta-equality
       constructor Π
       field
         F : Term
@@ -205,7 +172,6 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
         D : Γ ⊢ A :⇒*: Π F ▹ G
         ⊢F : Γ ⊢ F
         ⊢G : Γ ∙ F ⊢ G
-        A≡A : Γ ⊢ Π F ▹ G ≅ Π F ▹ G
         [F] : ∀ {ρ Δ} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ) → Δ ⊩¹ U.wk ρ F
         [G] : ∀ {ρ Δ a}
             → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
@@ -221,13 +187,14 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
     -- Π-type equality
     record _⊩¹Π_≡_/_ (Γ : Con Term) (A B : Term) ([A] : Γ ⊩¹Π A) : Set where
       inductive
+      eta-equality
       constructor Π₌
       open _⊩¹Π_ [A]
       field
         F′     : Term
         G′     : Term
         D′     : Γ ⊢ B ⇒* Π F′ ▹ G′
-        A≡B    : Γ ⊢ Π F ▹ G ≅ Π F′ ▹ G′
+        --A≡B    : Γ ⊢ Π F ▹ G ≡ Π F′ ▹ G′
         [F≡F′] : ∀ {ρ Δ}
                → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                → Δ ⊩¹ U.wk ρ F ≡ U.wk ρ F′ / [F] [ρ] ⊢Δ
@@ -238,10 +205,9 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 
     -- Term of Π-type
     _⊩¹Π_∷_/_ : (Γ : Con Term) (t A : Term) ([A] : Γ ⊩¹Π A) → Set
-    Γ ⊩¹Π t ∷ A / Π F G D ⊢F ⊢G A≡A [F] [G] G-ext =
+    Γ ⊩¹Π t ∷ A / Π F G D ⊢F ⊢G [F] [G] G-ext =
       ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ▹ G
             × Function f
-            × Γ ⊢ f ≅ f ∷ Π F ▹ G
             × (∀ {ρ Δ a b}
               → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                 ([a] : Δ ⊩¹ a ∷ U.wk ρ F / [F] [ρ] ⊢Δ)
@@ -257,14 +223,15 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 
     -- Term equality of Π-type
     _⊩¹Π_≡_∷_/_ : (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩¹Π A) → Set
-    Γ ⊩¹Π t ≡ u ∷ A / Π F G D ⊢F ⊢G A≡A [F] [G] G-ext =
-      let [A] = Π F G D ⊢F ⊢G A≡A [F] [G] G-ext
+    Γ ⊩¹Π t ≡ u ∷ A / Π F G D ⊢F ⊢G [F] [G] G-ext =
+      let [A] = Π F G D ⊢F ⊢G [F] [G] G-ext
       in  ∃₂ λ f g →
           Γ ⊢ t :⇒*: f ∷ Π F ▹ G
       ×   Γ ⊢ u :⇒*: g ∷ Π F ▹ G
       ×   Function f
       ×   Function g
-      ×   Γ ⊢ f ≅ g ∷ Π F ▹ G
+      ×   f == g
+      -- ×   Γ ⊢ f ≡ g ∷ Π F ▹ G
       ×   Γ ⊩¹Π t ∷ A / [A]
       ×   Γ ⊩¹Π u ∷ A / [A]
       ×   (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
@@ -314,7 +281,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 open LogRel public using (U; ℕ; ne; Π; emb; Uₜ; Uₜ₌; Π₌)
 
 -- Patterns for the non-records of Π
-pattern Πₜ a b c d e f = a , b , c , d , e , f
+pattern Πₜ a b c d e = a , b , c , d , e
 pattern Πₜ₌ a b c d e f g h i j = a , b , c , d , e , f , g , h , i , j
 
 pattern U′  a b c = U (U a b c)
