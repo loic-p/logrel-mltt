@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
 module Definition.Typed where
 
@@ -66,6 +66,11 @@ mutual
            → Γ     ⊢ s ∷ Π ℕ ▹ (G ▹▹ G [ suc (var zero) ]↑)
            → Γ     ⊢ n ∷ ℕ
            → Γ     ⊢ natrec G z s n ∷ G [ n ]
+    cast   : ∀ {A B t}
+           → Γ ⊢ A
+           → Γ ⊢ B
+           → Γ ⊢ t ∷ A
+           → Γ ⊢ cast A B t ∷ B
     conv   : ∀ {t A B}
            → Γ ⊢ t ∷ A
            → Γ ⊢ A ≡ B
@@ -149,6 +154,15 @@ mutual
                 → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
                 → Γ     ⊢ natrec F z s (suc n) ≡ (s ∘ n) ∘ (natrec F z s n)
                         ∷ F [ suc n ]
+    cast-cong   : ∀ {A A′ B B′ t t′}
+                → Γ ⊢ A ≡ A′
+                → Γ ⊢ B ≡ B′
+                → Γ ⊢ t ≡ t′ ∷ A
+                → Γ ⊢ cast A B t ≡ cast A′ B′ t′ ∷ B
+    cast-conv   : ∀ {A B t}
+                → Γ ⊢ A ≡ B
+                → Γ ⊢ t ∷ A
+                → Γ ⊢ cast A B t ≡ t ∷ B
 
 -- Term reduction
 data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
@@ -156,33 +170,98 @@ data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
                → Γ ⊢ t ⇒ u ∷ A
                → Γ ⊢ A ≡ B
                → Γ ⊢ t ⇒ u ∷ B
-  app-subst    : ∀ {A B t u a}
+  app-subst    : ∀ {A B t a b}
+               → Γ ⊢ t ∷ Π A ▹ B
+               → Γ ⊢ a ⇒ b ∷ A
+               → Γ ⊢ t ∘ a ⇒ t ∘ b ∷ B [ a ]
+  app-subst-2  : ∀ {A B t u a}
                → Γ ⊢ t ⇒ u ∷ Π A ▹ B
                → Γ ⊢ a ∷ A
+               → Dnf a
                → Γ ⊢ t ∘ a ⇒ u ∘ a ∷ B [ a ]
   β-red        : ∀ {A B a t}
                → Γ     ⊢ A
                → Γ ∙ A ⊢ t ∷ B
+               → Dnf t
                → Γ     ⊢ a ∷ A
+               → Dnf a
                → Γ     ⊢ (lam t) ∘ a ⇒ t [ a ] ∷ B [ a ]
-  natrec-subst : ∀ {z s n n′ F}
+  natrec-subst : ∀ {z s n F F′}
+               → Γ ∙ ℕ ⊢ F ⇒ F′ ∷ U
+               → Γ ⊢ z ∷ F [ zero ]
+               → Γ ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Γ ⊢ n ∷ ℕ
+               → Γ ⊢ natrec F z s n ⇒ natrec F′ z s n ∷ F [ n ]
+  natrec-subst-2 : ∀ {z z′ s n F}
                → Γ ∙ ℕ ⊢ F
+               → Dnf F
+               → Γ ⊢ z ⇒ z′ ∷ F [ zero ]
+               → Γ ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Γ ⊢ n ∷ ℕ
+               → Γ ⊢ natrec F z s n ⇒ natrec F z′ s n ∷ F [ n ]
+  natrec-subst-3 : ∀ {z s s′ n F}
+               → Γ ∙ ℕ ⊢ F
+               → Dnf F
+               → Γ ⊢ z ∷ F [ zero ]
+               → Dnf z
+               → Γ ⊢ s ⇒ s′ ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Γ ⊢ n ∷ ℕ
+               → Γ ⊢ natrec F z s n ⇒ natrec F z s′ n ∷ F [ n ]
+  natrec-subst-4 : ∀ {z s n n′ F}
+               → Γ ∙ ℕ ⊢ F
+               → Dnf F
                → Γ     ⊢ z ∷ F [ zero ]
+               → Dnf z
                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Dnf s
                → Γ     ⊢ n ⇒ n′ ∷ ℕ
                → Γ     ⊢ natrec F z s n ⇒ natrec F z s n′ ∷ F [ n ]
   natrec-zero  : ∀ {z s F}
                → Γ ∙ ℕ ⊢ F
+               → Dnf F
                → Γ     ⊢ z ∷ F [ zero ]
+               → Dnf z
                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Dnf s
                → Γ     ⊢ natrec F z s zero ⇒ z ∷ F [ zero ]
   natrec-suc   : ∀ {n z s F}
                → Γ     ⊢ n ∷ ℕ
+               → Dnf n
                → Γ ∙ ℕ ⊢ F
+               → Dnf F
                → Γ     ⊢ z ∷ F [ zero ]
+               → Dnf z
                → Γ     ⊢ s ∷ Π ℕ ▹ (F ▹▹ F [ suc (var zero) ]↑)
+               → Dnf s
                → Γ     ⊢ natrec F z s (suc n) ⇒ (s ∘ n) ∘ (natrec F z s n)
                        ∷ F [ suc n ]
+  cast-subst : ∀ {A B t t′}
+             → Γ ⊢ A
+             → Γ ⊢ B
+             → Γ ⊢ t ⇒ t′ ∷ A
+             → Γ ⊢ cast A B t ⇒ cast A B t′ ∷ B
+  cast-subst-2 : ∀ {A A′ B t}
+             → Γ ⊢ A ⇒ A′ ∷ U
+             → Γ ⊢ B
+             → Γ ⊢ t ∷ A
+             → Dnf t
+             → Γ ⊢ cast A B t ⇒ cast A′ B t ∷ B
+  cast-subst-3 : ∀ {A B B′ t}
+             → Γ ⊢ A
+             → Dnf A
+             → Γ ⊢ B ⇒ B′ ∷ U
+             → Γ ⊢ t ∷ A
+             → Dnf t
+             → Γ ⊢ cast A B t ⇒ cast A B′ t ∷ B
+  cast-conv : ∀ {A B t}
+            → Γ ⊢ A
+            → Dnf A
+            → Γ ⊢ B
+            → Dnf B
+            → A == B
+            → Γ ⊢ t ∷ A
+            → Dnf t
+            → Γ ⊢ cast A B t ⇒ t ∷ B
 
 -- Type reduction
 data _⊢_⇒_ (Γ : Con Term) : Term → Term → Set where
@@ -212,11 +291,11 @@ data _⊢_⇒*_ (Γ : Con Term) : Term → Term → Set where
 
 -- Type reduction to whnf
 _⊢_↘_ : (Γ : Con Term) → Term → Term → Set
-Γ ⊢ A ↘ B = Γ ⊢ A ⇒* B × Whnf B
+Γ ⊢ A ↘ B = Γ ⊢ A ⇒* B × Dnf B
 
 -- Term reduction to whnf
 _⊢_↘_∷_ : (Γ : Con Term) → Term → Term → Term → Set
-Γ ⊢ t ↘ u ∷ A = Γ ⊢ t ⇒* u ∷ A × Whnf u
+Γ ⊢ t ↘ u ∷ A = Γ ⊢ t ⇒* u ∷ A × Dnf u
 
 -- Type eqaulity with well-formed types
 _⊢_:≡:_ : (Γ : Con Term) → Term → Term → Set

@@ -1,6 +1,6 @@
 -- Laws for weakenings and substitutions.
 
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K  #-}
 
 module Definition.Untyped.Properties where
 
@@ -59,6 +59,7 @@ wkVar-to-wk eq (suc t)    = cong suc (wkVar-to-wk eq t)
 wkVar-to-wk eq (natrec t t₁ t₂ t₃) =
   cong₄ natrec (wkVar-to-wk (wkVar-lift eq) t)
                (wkVar-to-wk eq t₁) (wkVar-to-wk eq t₂) (wkVar-to-wk eq t₃)
+wkVar-to-wk eq (cast A B t) = cong₃ cast (wkVar-to-wk eq A) (wkVar-to-wk eq B) (wkVar-to-wk eq t)
 
 -- lift id  is extensionally equal to  id.
 
@@ -84,6 +85,7 @@ wk-id (suc t)    = cong suc (wk-id t)
 wk-id (natrec t t₁ t₂ t₃) =
   cong₄ natrec (trans (wkVar-to-wk wkVar-lift-id t) (wk-id t))
                (wk-id t₁) (wk-id t₂) (wk-id t₃)
+wk-id (cast A B t) = cong₃ cast (wk-id A) (wk-id B) (wk-id t)
 
 -- lift id  is also the identity renaming.
 
@@ -119,7 +121,7 @@ wk-comp ρ ρ′ (natrec t t₁ t₂ t₃) =
                (wk-comp ρ ρ′ t₁)
                (wk-comp ρ ρ′ t₂)
                (wk-comp ρ ρ′ t₃)
-
+wk-comp ρ ρ′ (cast A B t) = cong₃ cast (wk-comp ρ ρ′ A) (wk-comp ρ ρ′ B) (wk-comp ρ ρ′ t)
 
 -- The following lemmata are variations on the equality
 --
@@ -179,6 +181,8 @@ substVar-to-subst eq (natrec t t₁ t₂ t₃) =
                (substVar-to-subst eq t₁)
                (substVar-to-subst eq t₂)
                (substVar-to-subst eq t₃)
+substVar-to-subst eq (cast A B t)  =
+  cong₃ cast (substVar-to-subst eq A) (substVar-to-subst eq B) (substVar-to-subst eq t)
 
 -- lift id = id  (as substitutions)
 
@@ -201,7 +205,8 @@ subst-id (suc t)    = cong suc (subst-id t)
 subst-id (natrec t t₁ t₂ t₃) =
   cong₄ natrec (trans (substVar-to-subst subst-lift-id t) (subst-id t))
                (subst-id t₁) (subst-id t₂) (subst-id t₃)
-
+subst-id (cast A B t) =
+  cong₃ cast (subst-id A) (subst-id B) (subst-id t)
 
 -- Correctness of composition of weakening and substitution.
 
@@ -236,6 +241,8 @@ wk-subst (suc t)    = cong suc (wk-subst t)
 wk-subst (natrec t t₁ t₂ t₃) =
   cong₄ natrec (trans (wk-subst t) (subst-lift-•ₛ t))
                (wk-subst t₁) (wk-subst t₂) (wk-subst t₃)
+wk-subst (cast A B t) =
+  cong₃ cast (wk-subst A) (wk-subst B) (wk-subst t)
 
 -- subst σ ∘ wk ρ = subst (σ •ₛ ρ)
 
@@ -252,6 +259,8 @@ subst-wk (suc t)    = cong suc (subst-wk t)
 subst-wk (natrec t t₁ t₂ t₃) =
   cong₄ natrec (trans (subst-wk t) (subst-lift-ₛ• t))
                (subst-wk t₁) (subst-wk t₂) (subst-wk t₃)
+subst-wk (cast A B t) =
+  cong₃ cast (subst-wk A) (subst-wk B) (subst-wk t)
 
 -- Composition of liftings is lifting of the composition.
 
@@ -292,7 +301,8 @@ substCompEq (suc t)    = cong suc (substCompEq t)
 substCompEq (natrec t t₁ t₂ t₃) =
   cong₄ natrec (trans (substCompEq t) (substVar-to-subst substCompLift t))
                (substCompEq t₁) (substCompEq t₂) (substCompEq t₃)
-
+substCompEq (cast A B t) =
+  cong₃ cast (substCompEq A) (substCompEq B) (substCompEq t)
 
 -- Weakening single substitutions.
 

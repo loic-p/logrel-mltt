@@ -1,6 +1,6 @@
 -- Raw terms, weakening (renaming) and substitution.
 
-{-# OPTIONS --safe #-}
+{-# OPTIONS --without-K #-}
 
 module Definition.Untyped where
 
@@ -51,116 +51,113 @@ data Term : Set where
   suc    : (t : Term)       → Term  -- Successor.
   natrec : (A t u v : Term) → Term  -- Recursor (A is a binder).
 
+  -- Type casting
+  cast   : (A B t : Term)   → Term
+
 -- maybe we want an explicit description of "distinct" rather then "equal"
 -- unfortunately, the most naive way to describe distinct is with n^2 constructors
 -- so let's see how far we can get with "not equal"
-data _==_ : (t u : Term) → Set where
-  -- diagonal constructors
-  Uₑ : U == U
-  Πₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → Π t ▹ u == Π t′ ▹ u′
-  ℕₑ : ℕ == ℕ
-  varₑ : ∀ {x} → var x == var x
-  lamₑ : ∀ {t t′} → t == t′ → lam t == lam t′
-  appₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → (t ∘ u) == (t′ ∘ u′)
-  zeroₑ : zero == zero
-  sucₑ : ∀ {t t′} → t == t′ → suc t == suc t′
-  natrecₑ : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == natrec A′ t′ u′ v′
-  -- eta for neutral constructor vs lambda
-  ηvarleft : ∀ {x} → lam ((var x) ∘ (var 0)) == var x
-  ηappleft : ∀ {t t′ u u′} → t == t′ → u == u′ → lam ((t ∘ u) ∘ (var 0)) == (t′ ∘ u′)
-  ηnatrecleft : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → lam ((natrec A t u v) ∘ (var 0)) == natrec A′ t′ u′ v′
-  ηvarright : ∀ {x} → var x == lam ((var x) ∘ (var 0))
-  ηappright : ∀ {t t′ u u′} → t == t′ → u == u′ → (t ∘ u) == lam ((t′ ∘ u′) ∘ (var 0))
-  ηnatrecright : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == lam ((natrec A′ t′ u′ v′) ∘ (var 0))
 
-view : (t u : Term) → Maybe (t == u)
---first all the diagonal constructors
-view (lam t) (lam t′) with (view t t′)
-view (lam t) (lam t′) | just p = just (lamₑ p)
-view (lam t) (lam t′) | nothing = nothing
-view (lam ((var x) ∘ (var 0))) (var y) with (x ≟ y)
-view (lam ((var x) ∘ (var 0))) (var y) | yes PE.refl = just ηvarleft
-view (lam ((var x) ∘ (var 0))) (var y) | no ¬p = nothing
-view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) with (view t t′) | (view u u′)
-view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) | just pt | just pu = just (ηappleft pt pu)
-view (lam ((t ∘ u) ∘ (var 0))) (t′ ∘ u′) | _ | _ = nothing
-view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) | just pA | just pt | just pu | just pv = just (ηnatrecleft pA pt pu pv)
-view (lam ((natrec A t u v) ∘ (var 0))) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
-view (var x) (lam ((var y) ∘ (var 0))) with (x ≟ y)
-view (var x) (lam ((var y) ∘ (var 0))) | yes PE.refl = just ηvarright
-view (var x) (lam ((var y) ∘ (var 0))) | no ¬p = nothing
-view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) with (view t t′) | (view u u′)
-view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) | just pt | just pu = just (ηappright pt pu)
-view (t ∘ u) (lam ((t′ ∘ u′) ∘ (var 0))) | _ | _ = nothing
-view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | just pA | just pt | just pu | just pv = just (ηnatrecright pA pt pu pv)
-view (natrec A t u v) (lam ((natrec A′ t′ u′ v′) ∘ (var 0))) | _ | _ | _ | _ = nothing
---now the eta versions of the (potentially) neutral constructors
-view U U = just Uₑ
-view (Π A ▹ B) (Π C ▹ D) with (view A C) | (view B D)
-view (Π A ▹ B) (Π C ▹ D) | just pA | just pB = just (Πₑ pA pB)
-view (Π A ▹ B) (Π C ▹ D) | _ | _ = nothing
-view ℕ ℕ = just ℕₑ
-view (var x) (var y) with (x ≟ y)
-view (var x) (var .x) | yes PE.refl = just varₑ
-view (var x) (var y) | no ¬p = nothing
-view (t ∘ u) (t′ ∘ u′) with (view t t′) | (view u u′)
-view (t ∘ u) (t′ ∘ u′) | just pt | just pu = just (appₑ pt pu)
-view (t ∘ u) (t′ ∘ u′) | _ | _ = nothing
-view zero zero = just zeroₑ
-view (suc t) (suc t′) with (view t t′)
-view (suc t) (suc t′) | just p = just (sucₑ p)
-view (suc t) (suc t′) | nothing = nothing
-view (natrec A t u v) (natrec A′ t′ u′ v′) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-view (natrec A t u v) (natrec A′ t′ u′ v′) | just pA | just pt | just pu | just pv = just (natrecₑ pA pt pu pv)
-view (natrec A t u v) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
-view t t′ = nothing
+-- data _==_ : (t u : Term) → Set where
+--   -- diagonal constructors
+--   Uₑ : U == U
+--   Πₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → Π t ▹ u == Π t′ ▹ u′
+--   ℕₑ : ℕ == ℕ
+--   varₑ : ∀ {x} → var x == var x
+--   lamₑ : ∀ {t t′} → t == t′ → lam t == lam t′
+--   appₑ : ∀ {t t′ u u′} → t == t′ → u == u′ → (t ∘ u) == (t′ ∘ u′)
+--   zeroₑ : zero == zero
+--   sucₑ : ∀ {t t′} → t == t′ → suc t == suc t′
+--   natrecₑ : ∀ {A A′ t t′ u u′ v v′} → A == A′ → t == t′ → u == u′ → v == v′ → natrec A t u v == natrec A′ t′ u′ v′
+--   castₑ : ∀ {A A′ B B′ t t′} → A == A′ → B == B′ → t == t′ → cast A B t == cast A′ B′ t′
+--   -- eta for lambda vs neutral constructor
+--   ηvarleft : ∀ {f x} → f == ((var x) ∘ var 0) → lam f == var x
+--   ηappleft : ∀ {f t u} → f == ((t ∘ u) ∘ var 0) → lam f == (t ∘ u)
+--   ηnatrecleft : ∀ {f A t u v} → f == ((natrec A t u v) ∘ var 0) → lam f == natrec A t u v
+--   ηcastleft : ∀ {f A B t} → f == ((cast A B t) ∘ var 0) → lam f == cast A B t
+--   -- eta for neutral constructor vs lambda
+--   ηvarright : ∀ {f x} → f == ((var x) ∘ var 0) → var x == lam f
+--   ηappright : ∀ {f t u} → ((t ∘ u) ∘ var 0) == f → (t ∘ u) == lam f
+--   ηnatrecright : ∀ {f A t u v} → ((natrec A t u v) ∘ var 0) == f → natrec A t u v == lam f
+--   ηcastright : ∀ {f A B t} → ((cast A B t) ∘ var 0) == f → cast A B t == lam f
 
-view-diag : (t u : Term) → (e : t == u) → (view t u PE.≡ just e)
---diagonal constructors
-view-diag .U .U Uₑ = PE.refl
-view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
-view-diag .ℕ .ℕ ℕₑ = PE.refl
-view-diag .(var x) .(var x) (varₑ {x}) with (x ≟ x)
-... | yes PE.refl = PE.refl
-... | no ¬p = ⊥-elim (¬p (PE.refl))
-view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
-... | just .e | PE.refl = PE.refl
-view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
-view-diag .zero .zero zeroₑ = PE.refl
-view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
-... | just .e | PE.refl = PE.refl
-view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
-  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
-... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
---eta laws
-view-diag (var x) (lam .(var x ∘ var 0)) ηvarright with (x ≟ x)
-... | yes PE.refl = PE.refl
-... | no ¬p = ⊥-elim (¬p (PE.refl))
-view-diag (lam .(var x ∘ var 0)) (var x) ηvarleft with (x ≟ x)
-... | yes PE.refl = PE.refl
-... | no ¬p = ⊥-elim (¬p (PE.refl))
-view-diag (lam .((t ∘ u) ∘ var 0)) .(t′ ∘ u′) (ηappleft {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
-view-diag .(t ∘ u) (lam .((t′ ∘ u′) ∘ var 0)) (ηappright {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
-... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
-view-diag (lam .(natrec A t u v ∘ var 0)) .(natrec A′ t′ u′ v′) (ηnatrecleft {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
-  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
-... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
-view-diag .(natrec A t u v) (lam .((natrec A′ t′ u′ v′) ∘ var 0)) (ηnatrecright {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
-  with (view A A′) | (view t t′) | (view u u′) | (view v v′)
-    | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
-... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+postulate
+  _==_ : Term → Term → Set
+  ==-dec : ∀ t u → Dec (t == u)
 
-==-dec : (t u : Term) → Dec (t == u)
-==-dec t u with (view t u) in eq
-==-dec t u | just e = yes e
-==-dec t u | nothing = no λ e → inversion (PE.trans (PE.sym (view-diag t u e)) eq)
+_<>_ : Term → Term → Set
+t <> u = (t == u) → ⊥
+
+-- view : (t u : Term) → Maybe (t == u)
+-- --first all the diagonal constructors
+-- view (lam t) (lam t′) with (view t t′)
+-- view (lam t) (lam t′) | just p = just (lamₑ p)
+-- view (lam t) (lam t′) | nothing = nothing
+-- view U U = just Uₑ
+-- view (Π A ▹ B) (Π C ▹ D) with (view A C) | (view B D)
+-- view (Π A ▹ B) (Π C ▹ D) | just pA | just pB = just (Πₑ pA pB)
+-- view (Π A ▹ B) (Π C ▹ D) | _ | _ = nothing
+-- view ℕ ℕ = just ℕₑ
+-- view (var x) (var y) with (x ≟ y)
+-- view (var x) (var .x) | yes PE.refl = just varₑ
+-- view (var x) (var y) | no ¬p = nothing
+-- view (t ∘ u) (t′ ∘ u′) with (view t t′) | (view u u′)
+-- view (t ∘ u) (t′ ∘ u′) | just pt | just pu = just (appₑ pt pu)
+-- view (t ∘ u) (t′ ∘ u′) | _ | _ = nothing
+-- view zero zero = just zeroₑ
+-- view (suc t) (suc t′) with (view t t′)
+-- view (suc t) (suc t′) | just p = just (sucₑ p)
+-- view (suc t) (suc t′) | nothing = nothing
+-- view (natrec A t u v) (natrec A′ t′ u′ v′) with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+-- view (natrec A t u v) (natrec A′ t′ u′ v′) | just pA | just pt | just pu | just pv = just (natrecₑ pA pt pu pv)
+-- view (natrec A t u v) (natrec A′ t′ u′ v′) | _ | _ | _ | _ = nothing
+-- -- view (lam t) u
+-- view t t′ = nothing
+
+-- view-diag : (t u : Term) → (e : t == u) → (view t u PE.≡ just e)
+-- --diagonal constructors
+-- view-diag .U .U Uₑ = PE.refl
+-- view-diag .(Π t ▹ u) .(Π t′ ▹ u′) (Πₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+-- ... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+-- view-diag .ℕ .ℕ ℕₑ = PE.refl
+-- view-diag .(var x) .(var x) (varₑ {x}) with (x ≟ x)
+-- ... | yes PE.refl = PE.refl
+-- ... | no ¬p = ⊥-elim (¬p (PE.refl))
+-- view-diag .(lam t) .(lam t′) (lamₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
+-- ... | just .e | PE.refl = PE.refl
+-- view-diag .(t ∘ u) .(t′ ∘ u′) (appₑ {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+-- ... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+-- view-diag .zero .zero zeroₑ = PE.refl
+-- view-diag .(suc t) .(suc t′) (sucₑ {t} {t′} e) with (view t t′) | (view-diag t t′ e)
+-- ... | just .e | PE.refl = PE.refl
+-- view-diag .(natrec A t u v) .(natrec A′ t′ u′ v′) (natrecₑ {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+--   with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+--     | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+-- ... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+-- --eta laws
+-- view-diag (var x) (lam .(var x ∘ var 0)) ηvarright with (x ≟ x)
+-- ... | yes PE.refl = PE.refl
+-- ... | no ¬p = ⊥-elim (¬p (PE.refl))
+-- view-diag (lam .(var x ∘ var 0)) (var x) ηvarleft with (x ≟ x)
+-- ... | yes PE.refl = PE.refl
+-- ... | no ¬p = ⊥-elim (¬p (PE.refl))
+-- view-diag (lam .((t ∘ u) ∘ var 0)) .(t′ ∘ u′) (ηappleft {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+-- ... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+-- view-diag .(t ∘ u) (lam .((t′ ∘ u′) ∘ var 0)) (ηappright {t} {t′} {u} {u′} e e₁) with (view t t′) | (view u u′) | (view-diag t t′ e) | (view-diag u u′ e₁)
+-- ... | just .e | just .e₁ | PE.refl | PE.refl = PE.refl
+-- view-diag (lam .(natrec A t u v ∘ var 0)) .(natrec A′ t′ u′ v′) (ηnatrecleft {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+--   with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+--     | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+-- ... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+-- view-diag .(natrec A t u v) (lam .((natrec A′ t′ u′ v′) ∘ var 0)) (ηnatrecright {A} {A′} {t} {t′} {u} {u′} {v} {v′} e e₁ e₂ e₃)
+--   with (view A A′) | (view t t′) | (view u u′) | (view v v′)
+--     | (view-diag A A′ e) | (view-diag t t′ e₁) | (view-diag u u′ e₂) | (view-diag v v′ e₃)
+-- ... | just .e | just .e₁ | just .e₂ | just .e₃ | PE.refl | PE.refl | PE.refl | PE.refl = PE.refl
+
+-- ==-dec : (t u : Term) → Dec (t == u)
+-- ==-dec t u with (view t u) in eq
+-- ==-dec t u | just e = yes e
+-- ==-dec t u | nothing = no λ e → inversion (PE.trans (PE.sym (view-diag t u e)) eq)
 
 -- Injectivity of term constructors w.r.t. propositional equality.
 
@@ -175,35 +172,33 @@ suc-PE-injectivity : ∀ {n m} → Term.suc n PE.≡ suc m → n PE.≡ m
 suc-PE-injectivity PE.refl = PE.refl
 
 
--- Neutral terms.
+-- Neutral terms and Deep normal forms (dnfs).
 
--- A term is neutral if it has a variable in head position.
--- The variable blocks reduction of such terms.
+-- A term is neutral if it has a variable or an incompatible cast in head position.
+-- The variable/cast blocks reduction of such terms.
 
-data Neutral : Term → Set where
+data Neutral : Term → Set
+data Dnf : Term → Set
+
+data Neutral where
   var    : ∀ n                     → Neutral (var n)
-  _∘_    : ∀ {k u}     → Neutral k → Neutral (k ∘ u)
-  natrec : ∀ {C c g k} → Neutral k → Neutral (natrec C c g k)
+  _∘_    : ∀ {k u}     → Neutral k → Dnf u → Neutral (k ∘ u)
+  natrec : ∀ {C c g k} → Neutral k → Dnf C → Dnf c → Dnf g → Neutral (natrec C c g k)
+  cast   : ∀ {A B t}   → Dnf A → Dnf B → A <> B → Dnf t → Neutral (cast A B t)
 
+data Dnf where
+  -- Type constructors
+  U    : Dnf U
+  Π    : ∀ {A B} → Dnf A → Dnf B → Dnf (Π A ▹ B)
+  ℕ    : Dnf ℕ
 
--- Weak head normal forms (whnfs).
+  -- Introductions
+  lam  : ∀ {t} → Dnf t → Dnf (lam t)
+  zero : Dnf zero
+  suc  : ∀ {t} → Dnf t → Dnf (suc t)
 
--- These are the (lazy) values of our language.
-
-data Whnf : Term → Set where
-
-  -- Type constructors are whnfs.
-  U    : Whnf U
-  Π    : ∀ {A B} → Whnf (Π A ▹ B)
-  ℕ    : Whnf ℕ
-
-  -- Introductions are whnfs.
-  lam  : ∀ {t} → Whnf (lam t)
-  zero : Whnf zero
-  suc  : ∀ {t} → Whnf (suc t)
-
-  -- Neutrals are whnfs.
-  ne   : ∀ {n} → Neutral n → Whnf n
+  -- Neutrals are Dnfs.
+  ne   : ∀ {n} → Neutral n → Dnf n
 
 
 -- Whnf inequalities.
@@ -239,45 +234,45 @@ suc≢ne : ∀ {n k} → Neutral k → Term.suc n PE.≢ k
 suc≢ne () PE.refl
 
 
--- Several views on whnfs (note: not recursive).
+-- Several views on dnfs
 
--- A whnf of type ℕ is either zero, suc t, or neutral.
+-- A dnf of type ℕ is either zero, suc t, or neutral.
 
 data Natural : Term → Set where
   zero :                     Natural zero
-  suc  : ∀ {t}             → Natural (suc t)
+  suc  : ∀ {t} → Natural t → Natural (suc t)
   ne   : ∀ {n} → Neutral n → Natural n
 
--- A (small) type in whnf is either Π A B, ℕ, or neutral.
+-- A (small) type in dnf is either Π A B, ℕ, or neutral.
 -- Large types could also be U.
 
 data Type : Term → Set where
-  Π : ∀ {A B} → Type (Π A ▹ B)
+  Π : ∀ {A B} → Type A → Type B → Type (Π A ▹ B)
   ℕ : Type ℕ
   ne : ∀{n} → Neutral n → Type n
 
--- A whnf of type Π A B is either lam t or neutral.
+-- A dnf of type Π A B is either lam t or neutral.
 
 data Function : Term → Set where
-  lam : ∀{t} → Function (lam t)
+  lam : ∀{t} → Dnf t → Function (lam t)
   ne : ∀{n} → Neutral n → Function n
 
 -- These views classify only whnfs.
 -- Natural, Type, and Function are a subsets of Whnf.
 
-naturalWhnf : ∀ {n} → Natural n → Whnf n
-naturalWhnf suc = suc
-naturalWhnf zero = zero
-naturalWhnf (ne x) = ne x
+naturalDnf : ∀ {n} → Natural n → Dnf n
+naturalDnf (suc t) = suc (naturalDnf t)
+naturalDnf zero = zero
+naturalDnf (ne x) = ne x
 
-typeWhnf : ∀ {A} → Type A → Whnf A
-typeWhnf Π = Π
-typeWhnf ℕ = ℕ
-typeWhnf (ne x) = ne x
+typeDnf : ∀ {A} → Type A → Dnf A
+typeDnf (Π A B) = Π (typeDnf A) (typeDnf B)
+typeDnf ℕ = ℕ
+typeDnf (ne x) = ne x
 
-functionWhnf : ∀ {f} → Function f → Whnf f
-functionWhnf lam = lam
-functionWhnf (ne x) = ne x
+functionDnf : ∀ {f} → Function f → Dnf f
+functionDnf (lam t) = lam t
+functionDnf (ne x) = ne x
 
 ------------------------------------------------------------------------
 -- Weakening
@@ -332,6 +327,7 @@ wk ρ (t ∘ u)          = wk ρ t ∘ wk ρ u
 wk ρ zero             = zero
 wk ρ (suc t)          = suc (wk ρ t)
 wk ρ (natrec A t u v) = natrec (wk (lift ρ) A) (wk ρ t) (wk ρ u) (wk ρ v)
+wk ρ (cast A B t)     = cast (wk ρ A) (wk ρ B) (wk ρ t)
 
 -- Adding one variable to the context requires wk1.
 -- If Γ ⊢ t : B then Γ∙A ⊢ wk1 t : wk1 B.
@@ -339,37 +335,47 @@ wk ρ (natrec A t u v) = natrec (wk (lift ρ) A) (wk ρ t) (wk ρ u) (wk ρ v)
 wk1 : Term → Term
 wk1 = wk (step id)
 
--- Weakening of a neutral term.
+postulate
+  ==-wk : ∀ {A B} ρ → A == B → (wk ρ A) == (wk ρ B)
+  ==-antiwk : ∀ {A B} ρ → (wk ρ A) == (wk ρ B) → A == B
+
+<>-wk : ∀ {A B} ρ → A <> B → (wk ρ A) <> (wk ρ B)
+<>-wk ρ d e = d (==-antiwk ρ e)
+
+
+-- Weakening of neutral terms and dnfs.
 
 wkNeutral : ∀ {t} ρ → Neutral t → Neutral (wk ρ t)
+wkDnf : ∀ {t} ρ → Dnf t → Dnf (wk ρ t)
+
 wkNeutral ρ (var n)    = var (wkVar ρ n)
-wkNeutral ρ (_∘_ n)    = _∘_ (wkNeutral ρ n)
-wkNeutral ρ (natrec n) = natrec (wkNeutral ρ n)
+wkNeutral ρ (_∘_ n t)    = _∘_ (wkNeutral ρ n) (wkDnf ρ t)
+wkNeutral ρ (natrec n A z s) = natrec (wkNeutral ρ n) (wkDnf (lift ρ) A) (wkDnf ρ z) (wkDnf ρ s)
+wkNeutral ρ (cast A B A<>B t) = cast (wkDnf ρ A) (wkDnf ρ B) (<>-wk ρ A<>B) (wkDnf ρ t)
+
+wkDnf ρ U       = U
+wkDnf ρ (Π A B) = Π (wkDnf ρ A) (wkDnf (lift ρ) B)
+wkDnf ρ ℕ       = ℕ
+wkDnf ρ (lam t) = lam (wkDnf (lift ρ) t)
+wkDnf ρ zero    = zero
+wkDnf ρ (suc t) = suc (wkDnf ρ t)
+wkDnf ρ (ne x)  = ne (wkNeutral ρ x)
 
 -- Weakening can be applied to our whnf views.
 
 wkNatural : ∀ {t} ρ → Natural t → Natural (wk ρ t)
-wkNatural ρ suc    = suc
+wkNatural ρ (suc t)    = suc (wkNatural ρ t)
 wkNatural ρ zero   = zero
 wkNatural ρ (ne x) = ne (wkNeutral ρ x)
 
 wkType : ∀ {t} ρ → Type t → Type (wk ρ t)
-wkType ρ Π      = Π
-wkType ρ ℕ      = ℕ
-wkType ρ (ne x) = ne (wkNeutral ρ x)
+wkType ρ (Π A B) = Π (wkType ρ A) (wkType (lift ρ) B)
+wkType ρ ℕ       = ℕ
+wkType ρ (ne x)  = ne (wkNeutral ρ x)
 
 wkFunction : ∀ {t} ρ → Function t → Function (wk ρ t)
-wkFunction ρ lam    = lam
-wkFunction ρ (ne x) = ne (wkNeutral ρ x)
-
-wkWhnf : ∀ {t} ρ → Whnf t → Whnf (wk ρ t)
-wkWhnf ρ U      = U
-wkWhnf ρ Π      = Π
-wkWhnf ρ ℕ      = ℕ
-wkWhnf ρ lam    = lam
-wkWhnf ρ zero   = zero
-wkWhnf ρ suc    = suc
-wkWhnf ρ (ne x) = ne (wkNeutral ρ x)
+wkFunction ρ (lam t) = lam (wkDnf (lift ρ) t)
+wkFunction ρ (ne x)  = ne (wkNeutral ρ x)
 
 -- Non-dependent version of Π.
 
@@ -466,6 +472,7 @@ subst σ zero       = zero
 subst σ (suc t)    = suc (subst σ t)
 subst σ (natrec A t u v) =
   natrec (subst (liftSubst σ) A) (subst σ t) (subst σ u) (subst σ v)
+subst σ (cast A B t) = cast (subst σ A) (subst σ B) (subst σ t)
 
 -- Extend a substitution by adding a term as
 -- the first variable substitution and shift the rest.
