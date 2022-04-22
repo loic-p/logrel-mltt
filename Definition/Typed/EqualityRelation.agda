@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
 module Definition.Typed.EqualityRelation where
 
@@ -85,8 +85,8 @@ record EqRelSet : Set₁ where
     ≅-red : ∀ {A A′ B B′ Γ}
           → Γ ⊢ A ⇒* A′
           → Γ ⊢ B ⇒* B′
-          → Whnf A′
-          → Whnf B′
+          → Dnf A′
+          → Dnf B′
           → Γ ⊢ A′ ≅ B′
           → Γ ⊢ A  ≅ B
 
@@ -94,9 +94,9 @@ record EqRelSet : Set₁ where
            → Γ ⊢ A ⇒* B
            → Γ ⊢ a ⇒* a′ ∷ B
            → Γ ⊢ b ⇒* b′ ∷ B
-           → Whnf B
-           → Whnf a′
-           → Whnf b′
+           → Dnf B
+           → Dnf a′
+           → Dnf b′
            → Γ ⊢ a′ ≅ b′ ∷ B
            → Γ ⊢ a  ≅ b  ∷ A
 
