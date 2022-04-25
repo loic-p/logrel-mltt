@@ -285,8 +285,8 @@ pattern Πₜ a b c d e = a , b , c , d , e
 pattern Πₜ₌ a b c d e f g h i j = a , b , c , d , e , f , g , h , i , j
 
 pattern U′  a b c = U (U a b c)
-pattern ne′ a b c d = ne (ne a b c d)
-pattern Π′  a b c d e f g h i = Π (Π a b c d e f g h i)
+pattern ne′ a b c = ne (ne a b c)
+pattern Π′  a b c d e f g h = Π (Π a b c d e f g h)
 
 logRelRec : ∀ l {l′} → l′ < l → LogRelKit
 logRelRec ⁰ = λ ()

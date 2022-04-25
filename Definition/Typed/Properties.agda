@@ -57,10 +57,9 @@ wfEq (trans A≡B B≡C) = wfEq A≡B
 wfEq (Π-cong F F≡H G≡E) = wfEq F≡H
 
 -- Those should be provable by mutual induction
-postulate
-  ==-correctNe : ∀ {Γ A B n m} → Γ ⊢ n ∷ A → Neutral n → Γ ⊢ m ∷ B → Neutral m → n == m → (Γ ⊢ A ≡ B) × (Γ ⊢ n ≡ m ∷ A)
-  ==-correctTerm : ∀ {Γ A t u} → Γ ⊢ t ∷ A → Dnf t → Γ ⊢ u ∷ A → Dnf u → t == u → Γ ⊢ t ≡ u ∷ A
-  ==-correct : ∀ {Γ A B} → Γ ⊢ A → Dnf A → Γ ⊢ B → Dnf B → A == B → Γ ⊢ A ≡ B
+postulate ==-correctNe : ∀ {Γ A B n m} → Γ ⊢ n ∷ A → Neutral n → Γ ⊢ m ∷ B → Neutral m → n == m → (Γ ⊢ A ≡ B) × (Γ ⊢ n ≡ m ∷ A)
+postulate ==-correctTerm : ∀ {Γ A t u} → Γ ⊢ t ∷ A → Dnf t → Γ ⊢ u ∷ A → Dnf u → t == u → Γ ⊢ t ≡ u ∷ A
+postulate ==-correct : ∀ {Γ A B} → Γ ⊢ A → Dnf A → Γ ⊢ B → Dnf B → A == B → Γ ⊢ A ≡ B
 
 -- Reduction is a subset of conversion
 

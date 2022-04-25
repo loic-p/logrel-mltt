@@ -81,9 +81,9 @@ data Term : Set where
 --   ηnatrecright : ∀ {f A t u v} → ((natrec A t u v) ∘ var 0) == f → natrec A t u v == lam f
 --   ηcastright : ∀ {f A B t} → ((cast A B t) ∘ var 0) == f → cast A B t == lam f
 
-postulate
-  _==_ : Term → Term → Set
-  ==-dec : ∀ t u → Dec (t == u)
+postulate _==_ : Term → Term → Set
+postulate ==-dec : ∀ t u → Dec (t == u)
+postulate ==-refl : ∀ t → t == t
 
 _<>_ : Term → Term → Set
 t <> u = (t == u) → ⊥
@@ -335,9 +335,8 @@ wk ρ (cast A B t)     = cast (wk ρ A) (wk ρ B) (wk ρ t)
 wk1 : Term → Term
 wk1 = wk (step id)
 
-postulate
-  ==-wk : ∀ {A B} ρ → A == B → (wk ρ A) == (wk ρ B)
-  ==-antiwk : ∀ {A B} ρ → (wk ρ A) == (wk ρ B) → A == B
+postulate ==-wk : ∀ {A B} ρ → A == B → (wk ρ A) == (wk ρ B)
+postulate ==-antiwk : ∀ {A B} ρ → (wk ρ A) == (wk ρ B) → A == B
 
 <>-wk : ∀ {A B} ρ → A <> B → (wk ρ A) <> (wk ρ B)
 <>-wk ρ d e = d (==-antiwk ρ e)
