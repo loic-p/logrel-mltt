@@ -152,7 +152,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       d′    : Γ ⊢ u :⇒*: B ∷ U
       typeA : Type A
       typeB : Type B
-      --A≡B   : Γ ⊢ A ≡ B ∷ U
+      A≡B   : Γ ⊢ A ≡ B ∷ U
       [t]   : Γ ⊩ t
       [u]   : Γ ⊩ u
       [t≡u] : Γ ⊩ t ≡ u / [t]
@@ -194,7 +194,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
         F′     : Term
         G′     : Term
         D′     : Γ ⊢ B ⇒* Π F′ ▹ G′
-        --A≡B    : Γ ⊢ Π F ▹ G ≡ Π F′ ▹ G′
+        A≡B    : Γ ⊢ Π F ▹ G ≡ Π F′ ▹ G′
         [F≡F′] : ∀ {ρ Δ}
                → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                → Δ ⊩¹ U.wk ρ F ≡ U.wk ρ F′ / [F] [ρ] ⊢Δ
@@ -231,7 +231,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       ×   Function f
       ×   Function g
       ×   f == g
-      -- ×   Γ ⊢ f ≡ g ∷ Π F ▹ G
+      ×   Γ ⊢ f ≡ g ∷ Π F ▹ G
       ×   Γ ⊩¹Π t ∷ A / [A]
       ×   Γ ⊩¹Π u ∷ A / [A]
       ×   (∀ {ρ Δ a} → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
@@ -282,7 +282,7 @@ open LogRel public using (U; ℕ; ne; Π; emb; Uₜ; Uₜ₌; Π₌)
 
 -- Patterns for the non-records of Π
 pattern Πₜ a b c d e = a , b , c , d , e
-pattern Πₜ₌ a b c d e f g h i j = a , b , c , d , e , f , g , h , i , j
+pattern Πₜ₌ a b c d e f g h i j k = a , b , c , d , e , f , g , h , i , j , k
 
 pattern U′  a b c = U (U a b c)
 pattern ne′ a b c = ne (ne a b c)
