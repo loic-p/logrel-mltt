@@ -39,6 +39,7 @@ wfEqTerm (sym t≡u) = wfEqTerm t≡u
 wfEqTerm (trans t≡u u≡r) = wfEqTerm t≡u
 wfEqTerm (conv t≡u A≡B) = wfEqTerm t≡u
 wfEqTerm (Π-cong F F≡H G≡E) = wfEqTerm F≡H
+wfEqTerm (lam-cong F t≡u) = wf F
 wfEqTerm (app-cong f≡g a≡b) = wfEqTerm f≡g
 wfEqTerm (β-red F t a) = wfTerm a
 wfEqTerm (η-eq F f g f0≡g0) = wfTerm f
@@ -61,36 +62,6 @@ postulate ==-correctNe : ∀ {Γ A B n m} → Γ ⊢ n ∷ A → Neutral n → �
 postulate ==-correctTerm : ∀ {Γ A t u} → Γ ⊢ t ∷ A → Dnf t → Γ ⊢ u ∷ A → Dnf u → t == u → Γ ⊢ t ≡ u ∷ A
 postulate ==-correct : ∀ {Γ A B} → Γ ⊢ A → Dnf A → Γ ⊢ B → Dnf B → A == B → Γ ⊢ A ≡ B
 
--- Reduction is a subset of conversion
-
-subsetTerm : ∀ {Γ A t u} → Γ ⊢ t ⇒ u ∷ A → Γ ⊢ t ≡ u ∷ A
-subsetTerm (conv t⇒u A≡B) = conv (subsetTerm t⇒u) A≡B
-subsetTerm (app-subst t a⇒b) = app-cong (refl t) (subsetTerm a⇒b)
-subsetTerm (app-subst-2 t⇒u a _) = app-cong (subsetTerm t⇒u) (refl a)
-subsetTerm (β-red A t _ a _) = β-red A t a
-subsetTerm (natrec-subst F⇒F′ z s n) = natrec-cong (univ (subsetTerm F⇒F′)) (refl z) (refl s) (refl n)
-subsetTerm (natrec-subst-2 F _ z⇒z′ s n) = natrec-cong (refl F) (subsetTerm z⇒z′) (refl s) (refl n)
-subsetTerm (natrec-subst-3 F _ z _ s⇒s′ n) = natrec-cong (refl F) (refl z) (subsetTerm s⇒s′) (refl n)
-subsetTerm (natrec-subst-4 F _ z _ s _ n⇒n′) = natrec-cong (refl F) (refl z) (refl s) (subsetTerm n⇒n′)
-subsetTerm (natrec-zero F _ z _ s _) = natrec-zero F z s
-subsetTerm (natrec-suc n _ F _ z _ s _) = natrec-suc n F z s
-subsetTerm (cast-subst A B t⇒t′) = cast-cong (refl A) (refl B) (subsetTerm t⇒t′)
-subsetTerm (cast-subst-2 A⇒A′ B t _) = cast-cong (univ (subsetTerm A⇒A′)) (refl B) (refl t)
-subsetTerm (cast-subst-3 A _ B⇒B′ t _) = cast-cong (refl A) (univ (subsetTerm B⇒B′)) (refl t)
-subsetTerm (cast-conv A nfA B nfB e t _) = cast-conv (==-correct A nfA B nfB e) t
-
-subset : ∀ {Γ A B} → Γ ⊢ A ⇒ B → Γ ⊢ A ≡ B
-subset (univ A⇒B) = univ (subsetTerm A⇒B)
-
-subset*Term : ∀ {Γ A t u} → Γ ⊢ t ⇒* u ∷ A → Γ ⊢ t ≡ u ∷ A
-subset*Term (id t) = refl t
-subset*Term (t⇒t′ ⇨ t⇒*u) = trans (subsetTerm t⇒t′) (subset*Term t⇒*u)
-
-subset* : ∀ {Γ A B} → Γ ⊢ A ⇒* B → Γ ⊢ A ≡ B
-subset* (id A) = refl A
-subset* (A⇒A′ ⇨ A′⇒*B) = trans (subset A⇒A′) (subset* A′⇒*B)
-
-
 -- Can extract left-part of a reduction
 
 redFirstTerm : ∀ {Γ t u A} → Γ ⊢ t ⇒ u ∷ A → Γ ⊢ t ∷ A
@@ -108,9 +79,15 @@ redFirstTerm (cast-subst A B t⇒t′) = cast A B (redFirstTerm t⇒t′)
 redFirstTerm (cast-subst-2 A⇒A′ B t _) = cast (univ (redFirstTerm A⇒A′)) B t
 redFirstTerm (cast-subst-3 A _ B⇒B′ t _ ) = cast A (univ (redFirstTerm B⇒B′)) t
 redFirstTerm (cast-conv A _ B _ _ t _) = cast A B t
+redFirstTerm (Π-subst F F⇒F′ G) = Π redFirstTerm F⇒F′ ▹ G
+redFirstTerm (Π-subst-2 F _ G⇒G′) = Π F ▹ (redFirstTerm G⇒G′)
+redFirstTerm (lam-subst F t⇒t′) = lam F (redFirstTerm t⇒t′)
+redFirstTerm (suc-subst n⇒n′) = suc (redFirstTerm n⇒n′)
 
 redFirst : ∀ {Γ A B} → Γ ⊢ A ⇒ B → Γ ⊢ A
 redFirst (univ A⇒B) = univ (redFirstTerm A⇒B)
+redFirst (Π-subst F F⇒F′ G) = Π F ▹ G
+redFirst (Π-subst-2 F _ G⇒G′) = Π F ▹ (redFirst G⇒G′)
 
 redFirst*Term : ∀ {Γ t u A} → Γ ⊢ t ⇒* u ∷ A → Γ ⊢ t ∷ A
 redFirst*Term (id t) = t
@@ -119,6 +96,41 @@ redFirst*Term (t⇒t′ ⇨ t′⇒*u) = redFirstTerm t⇒t′
 redFirst* : ∀ {Γ A B} → Γ ⊢ A ⇒* B → Γ ⊢ A
 redFirst* (id A) = A
 redFirst* (A⇒A′ ⇨ A′⇒*B) = redFirst A⇒A′
+
+-- Reduction is a subset of conversion
+
+subsetTerm : ∀ {Γ A t u} → Γ ⊢ t ⇒ u ∷ A → Γ ⊢ t ≡ u ∷ A
+subsetTerm (conv t⇒u A≡B) = conv (subsetTerm t⇒u) A≡B
+subsetTerm (app-subst t a⇒b) = app-cong (refl t) (subsetTerm a⇒b)
+subsetTerm (app-subst-2 t⇒u a _) = app-cong (subsetTerm t⇒u) (refl a)
+subsetTerm (β-red A t _ a _) = β-red A t a
+subsetTerm (natrec-subst F⇒F′ z s n) = natrec-cong (univ (subsetTerm F⇒F′)) (refl z) (refl s) (refl n)
+subsetTerm (natrec-subst-2 F _ z⇒z′ s n) = natrec-cong (refl F) (subsetTerm z⇒z′) (refl s) (refl n)
+subsetTerm (natrec-subst-3 F _ z _ s⇒s′ n) = natrec-cong (refl F) (refl z) (subsetTerm s⇒s′) (refl n)
+subsetTerm (natrec-subst-4 F _ z _ s _ n⇒n′) = natrec-cong (refl F) (refl z) (refl s) (subsetTerm n⇒n′)
+subsetTerm (natrec-zero F _ z _ s _) = natrec-zero F z s
+subsetTerm (natrec-suc n _ F _ z _ s _) = natrec-suc n F z s
+subsetTerm (cast-subst A B t⇒t′) = cast-cong (refl A) (refl B) (subsetTerm t⇒t′)
+subsetTerm (cast-subst-2 A⇒A′ B t _) = cast-cong (univ (subsetTerm A⇒A′)) (refl B) (refl t)
+subsetTerm (cast-subst-3 A _ B⇒B′ t _) = cast-cong (refl A) (univ (subsetTerm B⇒B′)) (refl t)
+subsetTerm (cast-conv A nfA B nfB e t _) = cast-conv (==-correct A nfA B nfB e) t
+subsetTerm (Π-subst F F⇒F′ G) = Π-cong F (subsetTerm F⇒F′) (refl G)
+subsetTerm (Π-subst-2 F _ G⇒G′) = Π-cong (univ F) (refl F) (subsetTerm G⇒G′)
+subsetTerm (lam-subst F t⇒t′) = lam-cong F (subsetTerm t⇒t′)
+subsetTerm (suc-subst n⇒n′) = suc-cong (subsetTerm n⇒n′)
+
+subset : ∀ {Γ A B} → Γ ⊢ A ⇒ B → Γ ⊢ A ≡ B
+subset (univ A⇒B) = univ (subsetTerm A⇒B)
+subset (Π-subst F F⇒F′ G) = Π-cong F (subset F⇒F′) (refl G)
+subset (Π-subst-2 F _ G⇒G′) = Π-cong F (refl F) (subset G⇒G′)
+
+subset*Term : ∀ {Γ A t u} → Γ ⊢ t ⇒* u ∷ A → Γ ⊢ t ≡ u ∷ A
+subset*Term (id t) = refl t
+subset*Term (t⇒t′ ⇨ t⇒*u) = trans (subsetTerm t⇒t′) (subset*Term t⇒*u)
+
+subset* : ∀ {Γ A B} → Γ ⊢ A ⇒* B → Γ ⊢ A ≡ B
+subset* (id A) = refl A
+subset* (A⇒A′ ⇨ A′⇒*B) = trans (subset A⇒A′) (subset* A′⇒*B)
 
 
 -- No neutral terms are well-formed in an empty context
@@ -149,9 +161,15 @@ dnfRedTerm (cast-subst x x₁ d) (ne (cast x₂ x₃ x₄ t)) = dnfRedTerm d t
 dnfRedTerm (cast-subst-2 d x x₁ x₂) (ne (cast A x₄ x₅ x₆)) = dnfRedTerm d A
 dnfRedTerm (cast-subst-3 x x₁ d x₂ x₃) (ne (cast x₄ B x₆ x₇)) = dnfRedTerm d B
 dnfRedTerm (cast-conv x x₁ x₂ x₃ e x₅ x₆) (ne (cast x₇ x₈ d x₁₀)) = d e
+dnfRedTerm (Π-subst x D x₁) (Π d d₁) = dnfRedTerm D d
+dnfRedTerm (Π-subst-2 x x₁ D) (Π d d₁) = dnfRedTerm D d₁
+dnfRedTerm (lam-subst x D) (lam d) = dnfRedTerm D d
+dnfRedTerm (suc-subst D) (suc d) = dnfRedTerm D d
 
 dnfRed : ∀ {Γ A B} (d : Γ ⊢ A ⇒ B) (w : Dnf A) → ⊥
 dnfRed (univ x) w = dnfRedTerm x w
+dnfRed (Π-subst x D x₁) (Π d d₁) = dnfRed D d
+dnfRed (Π-subst-2 x x₁ D) (Π d d₁) = dnfRed D d₁
 
 -- Neutrals do not reduce
 
@@ -171,7 +189,7 @@ dnfRed* (x ⇨ d) w = ⊥-elim (dnfRed x w)
 
 -- reduction is deterministic
 
-redDetTerm : ∀{Γ t u A u′ A′} (d : Γ ⊢ t ⇒ u ∷ A) (d′ : Γ ⊢ t ⇒ u′ ∷ A′) → u PE.≡ u′
+redDetTerm : ∀{Γ Γ′ t u A u′ A′} (d : Γ ⊢ t ⇒ u ∷ A) (d′ : Γ′ ⊢ t ⇒ u′ ∷ A′) → u PE.≡ u′
 redDetTerm (conv d x) d′ = redDetTerm d d′
 redDetTerm d (conv d′ x) = redDetTerm d d′
 redDetTerm (app-subst x d) (app-subst x₁ d′) rewrite redDetTerm d d′ = PE.refl
@@ -233,9 +251,43 @@ redDetTerm (cast-conv x x₁ x₂ x₃ x₄ x₅ x₆) (cast-subst x₇ x₈ d�
 redDetTerm (cast-conv x x₁ x₂ x₃ x₄ x₅ x₆) (cast-subst-2 d′ x₇ x₈ x₉) = ⊥-elim (dnfRedTerm d′ x₁)
 redDetTerm (cast-conv x x₁ x₂ x₃ x₄ x₅ x₆) (cast-subst-3 x₇ x₈ d′ x₉ x₁₀) = ⊥-elim (dnfRedTerm d′ x₃)
 redDetTerm (cast-conv x x₁ x₂ x₃ x₄ x₅ x₆) (cast-conv x₇ x₈ x₉ x₁₀ x₁₁ x₁₂ x₁₃) = PE.refl
+redDetTerm (Π-subst x D x₁) (Π-subst x₂ D′ x₃) rewrite redDetTerm D D′ = PE.refl
+redDetTerm (Π-subst x D x₁) (Π-subst-2 x₂ x₃ D′) = ⊥-elim (dnfRedTerm D x₃)
+redDetTerm (Π-subst-2 x x₁ D) (Π-subst x₂ D′ x₃) = ⊥-elim (dnfRedTerm D′ x₁)
+redDetTerm (Π-subst-2 x x₁ D) (Π-subst-2 x₂ x₃ D′) rewrite redDetTerm D D′ = PE.refl
+redDetTerm (lam-subst x D) (lam-subst x₁ D′) rewrite redDetTerm D D′ = PE.refl
+redDetTerm (suc-subst D) (suc-subst D′) rewrite redDetTerm D D′ = PE.refl
 
 redDet : ∀{Γ A B B′} (d : Γ ⊢ A ⇒ B) (d′ : Γ ⊢ A ⇒ B′) → B PE.≡ B′
+redDetMix1 : ∀{Γ A B B′ X} (d : Γ ⊢ A ⇒ B) (d′ : Γ ⊢ A ⇒ B′ ∷ X) → B PE.≡ B′
+redDetMix2 : ∀{Γ A B B′ X} (d : Γ ⊢ A ⇒ B ∷ X) (d′ : Γ ⊢ A ⇒ B′) → B PE.≡ B′
+
 redDet (univ x) (univ x₁) = redDetTerm x x₁
+redDet (univ x) (Π-subst x₁ D′ x₂) = redDetMix2 x (Π-subst x₁ D′ x₂)
+redDet (univ x) (Π-subst-2 x₁ x₂ D′) = redDetMix2 x (Π-subst-2 x₁ x₂ D′)
+redDet (Π-subst x D x₁) (univ x₂) = redDetMix1 (Π-subst x D x₁) x₂
+redDet (Π-subst x D x₁) (Π-subst x₂ D′ x₃) rewrite redDet D D′ = PE.refl
+redDet (Π-subst x D x₁) (Π-subst-2 x₂ x₃ D′) = ⊥-elim (dnfRed D x₃)
+redDet (Π-subst-2 x x₁ D) (univ x₂) = redDetMix1 (Π-subst-2 x x₁ D) x₂
+redDet (Π-subst-2 x x₁ D) (Π-subst x₂ D′ x₃) = ⊥-elim (dnfRed D′ x₁)
+redDet (Π-subst-2 x x₁ D) (Π-subst-2 x₂ x₃ D′) rewrite redDet D D′ = PE.refl
+
+redDetMix1 (univ x) D′ = redDetTerm x D′
+redDetMix1 (Π-subst x D x₁) (conv D′ x₂) = redDetMix1 (Π-subst x D x₁) D′
+redDetMix1 (Π-subst x D x₁) (Π-subst x₂ D′ x₃) rewrite redDetMix1 D D′ = PE.refl
+redDetMix1 (Π-subst x D x₁) (Π-subst-2 x₂ x₃ D′) = ⊥-elim (dnfRed D x₃)
+redDetMix1 (Π-subst-2 x x₁ D) (conv D′ x₂) = redDetMix1 (Π-subst-2 x x₁ D) D′
+redDetMix1 (Π-subst-2 x x₁ D) (Π-subst x₂ D′ x₃) = ⊥-elim (dnfRedTerm D′ x₁)
+redDetMix1 (Π-subst-2 x x₁ D) (Π-subst-2 x₂ x₃ D′) rewrite redDetMix1 D D′ = PE.refl
+
+redDetMix2 D (univ x) = redDetTerm D x
+redDetMix2 (conv D x₂) (Π-subst x D′ x₁) = redDetMix2 D (Π-subst x D′ x₁)
+redDetMix2 (Π-subst x₂ D x₃) (Π-subst x D′ x₁) rewrite redDetMix2 D D′ = PE.refl
+redDetMix2 (Π-subst-2 x₂ x₃ D) (Π-subst x D′ x₁) = ⊥-elim (dnfRed D′ x₃)
+redDetMix2 (conv D x₂) (Π-subst-2 x x₁ D′) = redDetMix2 D (Π-subst-2 x x₁ D′)
+redDetMix2 (Π-subst x₂ D x₃) (Π-subst-2 x x₁ D′) = ⊥-elim (dnfRedTerm D x₁)
+redDetMix2 (Π-subst-2 x₂ x₃ D) (Π-subst-2 x x₁ D′) rewrite redDetMix2 D D′ = PE.refl
+
 
 redDet↘Term : ∀{Γ t u A u′} (d : Γ ⊢ t ↘ u ∷ A) (d′ : Γ ⊢ t ⇒* u′ ∷ A) → Γ ⊢ u′ ⇒* u ∷ A
 redDet↘Term (proj₁ , proj₂) (id x) = proj₁

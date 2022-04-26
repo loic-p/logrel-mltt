@@ -113,6 +113,9 @@ mutual
     let ρF = wk ρ ⊢Δ F
     in  Π-cong ρF (wkEqTerm ρ ⊢Δ F≡H)
                   (wkEqTerm (lift ρ) (⊢Δ ∙ ρF) G≡E)
+  wkEqTerm ρ ⊢Δ (lam-cong F t≡u) =
+    let ρF = wk ρ ⊢Δ F
+    in lam-cong ρF (wkEqTerm (lift ρ) (⊢Δ ∙ ρF) t≡u)
   wkEqTerm ρ ⊢Δ (app-cong {G = G} f≡g a≡b) =
     PE.subst (λ x → _ ⊢ _ ≡ _ ∷ x)
              (PE.sym (wk-β G))
@@ -177,6 +180,12 @@ mutual
                ρB = U.wk ρ B
            in ⊢ Δ → Γ ⊢ A ⇒ B → Δ ⊢ ρA ⇒ ρB
   wkRed ρ ⊢Δ (univ A⇒B) = univ (wkRedTerm ρ ⊢Δ A⇒B)
+  wkRed ρ ⊢Δ (Π-subst F F⇒F′ G) =
+           let ρF = wk ρ ⊢Δ F in
+           Π-subst ρF (wkRed ρ ⊢Δ F⇒F′) (wk (lift ρ) (⊢Δ ∙ ρF) G)
+  wkRed ρ ⊢Δ (Π-subst-2 F dF G⇒G′) =
+           let ρF = wk ρ ⊢Δ F in
+           Π-subst-2 ρF (wkDnf _ dF) (wkRed (lift ρ) (⊢Δ ∙ ρF) G⇒G′)
 
   wkRedTerm : ∀ {Γ Δ A t u ρ} → ρ ∷ Δ ⊆ Γ →
            let ρA = U.wk ρ A
@@ -262,6 +271,16 @@ mutual
     cast-subst-3 (wk [ρ] ⊢Δ A) (wkDnf ρ dA) (wkRedTerm [ρ] ⊢Δ B⇒B′) (wkTerm [ρ] ⊢Δ t) (wkDnf ρ dt)
   wkRedTerm {Δ = Δ} {ρ = ρ} [ρ] ⊢Δ (cast-conv A dA B dB d t dt) =
     cast-conv (wk [ρ] ⊢Δ A) (wkDnf ρ dA) (wk [ρ] ⊢Δ B) (wkDnf ρ dB) (==-wk ρ d) (wkTerm [ρ] ⊢Δ t) (wkDnf ρ dt)
+  wkRedTerm ρ ⊢Δ (Π-subst F F⇒F′ G) =
+           let ρF = wk ρ ⊢Δ F in
+           Π-subst ρF (wkRedTerm ρ ⊢Δ F⇒F′) (wkTerm (lift ρ) (⊢Δ ∙ ρF) G)
+  wkRedTerm ρ ⊢Δ (Π-subst-2 F dF G⇒G′) =
+           let ρF = wkTerm ρ ⊢Δ F in
+           Π-subst-2 ρF (wkDnf _ dF) (wkRedTerm (lift ρ) (⊢Δ ∙ (univ ρF)) G⇒G′)
+  wkRedTerm {Δ = Δ} {ρ = ρ} [ρ] ⊢Δ (lam-subst F t⇒u) =
+           let ρF = wk [ρ] ⊢Δ F in
+           lam-subst ρF (wkRedTerm (lift [ρ]) (⊢Δ ∙ ρF) t⇒u)
+  wkRedTerm {Δ = Δ} {ρ = ρ} [ρ] ⊢Δ (suc-subst D) = suc-subst (wkRedTerm [ρ] ⊢Δ D)
 
 wkRed* : ∀ {Γ Δ A B ρ} → ρ ∷ Δ ⊆ Γ →
            let ρA = U.wk ρ A

@@ -118,6 +118,10 @@ mutual
                 → Γ     ⊢ F ≡ H       ∷ U
                 → Γ ∙ F ⊢ G ≡ E       ∷ U
                 → Γ     ⊢ Π F ▹ G ≡ Π H ▹ E ∷ U
+    lam-cong    : ∀ {F G t u}
+                → Γ ⊢ F
+                → Γ ∙ F ⊢ t ≡ u ∷ G
+                → Γ ⊢ lam t ≡ lam u ∷ Π F ▹ G
     app-cong    : ∀ {a b f g F G}
                 → Γ ⊢ f ≡ g ∷ Π F ▹ G
                 → Γ ⊢ a ≡ b ∷ F
@@ -170,6 +174,20 @@ data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
                → Γ ⊢ t ⇒ u ∷ A
                → Γ ⊢ A ≡ B
                → Γ ⊢ t ⇒ u ∷ B
+  Π-subst      : ∀ {F F′ G}
+               → Γ ⊢ F
+               → Γ ⊢ F ⇒ F′ ∷ U
+               → Γ ∙ F ⊢ G ∷ U
+               → Γ ⊢ Π F ▹ G ⇒ Π F′ ▹ G ∷ U
+  Π-subst-2    : ∀ {F G G′}
+               → Γ ⊢ F ∷ U
+               → Dnf F
+               → Γ ∙ F ⊢ G ⇒ G′ ∷ U
+               → Γ ⊢ Π F ▹ G ⇒ Π F ▹ G′ ∷ U
+  lam-subst    : ∀ {F G t u}
+               → Γ ⊢ F
+               → Γ ∙ F ⊢ t ⇒ u ∷ G
+               → Γ ⊢ lam t ⇒ lam u ∷ Π F ▹ G
   app-subst    : ∀ {A B t a b}
                → Γ ⊢ t ∷ Π A ▹ B
                → Γ ⊢ a ⇒ b ∷ A
@@ -186,6 +204,9 @@ data _⊢_⇒_∷_ (Γ : Con Term) : Term → Term → Term → Set where
                → Γ     ⊢ a ∷ A
                → Dnf a
                → Γ     ⊢ (lam t) ∘ a ⇒ t [ a ] ∷ B [ a ]
+  suc-subst : ∀ {n n′}
+            → Γ ⊢ n ⇒ n′ ∷ ℕ
+            → Γ ⊢ suc n ⇒ suc n′ ∷ ℕ
   natrec-subst : ∀ {z s n F F′}
                → Γ ∙ ℕ ⊢ F ⇒ F′ ∷ U
                → Γ ⊢ z ∷ F [ zero ]
@@ -268,6 +289,16 @@ data _⊢_⇒_ (Γ : Con Term) : Term → Term → Set where
   univ : ∀ {A B}
        → Γ ⊢ A ⇒ B ∷ U
        → Γ ⊢ A ⇒ B
+  Π-subst : ∀ {F F′ G}
+          → Γ ⊢ F
+          → Γ ⊢ F ⇒ F′
+          → Γ ∙ F ⊢ G
+          → Γ ⊢ Π F ▹ G ⇒ Π F′ ▹ G
+  Π-subst-2 : ∀ {F G G′}
+            → Γ ⊢ F
+            → Dnf F
+            → Γ ∙ F ⊢ G ⇒ G′
+            → Γ ⊢ Π F ▹ G ⇒ Π F ▹ G′
 
 -- Term reduction closure
 data _⊢_⇒*_∷_ (Γ : Con Term) : Term → Term → Term → Set where
