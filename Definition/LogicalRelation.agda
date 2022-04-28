@@ -170,6 +170,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
         F : Term
         G : Term
         D : Γ ⊢ A :⇒*: Π F ▹ G
+        typeΠ : Type (Π F ▹ G)
         ⊢F : Γ ⊢ F
         ⊢G : Γ ∙ F ⊢ G
         [F] : ∀ {ρ Δ} → ρ ∷ Δ ⊆ Γ → (⊢Δ : ⊢ Δ) → Δ ⊩¹ U.wk ρ F
@@ -205,7 +206,7 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 
     -- Term of Π-type
     _⊩¹Π_∷_/_ : (Γ : Con Term) (t A : Term) ([A] : Γ ⊩¹Π A) → Set
-    Γ ⊩¹Π t ∷ A / Π F G D ⊢F ⊢G [F] [G] G-ext =
+    Γ ⊩¹Π t ∷ A / Π F G D typeΠ ⊢F ⊢G [F] [G] G-ext =
       ∃ λ f → Γ ⊢ t :⇒*: f ∷ Π F ▹ G
             × Function f
             × (∀ {ρ Δ a b}
@@ -223,8 +224,8 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
 
     -- Term equality of Π-type
     _⊩¹Π_≡_∷_/_ : (Γ : Con Term) (t u A : Term) ([A] : Γ ⊩¹Π A) → Set
-    Γ ⊩¹Π t ≡ u ∷ A / Π F G D ⊢F ⊢G [F] [G] G-ext =
-      let [A] = Π F G D ⊢F ⊢G [F] [G] G-ext
+    Γ ⊩¹Π t ≡ u ∷ A / Π F G D typeΠ ⊢F ⊢G [F] [G] G-ext =
+      let [A] = Π F G D typeΠ ⊢F ⊢G [F] [G] G-ext
       in  ∃₂ λ f g →
           Γ ⊢ t :⇒*: f ∷ Π F ▹ G
       ×   Γ ⊢ u :⇒*: g ∷ Π F ▹ G
@@ -286,7 +287,7 @@ pattern Πₜ₌ a b c d e f g h i j k = a , b , c , d , e , f , g , h , i , j ,
 
 pattern U′  a b c = U (U a b c)
 pattern ne′ a b c = ne (ne a b c)
-pattern Π′  a b c d e f g h = Π (Π a b c d e f g h)
+pattern Π′  a b c d e f g h i = Π (Π a b c d e f g h i)
 
 logRelRec : ∀ l {l′} → l′ < l → LogRelKit
 logRelRec ⁰ = λ ()

@@ -16,7 +16,7 @@ reflEq (U′ l′ l< ⊢Γ) = PE.refl
 reflEq (ℕ D) = red D
 reflEq (ne′ K [ ⊢A , ⊢B , D ] neK) =
   ne₌ _ [ ⊢A , ⊢B , D ] neK (==-refl K)
-reflEq (Π′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G [F] [G] G-ext) =
+reflEq (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) =
   Π₌ _ _ D (refl (Π ⊢F ▹ ⊢G))
      (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
      (λ ρ ⊢Δ [a] → reflEq ([G] ρ ⊢Δ [a]))
@@ -32,7 +32,7 @@ reflEqTerm (ℕ D) (ℕₜ n [ ⊢t , ⊢u , d ] prop) =
   ℕₜ₌ n n [ ⊢t , ⊢u , d ] [ ⊢t , ⊢u , d ] prop prop (==-refl n)
 reflEqTerm (ne′ K D neK) (neₜ k d (neNfₜ neK₁ ⊢k)) =
   neₜ₌ k k d d (neNfₜ₌ neK₁ neK₁ (==-refl k))
-reflEqTerm (Π′ F G D ⊢F ⊢G [F] [G] G-ext) (Πₜ f d funcF [f] [f]₁) =
+reflEqTerm (Π′ F G D typeΠ ⊢F ⊢G [F] [G] G-ext) (Πₜ f d funcF [f] [f]₁) =
   let [ _ , ⊢f , _ ] = d in
   Πₜ₌ f f d d funcF funcF (==-refl f) (refl ⊢f)
       (Πₜ f d funcF [f] [f]₁)

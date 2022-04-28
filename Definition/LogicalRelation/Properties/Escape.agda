@@ -19,7 +19,7 @@ escape : ∀ {l Γ A} → Γ ⊩⟨ l ⟩ A → Γ ⊢ A
 escape (U′ l′ l< ⊢Γ) = U ⊢Γ
 escape (ℕ [ ⊢A , ⊢B , D ]) = ⊢A
 escape (ne′ K [ ⊢A , ⊢B , D ] neK) = ⊢A
-escape (Π′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G [F] [G] G-ext) = ⊢A
+escape (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) = ⊢A
 escape (emb 0<1 A) = escape A
 
 -- Reducible type equality respect the equality relation.
@@ -30,7 +30,7 @@ escapeEq (U′ l′ l< ⊢Γ) PE.refl = refl (U ⊢Γ)
 escapeEq (ℕ [ ⊢A , ⊢B , D ]) [A≡B] = reduction D [A≡B] (refl (ℕ (wf ⊢A)))
 escapeEq (ne′ K [ ⊢A , ⊢B , D ] neK) (ne₌ M [ ⊢A′ , ⊢B′ , D′ ] neM K==M) =
   reduction D D′ (==-correct ⊢B (ne neK) ⊢B′ (ne neM) K==M)
-escapeEq {Γ = Γ} (Π′ F G [ ⊢A , ⊢B , D ] ⊢F ⊢G [F] [G] G-ext) (Π₌ F′ G′ D′ Π≡Π [F≡F′] [G≡G′]) =
+escapeEq {Γ = Γ} (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) (Π₌ F′ G′ D′ Π≡Π [F≡F′] [G≡G′]) =
   reduction D D′ Π≡Π
 escapeEq (emb 0<1 [A]) [A≡B] = escapeEq [A] [A≡B]
 
@@ -43,7 +43,7 @@ escapeTerm (ℕ D) (ℕₜ n [ ⊢t , ⊢u , d ] prop) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (ne′ K D neK) (neₜ k [ ⊢t , ⊢u , d ] nf) =
   conv ⊢t (sym (subset* (red D)))
-escapeTerm (Π′ F G D ⊢F ⊢G [F] [G] G-ext)
+escapeTerm (Π′ F G D typeΠ ⊢F ⊢G [F] [G] G-ext)
                (f , [ ⊢t , ⊢u , d ] , funcF , [f] , [f]₁) =
   conv ⊢t (sym (subset* (red D)))
 escapeTerm (emb 0<1 A) t = escapeTerm A t
@@ -60,7 +60,7 @@ escapeTermEq (ne′ K D neK)
                  (neₜ₌ k m [ ⊢t , ⊢u , d ] [ ⊢t′ , ⊢u′ , d′ ] (neNfₜ₌ neT neU t≡u)) =
   let (_ , eq) = ==-correctNe ⊢u neT ⊢u′ neU t≡u in
   reductionₜ (red D) d d′ eq
-escapeTermEq (Π′ F G D ⊢F ⊢G [F] [G] G-ext)
+escapeTermEq (Π′ F G D typeΠ ⊢F ⊢G [F] [G] G-ext)
                  (Πₜ₌ f g d d′ funcF funcG f==g f≡g [f] [g] [f≡g]) =
   reductionₜ (red D) (redₜ d) (redₜ d′) f≡g
 escapeTermEq (emb 0<1 A) t≡u = escapeTermEq A t≡u

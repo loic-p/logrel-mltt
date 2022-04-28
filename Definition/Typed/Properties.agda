@@ -288,6 +288,10 @@ redDetMix2 (conv D x₂) (Π-subst-2 x x₁ D′) = redDetMix2 D (Π-subst-2 x x
 redDetMix2 (Π-subst x₂ D x₃) (Π-subst-2 x x₁ D′) = ⊥-elim (dnfRedTerm D x₁)
 redDetMix2 (Π-subst-2 x₂ x₃ D) (Π-subst-2 x x₁ D′) rewrite redDetMix2 D D′ = PE.refl
 
+redDet↘ : ∀ {Γ t u u′} (d : Γ ⊢ t ↘ u) (d′ : Γ ⊢ t ⇒* u′) → Γ ⊢ u′ ⇒* u
+redDet↘ (proj₃ , proj₄) (id x) = proj₃
+redDet↘ (id x₁ , proj₄) (x ⇨ d′) = ⊥-elim (dnfRed x proj₄)
+redDet↘ ((x₁ ⇨ proj₃) , proj₄) (x ⇨ d′) = redDet↘ (PE.subst (λ X → _ ⊢ X ↘ _) (redDet x₁ x) (proj₃ , proj₄)) d′
 
 redDet↘Term : ∀{Γ t u A u′} (d : Γ ⊢ t ↘ u ∷ A) (d′ : Γ ⊢ t ⇒* u′ ∷ A) → Γ ⊢ u′ ⇒* u ∷ A
 redDet↘Term (proj₁ , proj₂) (id x) = proj₁
