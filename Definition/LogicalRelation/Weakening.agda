@@ -101,8 +101,8 @@ wkEq {ρ} [ρ] ⊢Δ (ne′ _ _ _) (ne₌ M D′ neM K≡M) =
   ne₌ (U.wk ρ M) (wkRed:*: [ρ] ⊢Δ D′)
       (wkNeutral ρ neM) (==-wk ρ K≡M)
 wkEq {ρ} [ρ] ⊢Δ (Π′ F G D TyΠ ⊢F ⊢G [F] [G] G-ext)
-                (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
-  Π₌ (U.wk ρ F′) (U.wk (lift ρ) G′) (T.wkRed* [ρ] ⊢Δ D′) (T.wkEq [ρ] ⊢Δ A≡B)
+                (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
+  Π₌ (U.wk ρ F′) (U.wk (lift ρ) G′) (T.wkRed* [ρ] ⊢Δ D′) (wkType ρ TyΠ′) (T.wkEq [ρ] ⊢Δ A≡B)
      (λ {ρ₁} [ρ₁] ⊢Δ₁ → irrelevanceEq″ (PE.sym (wk-comp ρ₁ ρ F))
                                  (PE.sym (wk-comp ρ₁ ρ F′))
                                  ([F] ([ρ₁] •ₜ [ρ]) ⊢Δ₁)

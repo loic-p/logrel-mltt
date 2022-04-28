@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Properties.Symmetry {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Properties.Symmetry where
 
 open import Definition.Untyped as U
 open import Definition.Typed
