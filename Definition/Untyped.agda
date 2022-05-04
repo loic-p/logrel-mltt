@@ -84,6 +84,7 @@ data Term : Set where
 postulate _==_ : Term → Term → Set
 postulate ==-dec : ∀ t u → Dec (t == u)
 postulate ==-refl : ∀ t → t == t
+postulate ==-sym : ∀ {t u} → t == u → u == t
 
 _<>_ : Term → Term → Set
 t <> u = (t == u) → ⊥

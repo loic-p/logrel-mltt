@@ -22,14 +22,13 @@ mutual
          → Γ ⊩⟨ l  ⟩ A ≡ B / [A]
          → Γ ⊩⟨ l′ ⟩ B ≡ A / [B]
   symEqT (ℕ D D′) A≡B = red D
-  symEqT (ne (ne K D neK K≡K) (ne K₁ D₁ neK₁ K≡K₁)) (ne₌ M D′ neM K≡M)
-         rewrite whrDet* (red D′ , ne neM) (red D₁ , ne neK₁) =
-    ne₌ _ D neK
-        (~-sym K≡M)
-  symEqT {Γ = Γ} (Π (Π F G D ⊢F ⊢G A≡A [F] [G] G-ext)
-                    (Π F₁ G₁ D₁ ⊢F₁ ⊢G₁ A≡A₁ [F]₁ [G]₁ G-ext₁))
-         (Π₌ F′ G′ D′ A≡B [F≡F′] [G≡G′]) =
-    let ΠF₁G₁≡ΠF′G′   = whrDet* (red D₁ , Π) (D′ , Π)
+  symEqT (ne (ne K D neK) (ne K₁ D₁ neK₁)) (ne₌ M D′ neM K≡M)
+         rewrite redDet* (red D′ , ne neM) (red D₁ , ne neK₁) =
+    ne₌ _ D neK (==-sym K≡M)
+  symEqT {Γ = Γ} (Π (Π F G D TyΠ ⊢F ⊢G [F] [G] G-ext)
+                    (Π F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁))
+         (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
+    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
         F₁≡F′ , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
         [F₁≡F] : ∀ {Δ} {ρ} [ρ] ⊢Δ → _
         [F₁≡F] {Δ} {ρ} [ρ] ⊢Δ =
@@ -39,7 +38,7 @@ mutual
                              ([ρF′] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ)
                              (symEq ([F] [ρ] ⊢Δ) ([ρF′] [ρ] ⊢Δ)
                                     ([F≡F′] [ρ] ⊢Δ))
-    in  Π₌ _ _ (red D) (≅-sym (PE.subst (λ x → Γ ⊢ Π F ▹ G ≅ x) (PE.sym ΠF₁G₁≡ΠF′G′) A≡B))
+    in  Π₌ _ _ (red D) TyΠ (sym (PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x) (PE.sym ΠF₁G₁≡ΠF′G′) A≡B))
           [F₁≡F]
           (λ {ρ} [ρ] ⊢Δ [a] →
                let ρG′a≡ρG₁′a = PE.cong (λ x → U.wk (lift ρ) x [ _ ]) (PE.sym G₁≡G′)
@@ -64,28 +63,20 @@ mutual
 symNeutralTerm : ∀ {t u A Γ}
                → Γ ⊩neNf t ≡ u ∷ A
                → Γ ⊩neNf u ≡ t ∷ A
-symNeutralTerm (neNfₜ₌ neK neM k≡m) = neNfₜ₌ neM neK (~-sym k≡m)
-
-symNatural-prop : ∀ {Γ k k′}
-                → [Natural]-prop Γ k k′
-                → [Natural]-prop Γ k′ k
-symNatural-prop (suc (ℕₜ₌ k k′ d d′ t≡u prop)) =
-  suc (ℕₜ₌ k′ k d′ d (≅ₜ-sym t≡u) (symNatural-prop prop))
-symNatural-prop zero = zero
-symNatural-prop (ne prop) = ne (symNeutralTerm prop)
+symNeutralTerm (neNfₜ₌ neK neM k≡m) = neNfₜ₌ neM neK (==-sym k≡m)
 
 -- Symmetry of term equality.
 symEqTerm : ∀ {l Γ A t u} ([A] : Γ ⊩⟨ l ⟩ A)
           → Γ ⊩⟨ l ⟩ t ≡ u ∷ A / [A]
           → Γ ⊩⟨ l ⟩ u ≡ t ∷ A / [A]
 symEqTerm (U′ .⁰ 0<1 ⊢Γ) (Uₜ₌ A B d d′ typeA typeB A≡B [A] [B] [A≡B]) =
-  Uₜ₌ B A d′ d typeB typeA (≅ₜ-sym A≡B) [B] [A] (symEq [A] [B] [A≡B])
-symEqTerm (ℕ D) (ℕₜ₌ k k′ d d′ t≡u prop) =
-  ℕₜ₌ k′ k d′ d (≅ₜ-sym t≡u) (symNatural-prop prop)
-symEqTerm (ne′ K D neK K≡K) (neₜ₌ k m d d′ nf) =
+  Uₜ₌ B A d′ d typeB typeA (sym A≡B) [B] [A] (symEq [A] [B] [A≡B])
+symEqTerm (ℕ D) (ℕₜ₌ k k′ d d′ prop prop₁ t≡u) =
+  ℕₜ₌ k′ k d′ d prop₁ prop (==-sym t≡u)
+symEqTerm (ne′ K D neK) (neₜ₌ k m d d′ nf) =
   neₜ₌ m k d′ d (symNeutralTerm nf)
 symEqTerm (Π′ F G D ⊢F ⊢G A≡A [F] [G] G-ext)
-          (Πₜ₌ f g d d′ funcF funcG f≡g [f] [g] [f≡g]) =
-  Πₜ₌ g f d′ d funcG funcF (≅ₜ-sym f≡g) [g] [f]
+          (Πₜ₌ f g d d′ funcF funcG f==g f≡g [f] [g] [f≡g]) =
+  Πₜ₌ g f d′ d funcG funcF (==-sym f==g) (sym f≡g) [g] [f]
       (λ ρ ⊢Δ [a] → symEqTerm ([G] ρ ⊢Δ [a]) ([f≡g] ρ ⊢Δ [a]))
 symEqTerm (emb 0<1 x) t≡u = symEqTerm x t≡u
