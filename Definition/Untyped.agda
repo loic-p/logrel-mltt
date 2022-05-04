@@ -85,6 +85,7 @@ postulate _==_ : Term → Term → Set
 postulate ==-dec : ∀ t u → Dec (t == u)
 postulate ==-refl : ∀ t → t == t
 postulate ==-sym : ∀ {t u} → t == u → u == t
+postulate ==-trans : ∀ {t u v} → t == u → u == v → t == v
 
 _<>_ : Term → Term → Set
 t <> u = (t == u) → ⊥
