@@ -73,7 +73,7 @@ mutual
                  (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
     let ΠFG≡ΠF₁G₁   = redDet* (red D , typeDnf TyΠ) (red D₁ , typeDnf TyΠ₁)
         F≡F₁ , G≡G₁ = Π-PE-injectivity ΠFG≡ΠF₁G₁
-    in Π₌ F′ G′ D′ TyΠ′ (PE.subst (λ x → Γ ⊢ x ≡ Π F′ ▹ G′) ΠFG≡ΠF₁G₁ A≡B)
+    in Π₌ F′ G′ D′ TyΠ′ (PE.subst (λ x → x == Π F′ ▹ G′) ΠFG≡ΠF₁G₁ A≡B)
        (λ {ρ} [ρ] ⊢Δ → irrelevanceEq′ (PE.cong (U.wk ρ) F≡F₁) ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ))
        (λ {ρ} [ρ] ⊢Δ [a]₁ →
           let [a] = irrelevanceTerm′ (PE.cong (U.wk ρ) (PE.sym F≡F₁))

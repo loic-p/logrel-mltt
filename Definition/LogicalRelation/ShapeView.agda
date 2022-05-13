@@ -179,13 +179,13 @@ goodCases (ne′ K D neK) (Π′ F G D₁ ⊢F ⊢G A≡A [F] [G] G-ext) (ne₌ 
   ⊥-elim (¬Π⇒ne (redDet↘ ((red D′) , ne neM) (red D₁)) neM)
 goodCases (Π′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (U ⊢Γ)
           (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
-  ⊥-elim (U≢Π (dnfRed* D′ U))
+  ⊥-elim (U≢Π (dnfRed* (red D′) U))
 goodCases (Π′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (ℕ D₁)
           (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
-  ⊥-elim (¬Π⇒ℕ (redDet↘ ((red D₁) , ℕ) D′))
+  ⊥-elim (¬Π⇒ℕ (redDet↘ ((red D₁) , ℕ) (red D′)))
 goodCases (Π′ F G D ⊢F ⊢G A≡A [F] [G] G-ext) (ne′ K D₁ neK)
           (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
-  ⊥-elim (¬Π⇒ne (redDet↘ ((red D₁) , ne neK) D′) neK)
+  ⊥-elim (¬Π⇒ne (redDet↘ ((red D₁) , ne neK) (red D′)) neK)
 goodCases (Π ΠA) (Π ΠB) A≡B = Π ΠA ΠB
 goodCases {l} [A] (emb 0<1 x) A≡B =
   emb¹⁰ (goodCases {l} {⁰} [A] x A≡B)

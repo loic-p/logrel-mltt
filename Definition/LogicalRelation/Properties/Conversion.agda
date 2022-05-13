@@ -41,10 +41,12 @@ mutual
                         (Π F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁))
              (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′])
              (Πₜ f d funcF [f] [f]₁) =
-    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
+    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′)
         F₁≡F′ , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
+        [ _ , ⊢Π , _ ] = D
+        [ _ , ⊢Π′ , _ ] = D′
         ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x) (PE.sym ΠF₁G₁≡ΠF′G′)
-                             A≡B
+                             (==-correct ⊢Π (typeDnf TyΠ) ⊢Π′ (typeDnf TyΠ′) A≡B)
     in  Πₜ f (convRed:*: d ΠFG≡ΠF₁G₁) funcF
            (λ {ρ} [ρ] ⊢Δ [a] [b] [a≡b] →
               let [F≡F₁] = irrelevanceEqR′ (PE.cong (U.wk ρ) (PE.sym F₁≡F′))
@@ -89,10 +91,12 @@ mutual
                         (Π F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁))
              (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′])
              (Πₜ f d funcF [f] [f]₁) =
-    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
+    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′)
         F₁≡F′ , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
+        [ _ , ⊢Π , _ ] = D
+        [ _ , ⊢Π′ , _ ] = D′
         ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x)
-                             (PE.sym ΠF₁G₁≡ΠF′G′) A≡B
+                             (PE.sym ΠF₁G₁≡ΠF′G′) (==-correct ⊢Π (typeDnf TyΠ) ⊢Π′ (typeDnf TyΠ′) A≡B)
     in  Πₜ f (convRed:*: d (sym ΠFG≡ΠF₁G₁)) funcF
            (λ {ρ} [ρ] ⊢Δ [a] [b] [a≡b] →
               let [F≡F₁] = irrelevanceEqR′ (PE.cong (U.wk ρ) (PE.sym F₁≡F′))
@@ -166,14 +170,16 @@ mutual
     let [A] = Π′ F G D TyΠ ⊢F ⊢G [F] [G] G-ext
         [B] = Π′ F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁
         [A≡B] = Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]
-        ΠF₁G₁≡ΠF′G′ = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
+        ΠF₁G₁≡ΠF′G′ = redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′)
+        [ _ , ⊢Π , _ ] = D
+        [ _ , ⊢Π′ , _ ] = D′
         ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x)
-                             (PE.sym ΠF₁G₁≡ΠF′G′) A≡B
+                             (PE.sym ΠF₁G₁≡ΠF′G′) (==-correct ⊢Π (typeDnf TyΠ) ⊢Π′ (typeDnf TyΠ′) A≡B)
     in  Πₜ₌ f g (convRed:*: d ΠFG≡ΠF₁G₁) (convRed:*: d′ ΠFG≡ΠF₁G₁)
             funcF funcG t==u (conv t≡u ΠFG≡ΠF₁G₁)
             (convTerm₁ [A] [B] [A≡B] [t]) (convTerm₁ [A] [B] [A≡B] [u])
             (λ {ρ} [ρ] ⊢Δ [a] →
-               let F₁≡F′ , G₁≡G′ = Π-PE-injectivity (redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′))
+               let F₁≡F′ , G₁≡G′ = Π-PE-injectivity (redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′))
                    [F≡F₁] = irrelevanceEqR′ (PE.cong (U.wk ρ) (PE.sym F₁≡F′))
                                             ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
                    [a]₁ = convTerm₂ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]
@@ -208,14 +214,16 @@ mutual
     let [A] = Π′ F G D TyΠ ⊢F ⊢G [F] [G] G-ext
         [B] = Π′ F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁
         [A≡B] = Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]
-        ΠF₁G₁≡ΠF′G′ = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
+        ΠF₁G₁≡ΠF′G′ = redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′)
+        [ _ , ⊢Π , _ ] = D
+        [ _ , ⊢Π′ , _ ] = D′
         ΠFG≡ΠF₁G₁ = PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x)
-                             (PE.sym ΠF₁G₁≡ΠF′G′) A≡B
+                             (PE.sym ΠF₁G₁≡ΠF′G′) (==-correct ⊢Π (typeDnf TyΠ) ⊢Π′ (typeDnf TyΠ′) A≡B)
     in  Πₜ₌ f g (convRed:*: d (sym ΠFG≡ΠF₁G₁)) (convRed:*: d′ (sym ΠFG≡ΠF₁G₁))
             funcF funcG t==u (conv t≡u (sym ΠFG≡ΠF₁G₁))
             (convTerm₂ [A] [B] [A≡B] [t]) (convTerm₂ [A] [B] [A≡B] [u])
             (λ {ρ} [ρ] ⊢Δ [a] →
-               let F₁≡F′ , G₁≡G′ = Π-PE-injectivity (redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′))
+               let F₁≡F′ , G₁≡G′ = Π-PE-injectivity (redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′))
                    [F≡F₁] = irrelevanceEqR′ (PE.cong (U.wk ρ) (PE.sym F₁≡F′))
                                             ([F] [ρ] ⊢Δ) ([F≡F′] [ρ] ⊢Δ)
                    [a]₁ = convTerm₁ ([F] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ) [F≡F₁] [a]

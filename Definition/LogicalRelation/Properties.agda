@@ -1,8 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Properties {{eqrel : EqRelSet}} where
+module Definition.LogicalRelation.Properties where
 
 
 open import Definition.LogicalRelation.Properties.Reflexivity public

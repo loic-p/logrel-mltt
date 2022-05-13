@@ -194,9 +194,9 @@ module LogRel (l : TypeLevel) (rec : ∀ {l′} → l′ < l → LogRelKit) wher
       field
         F′     : Term
         G′     : Term
-        D′     : Γ ⊢ B ⇒* Π F′ ▹ G′
+        D′     : Γ ⊢ B :⇒*: Π F′ ▹ G′
         typeΠ′ : Type (Π F′ ▹ G′)
-        A≡B    : Γ ⊢ Π F ▹ G ≡ Π F′ ▹ G′
+        A≡B    : Π F ▹ G == Π F′ ▹ G′
         [F≡F′] : ∀ {ρ Δ}
                → ([ρ] : ρ ∷ Δ ⊆ Γ) (⊢Δ : ⊢ Δ)
                → Δ ⊩¹ U.wk ρ F ≡ U.wk ρ F′ / [F] [ρ] ⊢Δ

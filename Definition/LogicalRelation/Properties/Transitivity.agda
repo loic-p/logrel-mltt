@@ -39,9 +39,9 @@ mutual
               (Π F₂ G₂ D₂ TyΠ₂ ⊢F₂ ⊢G₂ [F]₂ [G]₂ G-ext₂))
            (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′])
            (Π₌ F″ G″ D″ TyΠ″ A≡B₁ [F≡F′]₁ [G≡G′]₁) =
-    let ΠF₁G₁≡ΠF′G′    = redDet* (red D₁ , typeDnf TyΠ₁) (D′  , typeDnf TyΠ′)
+    let ΠF₁G₁≡ΠF′G′    = redDet* (red D₁ , typeDnf TyΠ₁) (red D′  , typeDnf TyΠ′)
         F₁≡F′  , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
-        F₂≡F″ , G₂≡G″  = Π-PE-injectivity (redDet* (red D₂ ,  typeDnf TyΠ₂) (D″ , typeDnf TyΠ″))
+        F₂≡F″ , G₂≡G″  = Π-PE-injectivity (redDet* (red D₂ ,  typeDnf TyΠ₂) (red D″ , typeDnf TyΠ″))
         substLift {Δ} {l} {a} ρ x = Δ ⊩⟨ l ⟩ U.wk (lift ρ) x [ a ]
         [F′] : ∀ {ρ Δ} [ρ] ⊢Δ → Δ ⊩⟨ l′ ⟩ U.wk ρ F′
         [F′] {ρ} [ρ] ⊢Δ = PE.subst (λ x → _ ⊩⟨ _ ⟩ U.wk ρ x) F₁≡F′ ([F]₁ [ρ] ⊢Δ)
@@ -74,7 +74,7 @@ mutual
           in  irrelevanceEq′ (PE.cong (λ x → U.wk (lift ρ) x [ _ ]) G₁≡G′)
                              ([G]₁ [ρ] ⊢Δ [a]₁) ([G′] [ρ] ⊢Δ [a′])
                              ([G≡G′]₁ [ρ] ⊢Δ [a]₁)
-    in  Π₌ F″ G″ D″ TyΠ″ (trans A≡B (PE.subst (λ x → Γ ⊢ x ≡ Π F″ ▹ G″) ΠF₁G₁≡ΠF′G′ A≡B₁))
+    in  Π₌ F″ G″ D″ TyΠ″ (==-trans A≡B (PE.subst (λ x → x == Π F″ ▹ G″) ΠF₁G₁≡ΠF′G′ A≡B₁))
            (λ ρ ⊢Δ → transEq ([F] ρ ⊢Δ) ([F′] ρ ⊢Δ) ([F″] ρ ⊢Δ)
                              ([F≡F′] ρ ⊢Δ) ([F′≡F″] ρ ⊢Δ))
            (λ ρ ⊢Δ [a] →

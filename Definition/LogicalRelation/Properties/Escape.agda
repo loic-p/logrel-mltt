@@ -30,8 +30,8 @@ escapeEq (U′ l′ l< ⊢Γ) PE.refl = refl (U ⊢Γ)
 escapeEq (ℕ [ ⊢A , ⊢B , D ]) [A≡B] = reduction D [A≡B] (refl (ℕ (wf ⊢A)))
 escapeEq (ne′ K [ ⊢A , ⊢B , D ] neK) (ne₌ M [ ⊢A′ , ⊢B′ , D′ ] neM K==M) =
   reduction D D′ (==-correct ⊢B (ne neK) ⊢B′ (ne neM) K==M)
-escapeEq {Γ = Γ} (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) (Π₌ F′ G′ D′ TyΠ′ Π≡Π [F≡F′] [G≡G′]) =
-  reduction D D′ Π≡Π
+escapeEq {Γ = Γ} (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) (Π₌ F′ G′ [ ⊢A′ , ⊢B′ , D′ ] TyΠ′ Π≡Π [F≡F′] [G≡G′]) =
+  reduction D D′ (==-correct ⊢B (typeDnf typeΠ) ⊢B′ (typeDnf TyΠ′) Π≡Π)
 escapeEq (emb 0<1 [A]) [A≡B] = escapeEq [A] [A≡B]
 
 -- Reducible terms are well-formed.

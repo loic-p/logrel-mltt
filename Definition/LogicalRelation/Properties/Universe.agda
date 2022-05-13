@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Properties.Universe {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Properties.Universe where
 
 open import Definition.Untyped
 open import Definition.Typed
@@ -18,7 +15,7 @@ open import Tools.Empty
 
 -- Helper function for reducible terms of type U for specific type derivations.
 univEq′ : ∀ {l Γ A} ([U] : Γ ⊩⟨ l ⟩U) → Γ ⊩⟨ l ⟩ A ∷ U / U-intr [U] → Γ ⊩⟨ ⁰ ⟩ A
-univEq′ (noemb (U .⁰ 0<1 ⊢Γ)) (Uₜ A₁ d typeA A≡A [A]) = [A]
+univEq′ (noemb (U .⁰ 0<1 ⊢Γ)) (Uₜ A₁ d typeA [A]) = [A]
 univEq′ (emb 0<1 x) [A] = univEq′ x [A]
 
 -- Reducible terms of type U are reducible types.

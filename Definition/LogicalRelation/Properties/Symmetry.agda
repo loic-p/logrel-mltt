@@ -28,7 +28,7 @@ mutual
   symEqT {Γ = Γ} (Π (Π F G D TyΠ ⊢F ⊢G [F] [G] G-ext)
                     (Π F₁ G₁ D₁ TyΠ₁ ⊢F₁ ⊢G₁ [F]₁ [G]₁ G-ext₁))
          (Π₌ F′ G′ D′ TyΠ′ A≡B [F≡F′] [G≡G′]) =
-    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (D′ , typeDnf TyΠ′)
+    let ΠF₁G₁≡ΠF′G′   = redDet* (red D₁ , typeDnf TyΠ₁) (red D′ , typeDnf TyΠ′)
         F₁≡F′ , G₁≡G′ = Π-PE-injectivity ΠF₁G₁≡ΠF′G′
         [F₁≡F] : ∀ {Δ} {ρ} [ρ] ⊢Δ → _
         [F₁≡F] {Δ} {ρ} [ρ] ⊢Δ =
@@ -38,7 +38,7 @@ mutual
                              ([ρF′] [ρ] ⊢Δ) ([F]₁ [ρ] ⊢Δ)
                              (symEq ([F] [ρ] ⊢Δ) ([ρF′] [ρ] ⊢Δ)
                                     ([F≡F′] [ρ] ⊢Δ))
-    in  Π₌ _ _ (red D) TyΠ (sym (PE.subst (λ x → Γ ⊢ Π F ▹ G ≡ x) (PE.sym ΠF₁G₁≡ΠF′G′) A≡B))
+    in  Π₌ _ _ D TyΠ (==-sym (PE.subst (λ x → Π F ▹ G == x) (PE.sym ΠF₁G₁≡ΠF′G′) A≡B))
           [F₁≡F]
           (λ {ρ} [ρ] ⊢Δ [a] →
                let ρG′a≡ρG₁′a = PE.cong (λ x → U.wk (lift ρ) x [ _ ]) (PE.sym G₁≡G′)

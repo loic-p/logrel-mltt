@@ -17,7 +17,7 @@ reflEq (ℕ D) = red D
 reflEq (ne′ K [ ⊢A , ⊢B , D ] neK) =
   ne₌ _ [ ⊢A , ⊢B , D ] neK (==-refl K)
 reflEq (Π′ F G [ ⊢A , ⊢B , D ] typeΠ ⊢F ⊢G [F] [G] G-ext) =
-  Π₌ _ _ D typeΠ (refl (Π ⊢F ▹ ⊢G))
+  Π₌ _ _ [ ⊢A , ⊢B , D ] typeΠ (==-refl (Π F ▹ G))
      (λ ρ ⊢Δ → reflEq ([F] ρ ⊢Δ))
      (λ ρ ⊢Δ [a] → reflEq ([G] ρ ⊢Δ [a]))
 reflEq (emb 0<1 [A]) = reflEq [A]
