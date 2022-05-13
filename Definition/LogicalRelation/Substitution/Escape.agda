@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Substitution.Escape {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Substitution.Escape where
 
 open import Definition.Untyped
 open import Definition.Untyped.Properties
@@ -28,7 +25,7 @@ escapeᵛ [Γ] [A] =
 
 -- Valid type equality respects the equality relation.
 escapeEqᵛ : ∀ {A B l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-              → Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A] → Γ ⊢ A ≅ B
+              → Γ ⊩ᵛ⟨ l ⟩ A ≡ B / [Γ] / [A] → Γ ⊢ A ≡ B
 escapeEqᵛ [Γ] [A] [A≡B] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]
@@ -51,7 +48,7 @@ escapeTermᵛ [Γ] [A] [t] =
 
 -- Valid term equality respects the equality relation.
 escapeEqTermᵛ : ∀ {t u A l Γ} ([Γ] : ⊩ᵛ Γ) ([A] : Γ ⊩ᵛ⟨ l ⟩ A / [Γ])
-               → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A] → Γ ⊢ t ≅ u ∷ A
+               → Γ ⊩ᵛ⟨ l ⟩ t ≡ u ∷ A / [Γ] / [A] → Γ ⊢ t ≡ u ∷ A
 escapeEqTermᵛ [Γ] [A] [t≡u] =
   let ⊢Γ = soundContext [Γ]
       idSubst = idSubstS [Γ]

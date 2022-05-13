@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Substitution.Properties {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Substitution.Properties where
 
 open import Definition.Untyped
 open import Definition.Untyped.Properties
@@ -39,7 +36,7 @@ wellformedSubstEq : ∀ {Γ Δ σ σ′} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
 wellformedSubstEq ε ⊢Δ [σ] [σ≡σ′] = id
 wellformedSubstEq ([Γ] ∙ [A]) ⊢Δ ([tailσ] , [headσ]) ([tailσ≡σ′] , [headσ≡σ′]) =
   wellformedSubstEq [Γ] ⊢Δ [tailσ] [tailσ≡σ′]
-  , ≅ₜ-eq (escapeTermEq (proj₁ ([A] ⊢Δ [tailσ])) [headσ≡σ′])
+  , (escapeTermEq (proj₁ ([A] ⊢Δ [tailσ])) [headσ≡σ′])
 
 -- Extend a valid substitution with a term
 consSubstS : ∀ {l σ t A Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
@@ -118,8 +115,7 @@ liftSubstS {F = F} {σ = σ} {Δ = Δ} [Γ] ⊢Δ [F] [σ] =
       [tailσ] = wk1SubstS {F = subst σ F} [Γ] ⊢Δ (escape (proj₁ ([F] ⊢Δ [σ]))) [σ]
       var0 = var (⊢Δ ∙ ⊢F) (PE.subst (λ x → 0 ∷ x ∈ (Δ ∙ subst σ F))
                                      (wk-subst F) here)
-  in  [tailσ] , neuTerm (proj₁ ([F] (⊢Δ ∙ ⊢F) [tailσ])) (var zero)
-                        var0 (~-var var0)
+  in  [tailσ] , neuTerm (proj₁ ([F] (⊢Δ ∙ ⊢F) [tailσ])) (var zero) var0
 
 -- Lift a valid substitution equality
 liftSubstSEq : ∀ {l F σ σ′ Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)
@@ -134,8 +130,7 @@ liftSubstSEq {F = F} {σ = σ} {σ′ = σ′} {Δ = Δ} [Γ] ⊢Δ [F] [σ] [σ
       [tailσ] = wk1SubstS {F = subst σ F} [Γ] ⊢Δ (escape (proj₁ ([F] ⊢Δ [σ]))) [σ]
       [tailσ≡σ′] = wk1SubstSEq [Γ] ⊢Δ (escape (proj₁ ([F] ⊢Δ [σ]))) [σ] [σ≡σ′]
       var0 = var (⊢Δ ∙ ⊢F) (PE.subst (λ x → 0 ∷ x ∈ (Δ ∙ subst σ F)) (wk-subst F) here)
-  in  [tailσ≡σ′] , neuEqTerm (proj₁ ([F] (⊢Δ ∙ ⊢F) [tailσ])) (var zero) (var zero)
-                         var0 var0 (~-var var0)
+  in  [tailσ≡σ′] , neuEqTerm (proj₁ ([F] (⊢Δ ∙ ⊢F) [tailσ])) (var zero) (var zero) var0 var0 (==-refl _)
 
 mutual
   -- Valid contexts are well-formed
@@ -167,7 +162,7 @@ mutual
     in  [tailσ]
     ,   neuTerm (proj₁ ([A] ⊢Γ∙A [tailσ]))
                 (var zero)
-                var0 (~-var var0)
+                var0
 
 -- Reflexivity valid substitutions
 reflSubst : ∀ {σ Γ Δ} ([Γ] : ⊩ᵛ Γ) (⊢Δ : ⊢ Δ)

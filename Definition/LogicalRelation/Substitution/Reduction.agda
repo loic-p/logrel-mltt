@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Substitution.Reduction {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Substitution.Reduction where
 
 open import Definition.LogicalRelation.Properties
 open import Definition.LogicalRelation.Substitution

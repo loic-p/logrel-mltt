@@ -1,9 +1,6 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K #-}
 
-open import Definition.Typed.EqualityRelation
-
-module Definition.LogicalRelation.Substitution.MaybeEmbed {{eqrel : EqRelSet}} where
-open EqRelSet {{...}}
+module Definition.LogicalRelation.Substitution.MaybeEmbed where
 
 open import Definition.LogicalRelation
 open import Definition.LogicalRelation.Irrelevance
