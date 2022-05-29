@@ -19,17 +19,17 @@ a ≢ b = a ≡ b → ⊥
 
 -- Symmetry.
 
-sym : {A : Set} {a b : A} → a ≡ b → b ≡ a
+sym : {ℓ : Agda.Primitive.Level} {A : Set ℓ} {a b : A} → a ≡ b → b ≡ a
 sym refl = refl
 
 -- Transitivity.
 
-trans : {A : Set} {a b c : A} → a ≡ b → b ≡ c → a ≡ c
+trans : {ℓ : Agda.Primitive.Level} {A : Set ℓ} {a b c : A} → a ≡ b → b ≡ c → a ≡ c
 trans refl refl = refl
 
 -- Non-dependent congruence rules.
 
-cong : {A B : Set} {a b : A} (f : A → B) → a ≡ b → f a ≡ f b
+cong : {ℓ ℓ′ : Agda.Primitive.Level} {A : Set ℓ} {B : Set ℓ′} {a b : A} (f : A → B) → a ≡ b → f a ≡ f b
 cong f refl = refl
 
 cong₂ : ∀ {A B C : Set} {a a′ b b′}
@@ -49,8 +49,11 @@ cong₄ f refl refl refl refl = refl
 
 -- Substitution (type-cast).
 
-subst : {A : Set} {a b : A} {ℓ : Agda.Primitive.Level} (F : A → Set ℓ) → a ≡ b → F a → F b
+subst : {ℓ ℓ′ : Agda.Primitive.Level} {A : Set ℓ} {a b : A} (F : A → Set ℓ′) → a ≡ b → F a → F b
 subst F refl f = f
+
+J : {ℓ ℓ′ : Agda.Primitive.Level} {A : Set ℓ} {a : A} (F : (b : A) → a ≡ b → Set ℓ′) → F a refl → (b : A) → (e : a ≡ b) → F b e
+J F t _ refl = t
 
 -- Two substitutions simultaneously.
 
