@@ -24,18 +24,20 @@ The theory under study has:
 The meta-theory needs:
 - Dependent products
 - Five predicative universe levels (plus large types)
-- Indexed inductive types with large elimination
+- Indexed inductive types with large elimination.
 
-Furthermore, I believe that
-- The theory under study can be extended to support indexed inductive types, and this
-extension is conceptually simple, if a bit bothersome to formalize (the general scheme
-for indexed inductive types is quite technical).
+Furthermore, I conjecture that
+- The theory under study can be extended to support dependent sums, the inductive 
+equality, and W-types.
+- The use of indexed inductive types in the meta-theory should be reducible to 
+dependent sums, the inductive equality, and W-types.
 - The theory under study can be extended to support a hierarchy of n universes, at the
 expense of n+4 levels in the meta-theory.
 
-Therefore, the gap in strength between the two theories is precisely measured by the number
-of additional universes. It would be interesting to see how low we can bring this gap
-(of course, Gödel's theorem tells us that it will always be non-zero).
+If these conjectures turn out to be true, then the gap in strength between the theory and 
+the meta-theory is precisely measured by the number of additional universes. 
+It would be interesting to see how low we can bring this gap (of course, Gödel's theorem 
+tells us that it will always be non-zero).
 
 ### How can I be sure you did not cheat? ###
 
