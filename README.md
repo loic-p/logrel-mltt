@@ -27,10 +27,10 @@ The meta-theory needs:
 - Indexed inductive types with large elimination.
 
 Furthermore, I conjecture that
-- The theory under study can be extended to support dependent sums, the inductive 
+- The theory under study can be extended to support booleans, dependent sums, the inductive 
 equality, and W-types.
 - The use of indexed inductive types in the meta-theory should be reducible to 
-dependent sums, the inductive equality, and W-types.
+boolean, dependent sums, the inductive equality, and W-types.
 - The theory under study can be extended to support a hierarchy of n universes, at the
 expense of n+4 levels in the meta-theory.
 
